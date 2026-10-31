@@ -30,8 +30,8 @@ function setGame(id){
 $all('.game-tab').forEach(tab=>tab.addEventListener('click',()=>setGame(tab.dataset.game)));
 $all('.game-tab').forEach((tab,index)=>tab.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const tabs=$all('.game-tab');const idx=(index+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;setGame(tabs[idx].dataset.game);tabs[idx].focus();}));
 
-// Whack-a-mole: 9 illustrated targets; simultaneous waves of 1, 2, then 3.
-const mo={running:false,interval:null,timers:new Set(),active:new Map(),nextAt:0,deadline:0,lastWave:[],score:0,hits:0,misses:0,catsHit:0,catsAvoided:0,combo:0,best:0};
+// Whack-a-mole: 9 illustrated targets; progressive waves of up to 7 plus a local leaderboard.
+const mo={running:false,interval:null,timers:new Set(),active:new Map(),nextAt:0,deadline:0,lastWave:[],score:0,hits:0,misses:0,catsHit:0,catsAvoided:0,combo:0,best:0,saved:false};
 const holes=[];
 function moleArt(id){
  return '<svg class="critter-svg critter-mole" viewBox="0 0 120 120" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">'+
@@ -125,7 +125,8 @@ function spawnWave(now){
  $('moleTip').textContent=n>1?'⚡ '+n+'마리 동시 등장! 두더지만 톡톡!':'🐾 두더지를 잡고 고양이는 피하세요!';
 }
 function startMole(){
- stopMole();mo.running=true;mo.score=mo.hits=mo.misses=mo.catsHit=mo.catsAvoided=mo.combo=mo.best=0;
+ stopMole();mo.running=true;mo.score=mo.hits=mo.misses=mo.catsHit=mo.catsAvoided=mo.combo=mo.best=0;mo.saved=false;
+ $('moleSave').disabled=false;$('moleSaveMsg').textContent='';
  mo.deadline=performance.now()+60000;mo.nextAt=performance.now()+320;
  $('moleTime').textContent='60초';$('moleTime').parentElement.classList.remove('urgent');moleValues();
  $('moleResult').hidden=true;$('moleStart').disabled=true;$('moleStart').textContent='🔨 두더지 잡는 중!';
@@ -184,9 +185,72 @@ function finishMole(){
  $('moleResult').hidden=false;$('moleResultEmoji').textContent=mo.hits>=16?'🏆':'🐹';
  $('moleResultTitle').textContent=mo.hits>=16?'두더지 달인!':'두더지 잡기 완료!';
  $('moleResultDetail').textContent=mo.hits+'마리 잡기 성공 · 고양이 '+mo.catsHit+'번 실수 · 최종 '+mo.score+'점 · 최고 연속 '+mo.best+'번 🎉';
- $('moleStart').textContent='▶ 다시 시작';cheer();
+ $('moleStart').textContent='▶ 다시 시작';
+ $('moleSave').disabled=false;$('moleSaveMsg').textContent='이름을 적어 이번 점수를 순위표에 저장해 보세요!';
+ renderMoleRank();cheer();
 }
-$('moleStart').addEventListener('click',startMole);$('moleAgain').addEventListener('click',startMole);
+const MOLE_RANK_STORAGE='game-mole-rank-v1';
+const MOLE_PLAYER_STORAGE='game-mole-player';
+function loadMoleRank(){
+ try{
+  const data=JSON.parse(localStorage.getItem(MOLE_RANK_STORAGE)||'[]');
+  return Array.isArray(data)?data.filter(x=>x&&typeof x.name==='string'&&
+   Number.isFinite(x.score)&&x.score>=0&&Number.isInteger(x.hits)&&x.hits>=0&&
+   Number.isInteger(x.catsHit)&&x.catsHit>=0&&Number.isFinite(x.at)).slice(0,100):[];
+ }catch(_){return [];}
+}
+function moleRankSort(a,b){
+ return b.score-a.score||b.hits-a.hits||a.catsHit-b.catsHit||a.at-b.at;
+}
+function renderMoleRank(highlight=''){
+ const list=$('moleRankList');list.replaceChildren();
+ const entries=loadMoleRank().sort(moleRankSort).slice(0,20);
+ if(!entries.length){
+  const li=document.createElement('li');li.className='rank-empty';
+  li.textContent='아직 저장된 기록이 없어요. 첫 번째 두더지왕이 되어 보세요!';
+  list.append(li);return;
+ }
+ for(let i=0;i<entries.length;i++){
+  const entry=entries[i],li=document.createElement('li');
+  if(highlight&&entry.id===highlight)li.classList.add('mole-rank-current');
+  const pos=document.createElement('span');pos.className='rank-pos';
+  pos.textContent=['🥇','🥈','🥉'][i]||String(i+1);
+  const name=document.createElement('span');name.className='mole-rank-name';
+  // Player-provided text must be textContent, never innerHTML.
+  name.textContent=entry.name;
+  const details=document.createElement('small');details.className='rank-date';
+  details.textContent=new Date(entry.at).toLocaleDateString('ko-KR')+
+   ' · 두더지 '+entry.hits+'마리 · 고양이 실수 '+entry.catsHit+'번';
+  name.append(details);
+  const points=document.createElement('span');points.className='rank-points';
+  points.textContent=entry.score.toLocaleString('ko-KR')+'점';
+  li.append(pos,name,points);list.append(li);
+ }
+}
+function saveMoleRank(){
+ if(mo.running||$('moleResult').hidden||mo.saved)return;
+ const name=$('molePlayer').value.trim().slice(0,12)||'두더지왕';
+ const entry={id:String(Date.now())+'-'+String(Math.floor(Math.random()*1e9)),
+  name,score:mo.score,hits:mo.hits,catsHit:mo.catsHit,best:mo.best,at:Date.now()};
+ try{
+  const records=loadMoleRank();records.push(entry);records.sort(moleRankSort);
+  const place=records.findIndex(item=>item.id===entry.id)+1;
+  localStorage.setItem(MOLE_RANK_STORAGE,JSON.stringify(records.slice(0,100)));
+  localStorage.setItem(MOLE_PLAYER_STORAGE,name);
+  mo.saved=true;$('moleSave').disabled=true;
+  $('moleSaveMsg').textContent='🏆 기록 저장 완료! 이 기기 '+place+'등이에요!';
+  renderMoleRank(entry.id);
+ }catch(_){
+  $('moleSaveMsg').textContent='⚠️ 기록 저장이 차단되어 있어요. 일반 브라우저 모드에서 다시 시도해 주세요.';
+ }
+}
+$('moleStart').addEventListener('click',startMole);
+$('moleAgain').addEventListener('click',startMole);
+$('moleSave').addEventListener('click',saveMoleRank);
+$('molePlayer').addEventListener('keydown',e=>{if(e.key==='Enter')saveMoleRank();});
+$('moleRankRefresh').addEventListener('click',()=>renderMoleRank());
+try{$('molePlayer').value=localStorage.getItem(MOLE_PLAYER_STORAGE)||'';}catch(_){}
+renderMoleRank();
 
 // Fire station: 25 windows; each flame has its own EXACT 3-second deadline.
 const TOTAL_WINDOWS=25,STORAGE='game-fire-rank-v1';
