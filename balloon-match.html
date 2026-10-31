@@ -178,6 +178,10 @@ button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}butto
  .cards[data-cols="6"] .balloon-visual{width:clamp(32px,7.9vw,51px);height:clamp(43px,10.5vw,66px)}
  .cards[data-cols="5"],.cards[data-cols="6"]{gap:3px}
 }
+
+/* Keep balloon-card gestures from dragging the parent page on iOS. */
+#field,#cards,.balloon-card{touch-action:none;-webkit-user-select:none;user-select:none;overscroll-behavior:contain}
+html,body{overscroll-behavior:contain}
 </style></head>
 <body><div class="app">
 <header class="top"><div class="logo"><div class="logo-icon">🎈</div><div><h1>리안이·이준이 풍선놀이!</h1><small>풍선 개수가 점점 늘어나요! 무늬와 기억력까지 도전! ✨</small></div></div><button class="sound" id="soundBtn" aria-label="게임 소리 켜고 끄기">🔊 소리 켜짐</button></header>
@@ -430,6 +434,12 @@ function speak(){
   const u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';u.rate=.9;window.speechSynthesis.speak(u);
  }catch{notice('🎈 두 개를 차례로 눌러 짝을 맞춰요!');}
 }
+
+// Dragging on a balloon should never scroll the embedded game or its parent.
+// Only prevent gestures over the playfield: other page content remains scrollable.
+document.addEventListener('touchmove',e=>{
+ if(state.playing&&e.target.closest?.('#field')&&e.cancelable)e.preventDefault();
+},{passive:false,capture:true});
 $('startBtn').addEventListener('click',startGame);$('hintBtn').addEventListener('click',hintPair);$('modalAction').addEventListener('click',rewardClick);
 $('speakBtn').addEventListener('click',speak);$('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊 소리 켜짐':'🔇 소리 꺼짐';if(soundOn)sound(660,.1);});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.playing)tickTimer();});
