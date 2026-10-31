@@ -89,8 +89,8 @@ function finishMole(){
 $('moleStart').addEventListener('click',startMole);$('moleAgain').addEventListener('click',startMole);
 
 // Fire station: 25 windows; each flame has its own EXACT 3-second deadline.
-const TOTAL_WINDOWS=25,MAX_FIRE=2,STORAGE='game-fire-rank-v1';
-const fi={running:false,interval:null,deadline:0,spawnAt:0,flames:new Map(),burned:new Set(),score:0,hits:0,missed:0,streak:0,highest:0,saved:false,roundId:0};
+const TOTAL_WINDOWS=25,STORAGE='game-fire-rank-v1';
+const fi={running:false,interval:null,deadline:0,spawnAt:0,flames:new Map(),burned:new Set(),score:0,hits:0,missed:0,streak:0,highest:0,saved:false,roundId:0,stage:1};
 const windows=[];
 for(let i=0;i<TOTAL_WINDOWS;i++){
  const btn=document.createElement('button');btn.type='button';btn.className='fire-window';btn.dataset.index=String(i);
@@ -104,7 +104,7 @@ function fireValues(){ $('fireScore').textContent=fi.score.toLocaleString('ko-KR
 function stopFire(){fi.running=false;if(fi.interval)clearInterval(fi.interval);fi.interval=null;$('fireStart').disabled=false;}
 function startFire(){
  stopFire();fi.roundId++;fi.score=fi.hits=fi.missed=fi.streak=fi.highest=0;fi.saved=false;fi.flames.clear();fi.burned.clear();fi.running=true;
- fi.deadline=performance.now()+60000;fi.spawnAt=performance.now()+650;
+ fi.deadline=performance.now()+60000;fi.spawnAt=performance.now()+650;fi.stage=1;updateFireDifficulty(fireDifficulty(0));
  windows.forEach((b,i)=>{b.classList.remove('splashed');windowState(i);});fireValues();
  $('fireTime').textContent='60초';$('fireTime').parentElement.classList.remove('urgent');
  $('fireResult').hidden=true;$('fireSave').disabled=false;$('fireSaveMsg').textContent='';
@@ -117,15 +117,33 @@ function newFire(now){
  const i=candidates[Math.floor(Math.random()*candidates.length)];fi.flames.set(i,now+3000);windowState(i);beep(790,85,'square',.027);return true;
 }
 function burn(i){if(!fi.flames.has(i))return;fi.flames.delete(i);fi.burned.add(i);fi.streak=0;fi.missed++;windowState(i);fireValues();beep(145,175,'sawtooth',.065);}
+// Each home has its own three-second fire deadline; difficulty increases in waves.
+function fireDifficulty(elapsed){
+ if(elapsed<12)return {level:1,max:1,burst:1,gap:1750,label:'🌱 1단계 · 한 집씩 차근차근'};
+ if(elapsed<25)return {level:2,max:2,burst:2,gap:1500,label:'🔥 2단계 · 두 집에 불이 날 수 있어요'};
+ if(elapsed<38)return {level:3,max:3,burst:2,gap:1250,label:'🔥🔥 3단계 · 동시에 세 집까지'};
+ if(elapsed<50)return {level:4,max:4,burst:3,gap:1050,label:'🚨 4단계 · 네 집까지!'};
+ return {level:5,max:5,burst:3,gap:850,label:'🚨🚨 5단계 · 다섯 집까지!'};
+}
+function updateFireDifficulty(d){
+ const el=$('fireDifficulty');if(el){el.textContent=d.label;el.dataset.level=String(d.level);}
+}
 function tickFire(){
- if(!fi.running)return;const now=performance.now(),left=Math.max(0,Math.ceil((fi.deadline-now)/1000));
+ if(!fi.running)return;
+ const now=performance.now(),left=Math.max(0,Math.ceil((fi.deadline-now)/1000));
  $('fireTime').textContent=left+'초';$('fireTime').parentElement.classList.toggle('urgent',left<=10);
  if(now>=fi.deadline){finishFire();return;}
- for(const [i,endAt] of [...fi.flames]){if(now>=endAt)burn(i);else windows[i].querySelector('.fire-count').textContent=String(Math.max(1,Math.ceil((endAt-now)/1000)));}
+ for(const [i,endAt] of [...fi.flames]){
+  if(now>=endAt)burn(i);
+  else windows[i].querySelector('.fire-count').textContent=String(Math.max(1,Math.ceil((endAt-now)/1000)));
+ }
+ const elapsed=Math.max(0,(now-(fi.deadline-60000))/1000),difficulty=fireDifficulty(elapsed);
+ if(difficulty.level!==fi.stage){fi.stage=difficulty.level;updateFireDifficulty(difficulty);fi.spawnAt=now;}
  if(now>=fi.spawnAt){
- if(fi.flames.size<MAX_FIRE)newFire(now);
- const elapsed=(60000-(fi.deadline-now))/1000;
- fi.spawnAt=now+(elapsed<20?1350:elapsed<40?1150:950);
+  // More than one apartment window can ignite in a single wave.
+  const count=Math.min(difficulty.burst,difficulty.max-fi.flames.size);
+  for(let i=0;i<count;i++){if(!newFire(now))break;}
+  fi.spawnAt=now+difficulty.gap;
  }
  if(fi.burned.size===TOTAL_WINDOWS){finishFire(true);}
 }
