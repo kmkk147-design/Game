@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const $all=sel=>Array.from(document.querySelectorAll(sel));
 const scenes={trace:$('tracingScreen'),mole:$('moleScreen'),fire:$('fireScreen'),soccer:$('soccerScreen'),garden:$('gardenScreen')};
 let current='trace';
-const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','10초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','60초 동안 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 여섯 방향 중 골키퍼가 없는 곳을 선택해 5골에 도전해요!'],garden:['리안이·이준이의 <em>풍선 보물파티!</em> 🎈','리안이와 이준이의 사진과 함께 같은 색 풍선을 팡! 선물상자를 열어 보세요!']};
+const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','20초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','60초 동안 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 여섯 방향 중 골키퍼가 없는 곳을 선택해 5골에 도전해요!'],garden:['리안이·이준이의 <em>풍선 보물파티!</em> 🎈','리안이와 이준이의 사진과 함께 같은 색 풍선을 팡! 선물상자를 열어 보세요!']};
 let sound=null;
 function beep(freq=500,ms=90,type='sine',volume=.07){
  if($('soundBtn').textContent.includes('꺼짐'))return;
@@ -91,7 +91,7 @@ function resetHole(i){
  const h=holes[i];h.classList.remove('up','whacked','teasing','sinking');
  h.dataset.kind='none';h.setAttribute('aria-label',(i+1)+'번 빈 구멍');
 }
-function stopMole(){mo.running=false;clearMoleTimers();mo.active.clear();mo.lastWave=[];holes.forEach((_,i)=>resetHole(i));$('moleHammer').classList.remove('swing');$('moleStart').disabled=false;}
+function stopMole(){mo.running=false;window.GamePlayLock?.unlock('mole');clearMoleTimers();mo.active.clear();mo.lastWave=[];holes.forEach((_,i)=>resetHole(i));$('moleHammer').classList.remove('swing');$('moleStart').disabled=false;}
 function moleValues(){$('moleScore').textContent=mo.score+'점';$('moleCombo').textContent=String(mo.combo);}
 function waveSize(elapsed){
  if(elapsed<5)return 1;
@@ -125,7 +125,7 @@ function spawnWave(now){
  $('moleTip').textContent=n>1?'⚡ '+n+'마리 동시 등장! 두더지만 톡톡!':'🐾 두더지를 잡고 고양이는 피하세요!';
 }
 function startMole(){
- stopMole();mo.running=true;mo.score=mo.hits=mo.misses=mo.catsHit=mo.catsAvoided=mo.combo=mo.best=0;mo.saved=false;
+ stopMole();window.GamePlayLock?.lock('mole','moleTime',65);mo.running=true;mo.score=mo.hits=mo.misses=mo.catsHit=mo.catsAvoided=mo.combo=mo.best=0;mo.saved=false;
  $('moleSave').disabled=false;$('moleSaveMsg').textContent='';
  mo.deadline=performance.now()+60000;mo.nextAt=performance.now()+320;
  $('moleTime').textContent='60초';$('moleTime').parentElement.classList.remove('urgent');moleValues();
@@ -271,14 +271,14 @@ function updateTruck(){
  b.setAttribute('aria-label',fi.rescueMode?'사다리차 선택됨. 구조할 창문을 누르세요':'사다리차 선택하여 사람 구조하기');
 }
 function stopFire(){
- fi.running=false;if(fi.interval)clearInterval(fi.interval);fi.interval=null;
+ window.GamePlayLock?.unlock('fire');fi.running=false;if(fi.interval)clearInterval(fi.interval);fi.interval=null;
  if(fi.rescueTimer){clearTimeout(fi.rescueTimer);fi.rescueTimer=null;}
  fi.rescueMode=false;fi.rescueBusy=false;$('fireLadder').hidden=true;
  $('fireLadder').classList.remove('active');$('fireTruck').classList.remove('selected');
  updateTruck();$('fireStart').disabled=false;
 }
 function startFire(){
- stopFire();fi.roundId++;fi.score=fi.hits=fi.missed=fi.streak=fi.highest=0;fi.saved=false;fi.flames.clear();fi.burned.clear();fi.residents.clear();fi.running=true;
+ stopFire();window.GamePlayLock?.lock('fire','fireTime',65);fi.roundId++;fi.score=fi.hits=fi.missed=fi.streak=fi.highest=0;fi.saved=false;fi.flames.clear();fi.burned.clear();fi.residents.clear();fi.running=true;
  fi.deadline=performance.now()+60000;fi.spawnAt=performance.now()+650;fi.rescueAt=performance.now()+3600;fi.stage=1;fi.residents.clear();fi.rescued=0;fi.missedRescues=0;fi.rescueMode=false;fi.rescueBusy=false;updateTruck();updateFireDifficulty(fireDifficulty(0));
  windows.forEach((b,i)=>{b.classList.remove('splashed');windowState(i);});fireValues();
  $('fireTime').textContent='60초';$('fireTime').parentElement.classList.remove('urgent');
@@ -499,11 +499,11 @@ function updateSoccerValues(){
  $('soccerProgress').innerHTML=indicators.join('');
 }
 function stopSoccer(){
- so.epoch++;clearSoccerTimers();so.phase='idle';
+ window.GamePlayLock?.unlock('soccer');so.epoch++;clearSoccerTimers();so.phase='idle';
  setSoccerZoneButtons(false);resetSoccerVisuals();$('soccerStart').disabled=false;
 }
 function startSoccer(){
- stopSoccer();so.round=0;so.goals=0;so.spentMs=0;so.results=[];so.saved=false;
+ stopSoccer();window.GamePlayLock?.lock('soccer','soccerTime',65);so.round=0;so.goals=0;so.spentMs=0;so.results=[];so.saved=false;
  // Each shot has 6, 5, 4, 3, then 2 open directions.
  soccerPlanShots();
  $('soccerResult').hidden=true;$('soccerSave').disabled=false;$('soccerSaveMsg').textContent='';
@@ -605,7 +605,7 @@ function resolveSoccerShot(selected,timeout=false){
 }
 function finishSoccer(){
  if(so.phase==='finished')return;
- clearSoccerTimers();so.phase='finished';setSoccerZoneButtons(false);
+ window.GamePlayLock?.unlock('soccer');clearSoccerTimers();so.phase='finished';setSoccerZoneButtons(false);
  $('soccerTime').textContent='0초';$('soccerRemaining').textContent='0개';
  $('soccerStart').textContent='▶ 새로운 승부차기';$('soccerStart').disabled=false;
  $('soccerResult').hidden=false;
