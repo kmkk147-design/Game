@@ -104,9 +104,14 @@ function waveSize(elapsed){
 }
 function spawnWave(now){
  const elapsed=Math.max(0,(60000-(mo.deadline-now))/1000);
- const candidates=holes.map((_,i)=>i).filter(i=>!mo.active.has(i)&&!mo.lastWave.includes(i));
- const n=Math.min(waveSize(elapsed),candidates.length),chosen=[];
+ // Prefer new holes, but allow repeats after a wave ends. Otherwise 7 -> 2
+ // alternating waves would make the hardest stage accidentally easy.
+ const free=holes.map((_,i)=>i).filter(i=>!mo.active.has(i));
+ const fresh=free.filter(i=>!mo.lastWave.includes(i));
+ const repeat=free.filter(i=>mo.lastWave.includes(i));
+ const n=Math.min(waveSize(elapsed),free.length),chosen=[];
  for(let j=0;j<n;j++){
+  const candidates=fresh.length?fresh:repeat;
   const index=Math.floor(Math.random()*candidates.length),i=candidates.splice(index,1)[0];
   const p=elapsed<10?.22:elapsed<23?.29:elapsed<43?.36:.43;
   const kind=j<Math.min(2,Math.ceil(n/3))?'mole':Math.random()<p?'cat':'mole';
