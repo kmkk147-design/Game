@@ -86,12 +86,12 @@
  <button type="button" class="game-tab" id="tab-garden" role="tab" aria-selected="false" aria-controls="gardenScreen" data-game="garden"><span class="tab-emoji">🎈</span><span>풍선놀이</span></button>
 </nav>
 <main class="layout" id="tracingScreen" role="tabpanel" aria-labelledby="tab-trace">
-<aside class="side" aria-label="그림 고르기"><h2 class="section-title">🎁 어떤 그림을 그릴까?</h2><div class="active-shape"><span class="shape-emoji" id="shapeEmoji">☀️</span><h2 id="shapeName">동그라미</h2><p>마음에 드는 그림을 골라요!</p></div><div id="shapesGrid" class="shapes-grid"></div><div class="tip">💡 <strong>그리는 방법</strong><br>시작 버튼을 누르고 20초 안에 손을 떼지 않고 점선을 한 번에 따라가요. 선을 벗어난 거리와 그린 길이에 따라 조금씩 점수가 깎여요. <b>80점 이상</b> 합격! 🎉</div></aside>
+<aside class="side" aria-label="그림 고르기"><h2 class="section-title">🎁 어떤 그림을 그릴까?</h2><div class="active-shape"><span class="shape-emoji" id="shapeEmoji">☀️</span><h2 id="shapeName">동그라미</h2><p>마음에 드는 그림을 골라요!</p></div><div id="shapesGrid" class="shapes-grid"></div><div class="tip">💡 <strong>그리는 방법</strong><br>시작 버튼을 누르고 20초 안에 손을 떼지 않고 점선을 한 번에 따라가요. 선을 벗어난 거리와 그린 길이에 따라 조금씩 점수가 깎여요. <b>75점 이상</b> 합격! 🎉</div></aside>
 <section class="play" aria-label="따라 그리기 게임"><div class="stats"><div class="stat timer" id="timerBox"><span class="stat-icon">⏱️</span><span><small>남은 시간</small><b id="timer" aria-live="off">20초</b></span></div><div class="mid-instruction" id="statusText">준비되면 시작 버튼을 눌러요!</div><div class="stat score"><span class="stat-icon">✨</span><span><small>그리기 점수</small><b id="score">0점</b></span></div></div>
 <div class="board-outer" id="board"><span id="drawingHint" class="drawing-hint" hidden aria-hidden="true"></span><div id="remainingAlert" class="remaining-alert" role="status" hidden>⏰ 20초 남았어요! 틱탁 틱탁!</div><svg id="drawSvg" class="board-svg" viewBox="0 0 500 440" xmlns="http://www.w3.org/2000/svg" aria-label="모양을 따라 그리는 공간"><path id="guideBase" class="guide-base"/><path id="guideDash" class="guide-dash"/><g id="ink"></g><circle id="startCircle" class="start-marker" r="15"/><circle id="startDot" class="start-dot" r="5"/></svg></div>
 <div class="progress-area"><span class="progress-label">🎯 점수</span><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div><strong id="progressNumber" class="progress-number">0점</strong></div>
 <div id="tracePenalty" class="trace-penalties" aria-live="off">100점 만점 · 선을 벗어나면 감점!</div>
-<div class="controls"><button id="startBtn" class="btn primary">▶ 시작! 20초 도전</button><button id="clearBtn" class="btn secondary" disabled>↺ 다시 그리기</button><button id="finishBtn" class="btn primary" disabled>✓ 완성했어요!</button></div><p class="footnote">단 한 번 그리기! · 80점 이상 합격 · 손을 떼면 바로 채점</p>
+<div class="controls"><button id="startBtn" class="btn primary">▶ 시작! 20초 도전</button><button id="clearBtn" class="btn secondary" disabled>↺ 다시 그리기</button><button id="finishBtn" class="btn primary" disabled>✓ 완성했어요!</button></div><p class="footnote">단 한 번 그리기! · 75점 이상 합격 · 손을 떼면 바로 채점</p>
 <div id="resultOverlay" class="result-overlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden><div class="result-card"><div class="win-spark" id="resultStars"></div><div class="result-sticker" id="resultEmoji">🎉</div><h2 id="resultTitle">참 잘했어요!</h2><p id="resultDescription">멋지게 그렸어요!</p><div class="result-percentage" id="resultPercent">⭐ 95점</div><p class="trace-result-detail" id="resultBreakdown"></p><div class="result-buttons"><button class="btn secondary" id="retryBtn">↺ 다시 도전</button><button class="btn primary" id="nextBtn">다른 그림 ➜</button></div></div></div>
 </section></main>
 <section id="moleScreen" class="arcade-screen mole-screen" role="tabpanel" aria-labelledby="tab-mole" hidden>
@@ -318,9 +318,9 @@ function nearestGuideDistance(x,y){
    Small offsets remain playable for children, while repeated/off-line scribbles
    reduce points instead of earning coverage for touching a broad band. */
 function coverageCredit(distance){
- if(distance<=6)return 1;
- if(distance<=10)return 1-.07*(distance-6);
- if(distance<=16)return Math.max(0,.72*(16-distance)/6);
+ if(distance<=8)return 1;
+ if(distance<=13)return 1-.05*(distance-8);
+ if(distance<=20)return Math.max(0,.75*(20-distance)/7);
  return 0;
 }
 function scoreSegment(a,b){
@@ -330,14 +330,14 @@ function scoreSegment(a,b){
  const steps=Math.max(1,Math.ceil(len/3.5)),stepLen=len/steps;
  for(let i=0;i<steps;i++){
   const t=(i+.5)/steps,d=nearestGuideDistance(a.x+dx*t,a.y+dy*t);
-  if(d>6){
-   // Each level accumulates separately, so going farther off line costs more.
-   minorOff+=stepLen*Math.min(1,(d-6)/4);
-   if(d>10)midOff+=stepLen*Math.min(1,(d-10)/7);
-   if(d>17)majorOff+=stepLen*Math.min(1.5,(d-17)/12);
+  if(d>8){
+   // Gradual distance deductions with a little extra finger tolerance.
+   minorOff+=stepLen*Math.min(1,(d-8)/5);
+   if(d>13)midOff+=stepLen*Math.min(1,(d-13)/7);
+   if(d>20)majorOff+=stepLen*Math.min(1.5,(d-20)/12);
   }
  }
- const radius=16;
+ const radius=20;
  const x0=Math.floor((Math.min(a.x,b.x)-radius)/32),x1=Math.floor((Math.max(a.x,b.x)+radius)/32);
  const y0=Math.floor((Math.min(a.y,b.y)-radius)/32),y1=Math.floor((Math.max(a.y,b.y)+radius)/32);
  for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
@@ -353,10 +353,10 @@ function calculateScore(){
  if(!covered||!targetSamples.length||totalDrawn<1){updateScore(0);return 0;}
  const coverage=Math.max(0,Math.min(1,coveredCount/targetSamples.length));
  const missing=Math.max(0,100-Math.round(100*coverage));
- const minor=Math.ceil(12*minorOff/targetLength);
- const medium=Math.ceil(17*midOff/targetLength);
- const major=Math.ceil(30*majorOff/targetLength);
- const repeated=Math.max(0,Math.round(Math.max(0,totalDrawn-targetLength*1.08)*.09));
+ const minor=Math.ceil(10*minorOff/targetLength);
+ const medium=Math.ceil(14*midOff/targetLength);
+ const major=Math.ceil(27*majorOff/targetLength);
+ const repeated=Math.max(0,Math.round(Math.max(0,totalDrawn-targetLength*1.13)*.08));
  scoreBreakdown={missing,minor,medium,major,repeated};
  const points=Math.max(0,100-missing-minor-medium-major-repeated);
  updateScore(points);
@@ -400,10 +400,10 @@ function stopDraw(e){
  const finished=e.type==='pointerup';
  activeStroke=null;activePointer=null;
  try{if(svg.hasPointerCapture(e.pointerId))svg.releasePointerCapture(e.pointerId);}catch(_){}
- if(mode==='running'){calculateScore();end(finished&&score>=80?'win':'fail');}
+ if(mode==='running'){calculateScore();end(finished&&score>=75?'win':'fail');}
 }
 function removeInk(){if(mode!=='running')return;resetInk();$('finishBtn').disabled=true;$('drawingHint').textContent='✏️ 다시 천천히 따라가요!';}
-function finish(){if(mode!=='running')return;calculateScore();end(score>=80?'win':'fail');}
+function finish(){if(mode!=='running')return;calculateScore();end(score>=75?'win':'fail');}
 function end(reason){if(mode!=='running')return;clearInterval(interval);interval=0;mode='result';window.GamePlayLock?.unlock('trace');activePointer=null;activeStroke=null;$('board').classList.remove('playing');$('remainingAlert').hidden=true;$('timerBox').classList.remove('danger');$('startBtn').style.display='';$('startBtn').disabled=false;$('startBtn').textContent='▶ 다시 시작하기';$('finishBtn').disabled=true;$('clearBtn').disabled=true;renderShapeButtons();const overlay=$('resultOverlay');overlay.className='result-overlay '+reason;overlay.hidden=false;$('resultStars').textContent=reason==='win'?'🌟 ✨ 🌟':reason==='timeout'?'💥 💨 💥':'💛 ✨ 💛';$('resultEmoji').textContent=reason==='win'?'🥳':reason==='timeout'?'💥':'🥺';$('resultTitle').textContent=reason==='win'?'우와! 합격이에요!':reason==='timeout'?'펑! 시간 초과 · 실패!':'아깝다! 도전 실패!';$('resultDescription').textContent=reason==='win'?'정말 멋지게 따라 그렸어요! 불꽃놀이 선물!':reason==='timeout'?'20초가 지났어요. 다음 판에 다시 도전해 봐요!':'한 번의 기회였어요! 다음 판에는 더 정확하게 그려봐요!';$('resultPercent').textContent='⭐ '+score+'점 / 100점';
 const b=scoreBreakdown;
 $('resultBreakdown').textContent='감점 내역: 빈 구간 -'+b.missing+'점 · 살짝 이탈 -'+b.minor+'점 · 중간 이탈 -'+b.medium+'점 · 크게 이탈 -'+b.major+'점'+(b.repeated?' · 반복 -'+b.repeated+'점':'');$('nextBtn').textContent=reason==='win'?'다음 그림 ➜':'다른 그림 ➜';$('retryBtn').focus();if(reason==='win'){successSound();fireworks();}else{failSound();if(reason==='timeout'){const flash=document.createElement('div');flash.className='bomb-flash';document.body.appendChild(flash);setTimeout(()=>flash.remove(),700);}}}
@@ -417,7 +417,7 @@ window.GameTrace={stop:function(){if(mode==='running'){
 chooseShape(0);
 })();
 </script>
-<script src="/arcade.js?v=15"></script>
+<script src="/arcade.js?v=16"></script>
 <script>
 (function(){
  const frame=document.getElementById('gardenMatchEmbed');
