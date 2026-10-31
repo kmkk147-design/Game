@@ -460,3 +460,87 @@
 @media(prefers-reduced-motion:reduce){
  .garden-photo-hero.cheer .garden-photo-sticker,.garden-play-balloon .garden-balloon-shape,.garden-target-balloon,.garden-gift{animation:none}
 }
+
+
+/* Penalty showdown v2: visibly narrowed goal, real airborne goalkeeper and save impact */
+.soccer-level-banner{margin:-3px 0 12px;padding:10px 13px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 12px;border-radius:15px;border:2px solid #c2edcf;background:linear-gradient(100deg,#e6fff0,#f6ffeb);color:#25734b;text-align:center}
+.soccer-level-banner span{padding:5px 11px;background:#299658;color:white;border-radius:999px;font-size:13px;font-weight:950}
+.soccer-level-banner strong{font-size:17px;font-weight:1000;letter-spacing:-.4px}
+.soccer-level-banner small{font-size:11px;color:#518569;font-weight:750}
+.soccer-arena{background:
+ radial-gradient(ellipse at 50% 27%,#fffacc70,transparent 48%),
+ linear-gradient(180deg,#95ceef 0%,#d7f0fa 19%,#c2d9ba 22%,#768e82 27%,#577b5c 29%,#45a16f 29%,#1b7d51 100%);
+ border-color:#92cdb5;box-shadow:inset 0 0 0 5px #b9e9d5,0 13px 22px #275b3e24}
+.soccer-arena:before{inset:17% -10% auto;height:41px;background:
+ repeating-linear-gradient(90deg,#fff8d2 0 10px,#eb9c9d 10px 20px,#8ccefb 20px 30px,#b19be7 30px 40px);
+ border-top:3px solid #fff8d7;border-bottom:5px solid #405f4c;opacity:.76}
+.soccer-stadium-board{display:flex;position:absolute;top:29%;left:5%;right:5%;justify-content:space-between;font-weight:1000;color:#ffe699;text-shadow:0 2px 1px #20533a;font-size:12px;letter-spacing:.5px;pointer-events:none}
+.soccer-goal{background:linear-gradient(170deg,#c6e1f1d9,#c7e7ddac);box-shadow:0 0 0 3px #8ca8b6,0 10px 0 #25634470,0 18px 33px #143d2940}
+.soccer-net{background:repeating-linear-gradient(90deg,transparent 0 17px,#fff9ebad 17px 19px),repeating-linear-gradient(0deg,transparent 0 16px,#fff9ebad 16px 18px)}
+.soccer-zone.closed{background:repeating-linear-gradient(135deg,#70858a99 0 9px,#98aaa3bb 9px 19px)!important;border:1px solid #d7e6e6bb!important;opacity:1!important;box-shadow:inset 0 0 12px #4c596e66;cursor:not-allowed;filter:grayscale(.4)}
+.soccer-zone.closed span,.soccer-zone.closed small{opacity:.13;filter:grayscale(1)}
+.soccer-zone.closed:after{content:"🔒";position:absolute;z-index:1;left:50%;top:50%;transform:translate(-50%,-50%);font-size:clamp(20px,4vw,30px);filter:drop-shadow(0 2px 1px #45555d44)}
+.soccer-zone:not(.closed):not(:disabled){background:radial-gradient(circle at 50% 45%,#e7ffcca8,#a0e5b063);border:2px dashed #fffde7;box-shadow:inset 0 0 13px #ffffff61}
+.soccer-zone:not(.closed):not(:disabled) span{filter:drop-shadow(0 2px 1px #fff);color:#187b47}
+.soccer-zone:not(.closed):not(:disabled):active{background:#ffed94a9;transform:scale(.98)}
+.soccer-zone.chosen.scored{background:#79ff9bb3!important}
+.soccer-zone.chosen.blocked{background:#ff9b83b6!important}
+.soccer-keeper{top:65%;width:clamp(61px,12vw,112px);aspect-ratio:110/146;transform:translate(-50%,-50%) rotate(0deg);filter:drop-shadow(0 4px 4px #19433173);will-change:transform}
+.soccer-keeper svg{overflow:visible}
+.soccer-keeper .keeper-arm-left{transform-origin:31px 56px}
+.soccer-keeper .keeper-arm-right{transform-origin:79px 56px}
+.soccer-keeper .keeper-leg-left{transform-origin:52px 95px}
+.soccer-keeper .keeper-leg-right{transform-origin:60px 95px}
+.soccer-keeper.diving{transition:none!important;animation:soccerKeeperLeap .66s cubic-bezier(.14,.86,.16,1) both!important}
+.soccer-keeper.diving .keeper-arm-left{animation:soccerKeeperReachLeft .55s ease-out both}
+.soccer-keeper.diving .keeper-arm-right{animation:soccerKeeperReachRight .55s ease-out both}
+.soccer-keeper.diving .keeper-leg-left{animation:soccerKeeperKickLeft .62s ease-out both}
+.soccer-keeper.diving .keeper-leg-right{animation:soccerKeeperKickRight .62s ease-out both}
+.soccer-keeper.saved{filter:drop-shadow(0 0 13px #ffe54e) drop-shadow(0 5px 4px #26534199)}
+.soccer-glove-ball{position:absolute;z-index:8;left:50%;top:13%;transform:translate(-50%,-50%) scale(.4);opacity:0;font-size:clamp(16px,3.2vw,26px);filter:drop-shadow(0 1px 4px #1119)}
+.soccer-keeper.saved .soccer-glove-ball{opacity:1;animation:soccerGloveCatch .32s cubic-bezier(.2,1.6,.4,1) both}
+.soccer-ball.kicked{animation:soccerKick .62s cubic-bezier(.14,.65,.2,1) forwards}
+.soccer-ball.stopped{opacity:0!important;visibility:hidden}
+.soccer-speed-lines{position:absolute;z-index:3;display:none;pointer-events:none;height:10px;border-radius:50%;background:linear-gradient(90deg,transparent,#fff9b6bc,#fff);box-shadow:0 0 8px #fff7a6;transform-origin:left center;transform:rotate(var(--trail-angle,0deg))}
+.soccer-speed-lines.flying{display:block;animation:soccerTrail .56s linear both}
+.soccer-impact{position:absolute;z-index:10;pointer-events:none;transform:translate(-50%,-50%);font-size:clamp(24px,6vw,45px);white-space:nowrap;opacity:0;text-shadow:0 4px 3px #164c3a88}
+.soccer-impact.goal-burst{animation:soccerImpactBoom .8s cubic-bezier(.14,.8,.2,1) both}
+.soccer-impact.save-burst{animation:soccerImpactSave .72s ease-out both}
+.soccer-net-flash{position:absolute;z-index:1;inset:0;opacity:0;pointer-events:none;background:radial-gradient(circle at 50% 53%,#fff7acaa 0,#8dffd376 45%,transparent 74%)}
+.soccer-net-flash.flashing{animation:soccerNetFlash .8s ease-out both}
+.soccer-goal.net-shaking .soccer-net{animation:soccerNetRattle .48s ease-out both}
+.soccer-arena.soccer-scored{box-shadow:inset 0 0 0 5px #eaffd9,0 0 30px #ffff9a80}
+.soccer-arena.soccer-saved{box-shadow:inset 0 0 0 5px #bbe3ff,0 0 30px #76d6ff75}
+@keyframes soccerKeeperLeap{
+ 0%{transform:translate(-50%,-50%) rotate(0deg) scale(1)}
+ 15%{transform:translate(-50%,calc(-50% - 17px)) rotate(-3deg) scale(1.08)}
+ 63%{transform:translate(calc(-50% + var(--keeper-x)),calc(-50% + var(--keeper-y) - 8px)) rotate(var(--keeper-rotate)) scale(1.20)}
+ 88%{transform:translate(calc(-50% + var(--keeper-x)),calc(-50% + var(--keeper-y))) rotate(var(--keeper-rotate)) scale(1.06)}
+ 100%{transform:translate(calc(-50% + var(--keeper-x)),calc(-50% + var(--keeper-y))) rotate(var(--keeper-rotate)) scale(1.06)}
+}
+@keyframes soccerKeeperReachLeft{0%{transform:rotate(0)}65%,100%{transform:rotate(57deg)}}
+@keyframes soccerKeeperReachRight{0%{transform:rotate(0)}65%,100%{transform:rotate(-57deg)}}
+@keyframes soccerKeeperKickLeft{0%{transform:rotate(0)}65%,100%{transform:rotate(-22deg)}}
+@keyframes soccerKeeperKickRight{0%{transform:rotate(0)}65%,100%{transform:rotate(25deg)}}
+@keyframes soccerGloveCatch{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}70%{opacity:1;transform:translate(-50%,-50%) scale(1.6)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes soccerTrail{0%{opacity:0;scale:.03 1}22%{opacity:.92}85%{opacity:.9}100%{scale:1 1;opacity:0}}
+@keyframes soccerImpactBoom{0%{opacity:0;scale:.2}22%{opacity:1;scale:1.4}70%{opacity:1;scale:1.1}100%{opacity:0;scale:1.55}}
+@keyframes soccerImpactSave{0%{opacity:0;scale:.35}30%{opacity:1;scale:1.3}75%{opacity:1;scale:1}100%{opacity:0;scale:1.25}}
+@keyframes soccerNetFlash{10%{opacity:.9}100%{opacity:0}}
+@keyframes soccerNetRattle{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-2px)}}
+@media(max-width:540px){
+ .soccer-level-banner{gap:4px 7px;padding:8px 9px;margin-bottom:9px}
+ .soccer-level-banner span{font-size:11px}
+ .soccer-level-banner strong{font-size:13px}
+ .soccer-level-banner small{font-size:10px}
+ .soccer-stadium-board{font-size:9px;top:31%}
+ .soccer-arena{min-height:408px}
+ .soccer-keeper{width:clamp(51px,14vw,79px)}
+ .soccer-zone.closed:after{font-size:21px}
+ .soccer-zone:not(.closed) small{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .soccer-keeper.diving,.soccer-ball.kicked{animation-duration:.1s!important}
+ .soccer-keeper.diving .keeper-arm-left,.soccer-keeper.diving .keeper-arm-right,.soccer-keeper.diving .keeper-leg-left,.soccer-keeper.diving .keeper-leg-right{animation-duration:.1s}
+ .soccer-speed-lines.flying{animation-duration:.1s}
+}
