@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const $all=sel=>Array.from(document.querySelectorAll(sel));
 const scenes={trace:$('tracingScreen'),mole:$('moleScreen'),fire:$('fireScreen')};
 let current='trace';
-const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','10초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','30초 안에 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','60초 동안 불난 창문을 눌러요. 3초를 넘기면 집이 타요!']};
+const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','10초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','30초 안에 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!']};
 let sound=null;
 function beep(freq=500,ms=90,type='sine',volume=.07){
  if($('soundBtn').textContent.includes('꺼짐'))return;
@@ -174,29 +174,40 @@ $('moleStart').addEventListener('click',startMole);$('moleAgain').addEventListen
 
 // Fire station: 25 windows; each flame has its own EXACT 3-second deadline.
 const TOTAL_WINDOWS=25,STORAGE='game-fire-rank-v1';
-const fi={running:false,interval:null,deadline:0,spawnAt:0,flames:new Map(),burned:new Set(),score:0,hits:0,missed:0,streak:0,highest:0,saved:false,roundId:0,stage:1};
+const fi={running:false,interval:null,deadline:0,spawnAt:0,flames:new Map(),burned:new Set(),score:0,hits:0,missed:0,streak:0,highest:0,saved:false,roundId:0,stage:1,residents:new Map(),rescued:0,missedRescues:0,rescueAt:0,rescueMode:false,rescueBusy:false,rescueTimer:null};
 const windows=[];
 for(let i=0;i<TOTAL_WINDOWS;i++){
  const btn=document.createElement('button');btn.type='button';btn.className='fire-window';btn.dataset.index=String(i);
  const fire=document.createElement('span');fire.className='flame-emoji';fire.textContent='🔥';
- const countdown=document.createElement('span');countdown.className='fire-count';countdown.textContent='3';btn.append(fire,countdown);
- btn.addEventListener('click',()=>putOutFire(i));windows.push(btn);$('fireWindows').append(btn);
+ const countdown=document.createElement('span');countdown.className='fire-count';countdown.textContent='3';const resident=document.createElement('span');resident.className='resident-emoji';resident.textContent='🧒';btn.append(fire,countdown,resident);
+ btn.addEventListener('click',()=>selectFireWindow(i));windows.push(btn);$('fireWindows').append(btn);
 }
 function windowName(i){return (5-Math.floor(i/5))+'층 '+((i%5)+1)+'번 창문';}
-function windowState(i){const b=windows[i];b.classList.toggle('burned',fi.burned.has(i));b.classList.toggle('burning',fi.flames.has(i));b.querySelector('.flame-emoji').textContent=fi.burned.has(i)?'💨':'🔥';b.setAttribute('aria-label',windowName(i)+(fi.flames.has(i)?' 불났어요! 빨리 끄기':fi.burned.has(i)?' 불에 탔어요':' 안전해요'));}
-function fireValues(){ $('fireScore').textContent=fi.score.toLocaleString('ko-KR')+'점';$('fireHits').textContent=String(fi.hits);$('fireBurns').textContent=String(fi.burned.size); }
-function stopFire(){fi.running=false;if(fi.interval)clearInterval(fi.interval);fi.interval=null;$('fireStart').disabled=false;}
+function windowState(i){const b=windows[i];b.classList.toggle('burned',fi.burned.has(i));b.classList.toggle('burning',fi.flames.has(i));b.classList.toggle('waiting',fi.residents.has(i));b.querySelector('.flame-emoji').textContent=fi.burned.has(i)?'💨':'🔥';b.setAttribute('aria-label',windowName(i)+(fi.flames.has(i)?' 불났어요! 빨리 끄기':fi.burned.has(i)?' 불에 탔어요':fi.residents.has(i)?' 구조를 기다리는 사람이 있어요':' 안전해요'));}
+function fireValues(){ $('fireScore').textContent=fi.score.toLocaleString('ko-KR')+'점';$('fireHits').textContent=String(fi.hits);$('fireBurns').textContent=String(fi.burned.size);$('fireRescued').textContent=String(fi.rescued)+'명'; }
+function updateTruck(){
+ const b=$('fireTruck');b.classList.toggle('selected',fi.rescueMode);
+ b.setAttribute('aria-pressed',String(fi.rescueMode));b.disabled=!fi.running||fi.rescueBusy;
+ b.setAttribute('aria-label',fi.rescueMode?'사다리차 선택됨. 구조할 창문을 누르세요':'사다리차 선택하여 사람 구조하기');
+}
+function stopFire(){
+ fi.running=false;if(fi.interval)clearInterval(fi.interval);fi.interval=null;
+ if(fi.rescueTimer){clearTimeout(fi.rescueTimer);fi.rescueTimer=null;}
+ fi.rescueMode=false;fi.rescueBusy=false;$('fireLadder').hidden=true;
+ $('fireLadder').classList.remove('active');$('fireTruck').classList.remove('selected');
+ updateTruck();$('fireStart').disabled=false;
+}
 function startFire(){
- stopFire();fi.roundId++;fi.score=fi.hits=fi.missed=fi.streak=fi.highest=0;fi.saved=false;fi.flames.clear();fi.burned.clear();fi.running=true;
- fi.deadline=performance.now()+60000;fi.spawnAt=performance.now()+650;fi.stage=1;updateFireDifficulty(fireDifficulty(0));
+ stopFire();fi.roundId++;fi.score=fi.hits=fi.missed=fi.streak=fi.highest=0;fi.saved=false;fi.flames.clear();fi.burned.clear();fi.residents.clear();fi.running=true;
+ fi.deadline=performance.now()+60000;fi.spawnAt=performance.now()+650;fi.rescueAt=performance.now()+3600;fi.stage=1;fi.residents.clear();fi.rescued=0;fi.missedRescues=0;fi.rescueMode=false;fi.rescueBusy=false;updateTruck();updateFireDifficulty(fireDifficulty(0));
  windows.forEach((b,i)=>{b.classList.remove('splashed');windowState(i);});fireValues();
  $('fireTime').textContent='60초';$('fireTime').parentElement.classList.remove('urgent');
  $('fireResult').hidden=true;$('fireSave').disabled=false;$('fireSaveMsg').textContent='';
- $('fireStart').disabled=true;$('fireStart').textContent='🚒 소방 활동 중!';$('fireTip').textContent='🔥 3초 안에 불난 창문을 톡!';
+ $('fireStart').disabled=true;$('fireStart').textContent='🚒 소방 활동 중!';$('fireTip').textContent='🔥 불은 바로 터치 · 🧒 사람은 🚒 소방차 → 창문!';
  beep(450,130,'sawtooth',.06);fi.interval=setInterval(tickFire,70);tickFire();
 }
 function newFire(now){
- const candidates=windows.map((_,i)=>i).filter(i=>!fi.burned.has(i)&&!fi.flames.has(i));
+ const candidates=windows.map((_,i)=>i).filter(i=>!fi.burned.has(i)&&!fi.flames.has(i)&&!fi.residents.has(i));
  if(!candidates.length)return false;
  const i=candidates[Math.floor(Math.random()*candidates.length)];fi.flames.set(i,now+3000);windowState(i);beep(790,85,'square',.027);return true;
 }
@@ -221,6 +232,12 @@ function tickFire(){
   if(now>=endAt)burn(i);
   else windows[i].querySelector('.fire-count').textContent=String(Math.max(1,Math.ceil((endAt-now)/1000)));
  }
+ // Residents occasionally appear at safe windows; missed rescues lose the opportunity,
+ // but never depict anyone being harmed.
+ for(const [i,until] of [...fi.residents]){
+  if(now>=until){fi.residents.delete(i);fi.missedRescues++;windowState(i);$('fireTip').textContent='🧒 다음 구조 요청이 오면 사다리차를 눌러요!';}
+ }
+ if(now>=fi.rescueAt&&fi.residents.size===0&&!fi.rescueBusy)spawnResident(now);
  const elapsed=Math.max(0,(now-(fi.deadline-60000))/1000),difficulty=fireDifficulty(elapsed);
  if(difficulty.level!==fi.stage){fi.stage=difficulty.level;updateFireDifficulty(difficulty);fi.spawnAt=now;}
  if(now>=fi.spawnAt){
@@ -230,6 +247,62 @@ function tickFire(){
   fi.spawnAt=now+difficulty.gap;
  }
  if(fi.burned.size===TOTAL_WINDOWS){finishFire(true);}
+}
+function spawnResident(now){
+ const candidates=windows.map((_,i)=>i).filter(i=>!fi.burned.has(i)&&!fi.flames.has(i)&&!fi.residents.has(i));
+ if(!candidates.length){fi.rescueAt=now+1700;return;}
+ const i=candidates[Math.floor(Math.random()*candidates.length)];
+ fi.residents.set(i,now+7700);windowState(i);
+ fi.rescueAt=now+5900+Math.random()*2700;
+ $('fireTip').textContent='🧒 도움 요청! 🚒 소방차를 누르고 사람이 있는 창문을 터치하세요!';
+ beep(730,110,'triangle',.07);beep(960,140,'sine',.07);
+}
+function selectFireWindow(i){
+ if(!fi.running)return;
+ if(fi.residents.has(i)){
+  if(fi.rescueMode&&!fi.rescueBusy){rescueResident(i);return;}
+  $('fireTip').textContent='🧒 먼저 아래 🚒 소방차를 눌러 사다리차를 선택하세요!';
+  $('fireTruck').classList.remove('nudge');void $('fireTruck').offsetWidth;$('fireTruck').classList.add('nudge');
+  return;
+ }
+ if(fi.flames.has(i)){putOutFire(i);return;}
+ if(fi.rescueMode)$('fireTip').textContent='🧒 사람이 있는 창문을 눌러 주세요!';
+}
+function chooseRescueTruck(){
+ if(!fi.running||fi.rescueBusy)return;
+ fi.rescueMode=!fi.rescueMode;updateTruck();
+ $('fireTip').textContent=fi.rescueMode?'🚒 사다리차 준비! 🧒 사람이 있는 창문을 누르세요!':'💧 진화 모드! 불난 창문을 눌러요!';
+ beep(fi.rescueMode?650:430,95,'sine',.07);
+}
+$('fireTruck').addEventListener('click',chooseRescueTruck);
+function drawRescueLadder(i){
+ const scene=$('fireScene').getBoundingClientRect();
+ const truck=$('fireTruck').getBoundingClientRect(),target=windows[i].getBoundingClientRect();
+ const sx=truck.left+truck.width*.55-scene.left,sy=truck.top+truck.height*.28-scene.top;
+ const ex=target.left+target.width*.51-scene.left,ey=target.top+target.height*.5-scene.top;
+ const length=Math.hypot(ex-sx,ey-sy),angle=Math.atan2(ey-sy,ex-sx)*180/Math.PI;
+ const overlay=$('fireLadder');overlay.hidden=false;
+ overlay.style.left=sx+'px';overlay.style.top=sy+'px';
+ overlay.style.width=length+'px';overlay.style.setProperty('--ladder-angle',angle+'deg');
+ overlay.classList.remove('active');void overlay.offsetWidth;overlay.classList.add('active');
+}
+function rescueResident(i){
+ if(!fi.running||fi.rescueBusy||!fi.residents.has(i))return;
+ fi.rescueBusy=true;fi.residents.delete(i);fi.rescued++;fi.score+=250;
+ fi.rescueMode=false;updateTruck();fireValues();windowState(i);
+ drawRescueLadder(i);
+ $('fireTip').textContent='🚒 사다리 올라간다! 👨‍🚒 구조 성공 +250점! 🥳';
+ const pop=$('fireRescuePop'),scene=$('fireScene').getBoundingClientRect(),target=windows[i].getBoundingClientRect();
+ pop.style.left=(target.left-scene.left+target.width*.2)+'px';
+ pop.style.top=(target.top-scene.top-25)+'px';
+ pop.textContent='💛 구조 성공! +250점';pop.classList.remove('show');void pop.offsetWidth;pop.classList.add('show');
+ beep(600,140,'sine',.08);beep(900,120,'sine',.08);
+ const round=fi.roundId;
+ fi.rescueTimer=setTimeout(()=>{
+  if(fi.roundId!==round)return;
+  $('fireLadder').hidden=true;$('fireLadder').classList.remove('active');
+  fi.rescueBusy=false;fi.rescueTimer=null;updateTruck();
+ },1550);
 }
 function putOutFire(i){
  if(!fi.running)return;const until=fi.flames.get(i),now=performance.now();
@@ -242,13 +315,13 @@ function putOutFire(i){
 }
 function finishFire(allBurned=false){
  if(!fi.running)return;
- stopFire();fi.flames.clear();windows.forEach((_,i)=>windowState(i));$('fireTime').textContent='0초';$('fireStart').textContent='▶ 다시 출동';
+ stopFire();fi.flames.clear();fi.residents.clear();windows.forEach((_,i)=>windowState(i));$('fireTime').textContent='0초';$('fireStart').textContent='▶ 다시 출동';
  $('fireTip').textContent='소방 임무가 끝났어요! 기록을 저장해 봐요';
  $('fireResult').hidden=false;
  const intact=TOTAL_WINDOWS-fi.burned.size;
  $('fireResultEmoji').textContent=intact===0?'🥺':intact>=22?'🏆':'🧑‍🚒';
  $('fireResultTitle').textContent=allBurned?'앗! 아파트에 불이 번졌어요!':intact>=22?'최고의 꼬마 소방관!':'출동 완료! 참 잘했어요!';
- $('fireResultDetail').textContent=`${fi.hits}번 불을 껐어요! ${intact}개 창문 구조 · ${fi.burned.size}개 창문 피해 · ${fi.score.toLocaleString('ko-KR')}점`;
+ $('fireResultDetail').textContent=`${fi.hits}번 불을 껐어요! · 🧒 ${fi.rescued}명 구조 · ${intact}개 안전한 창문 · ${fi.burned.size}개 창문 피해 · ${fi.score.toLocaleString('ko-KR')}점`;
  $('fireSave').disabled=false;fi.saved=false;cheer();
  $('fireResult').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -259,14 +332,14 @@ function renderRank(highlight=''){
  for(let i=0;i<items.length;i++){
   const item=items[i],li=document.createElement('li');if(highlight&&item.id===highlight)li.style.background='#e9f8e6';
   const pos=document.createElement('span');pos.className='rank-pos';pos.textContent=['🥇','🥈','🥉'][i]||String(i+1);
-  const name=document.createElement('span');name.textContent=item.name;const date=document.createElement('small');date.className='rank-date';date.textContent=`${new Date(item.at).toLocaleDateString('ko-KR')} · 불 끄기 ${item.hits}번 · 피해 ${item.burned}곳`;name.append(date);
+  const name=document.createElement('span');name.textContent=item.name;const date=document.createElement('small');date.className='rank-date';date.textContent=`${new Date(item.at).toLocaleDateString('ko-KR')} · 불 끄기 ${item.hits}번 · 구조 ${item.rescued||0}명 · 피해 ${item.burned}곳`;name.append(date);
   const score=document.createElement('span');score.className='rank-points';score.textContent=item.score.toLocaleString('ko-KR')+'점';li.append(pos,name,score);ol.append(li);
  }
 }
 function saveFire(){
  if(fi.running||$('fireResult').hidden||fi.saved)return;
  const name=$('firePlayer').value.trim().slice(0,12)||'용감한 소방관';
- const entry={id:String(Date.now())+'-'+String(Math.floor(Math.random()*1e8)),name,score:fi.score,hits:fi.hits,burned:fi.burned.size,at:Date.now()};
+ const entry={id:String(Date.now())+'-'+String(Math.floor(Math.random()*1e8)),name,score:fi.score,hits:fi.hits,burned:fi.burned.size,rescued:fi.rescued,at:Date.now()};
  try{
   const items=loadRank();items.push(entry);items.sort((a,b)=>b.score-a.score||a.burned-b.burned||a.at-b.at);
   const rank=items.findIndex(x=>x.id===entry.id)+1;
@@ -286,5 +359,5 @@ renderRank();
 // If a phone goes to sleep, use the monotonic deadline and process expiration on resume.
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(mo.running)tickMole();if(fi.running)tickFire();});
 window.addEventListener('pagehide',()=>{stopMole();stopFire();});
-window.gameArcadeDebug={getState:()=>({current,mole:{...mo,timers:undefined},fire:{running:fi.running,score:fi.score,hits:fi.hits,burns:fi.burned.size,flames:fi.flames.size}})};
+window.gameArcadeDebug={getState:()=>({current,mole:{...mo,timers:undefined},fire:{running:fi.running,score:fi.score,hits:fi.hits,rescued:fi.rescued,residents:fi.residents.size,rescueMode:fi.rescueMode,burns:fi.burned.size,flames:fi.flames.size}})};
 })();
