@@ -95,9 +95,9 @@
 <div id="resultOverlay" class="result-overlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden><div class="result-card"><div class="win-spark" id="resultStars"></div><div class="result-sticker" id="resultEmoji">🎉</div><h2 id="resultTitle">참 잘했어요!</h2><p id="resultDescription">멋지게 그렸어요!</p><div class="result-percentage" id="resultPercent">⭐ 95점</div><p class="trace-result-detail" id="resultBreakdown"></p><div class="result-buttons"><button class="btn secondary" id="retryBtn">↺ 다시 도전</button><button class="btn primary" id="nextBtn">다른 그림 ➜</button></div></div></div>
 </section></main>
 <section id="moleScreen" class="arcade-screen mole-screen" role="tabpanel" aria-labelledby="tab-mole" hidden>
- <div class="arcade-intro"><div><span class="arcade-tag mole-tag">🕹️ ARCADE · 60 SEC</span><h2>🐹 두더지 팡팡!</h2><p>처음 5초는 1마리! 이후 점점 빨라져 최대 7마리까지 동시에 등장해요!</p></div><span class="arcade-bubble" aria-hidden="true">🔨</span></div>
+ <div class="arcade-intro"><div><span class="arcade-tag mole-tag">🕹️ ARCADE · 60 SEC</span><h2>🐹 두더지 팡팡!</h2><p>처음 8초는 1마리! 이후 천천히 늘어나 최대 5마리까지 동시에 등장해요!</p></div><span class="arcade-bubble" aria-hidden="true">🔨</span></div>
  <div class="arcade-stats"><div><small>⏳ 남은 시간</small><strong id="moleTime">60초</strong></div><div><small>🏆 점수</small><strong id="moleScore">0점</strong></div><div><small>🔥 연속 성공</small><strong id="moleCombo">0</strong></div></div>
- <div class="mole-rules"><span>🐾 두더지 <strong>+10~30점</strong></span><span>🐱 고양이 <strong>−20점</strong></span><span>⚡ 후반엔 <strong>최대 7마리 동시!</strong></span></div>
+ <div class="mole-rules"><span>🐾 두더지 <strong>+10~30점</strong></span><span>🐱 고양이 <strong>−20점</strong></span><span>⚡ 후반엔 <strong>최대 5마리 동시!</strong></span></div>
  <div class="mole-arena" id="moleArena">
   <div class="mole-stars" aria-hidden="true">✦ 🎪 ✨ ⭐ ✦</div>
   <div class="mole-grid" id="moleGrid" aria-label="두더지 구멍 9개"></div>
@@ -143,7 +143,7 @@
  <div class="leaderboard"><div class="leaderboard-head"><div><h3>🏅 소방관 명예의 전당</h3><p>이 기기의 기록을 저장해 순위를 확인해요</p></div><button type="button" class="board-refresh" id="rankRefresh" aria-label="순위 새로고침">↻</button></div><ol id="fireRankList" class="rank-list"><li class="rank-empty">아직 기록이 없어요. 첫 번째 소방관이 되어 주세요!</li></ol></div>
 </section>
 <section id="soccerScreen" class="arcade-screen soccer-screen" role="tabpanel" aria-labelledby="tab-soccer" hidden>
- <div class="arcade-intro"><div><span class="arcade-tag soccer-tag">⚽ PENALTY SHOOTOUT · 5 SHOTS</span><h2>⚽ 승부차기 챌린지!</h2><p>5번의 승부차기! 1단계 6곳에서 시작해 매번 공격 가능한 곳이 하나씩 줄어요. 골키퍼는 미리 막을 방향을 정합니다!</p></div><span class="arcade-bubble soccer-bubble" aria-hidden="true">🏆</span></div>
+ <div class="arcade-intro"><div><span class="arcade-tag soccer-tag">⚽ PENALTY SHOOTOUT · 5 SHOTS</span><h2>⚽ 승부차기 챌린지!</h2><p>5번의 승부차기! 6→5→5→4→4곳 중 선택하세요. 골키퍼는 선택 전에 막을 방향을 정해요!</p></div><span class="arcade-bubble soccer-bubble" aria-hidden="true">🏆</span></div>
  <div class="arcade-stats soccer-stats"><div><small>⏳ 슛 남은 시간</small><strong id="soccerTime">10초</strong></div><div><small>⚽ 남은 슈팅</small><strong id="soccerRemaining">5개</strong></div><div><small>🥅 성공한 골</small><strong id="soccerGoals">0 / 5</strong></div></div>
  <div id="soccerProgress" class="soccer-progress" aria-label="다섯 번 슈팅 기록">⚽ ⚽ ⚽ ⚽ ⚽</div>
  <div class="soccer-level-banner" id="soccerLevelBanner" aria-live="polite"><span id="soccerStage">1단계</span><strong id="soccerChoices">6개 방향 중 슈팅!</strong><small>선택 가능한 곳을 노려요 · 키퍼는 선택 전 방향 확정</small></div>
@@ -188,7 +188,7 @@
   <div id="soccerCelebration" class="soccer-celebration" aria-live="polite"></div>
  </div>
  <div class="soccer-caption" id="soccerInstruction" aria-live="polite">준비되면 시작하세요! 5번의 슈팅에 도전합니다.</div>
- <div class="arcade-actions"><button type="button" class="arcade-action soccer-action" id="soccerStart">▶ 축구 게임 시작</button><span class="action-tip">각 슛 10초 · 6→5→4→3→2곳 · 골키퍼가 몸을 던져 막아요!</span></div>
+ <div class="arcade-actions"><button type="button" class="arcade-action soccer-action" id="soccerStart">▶ 축구 게임 시작</button><span class="action-tip">각 슛 10초 · 6→5→5→4→4곳 · 골키퍼가 몸을 던져 막아요!</span></div>
  <div class="arcade-result soccer-result" id="soccerResult" hidden role="status"><span id="soccerResultEmoji">🏆</span><h3 id="soccerResultTitle">승부차기 종료!</h3><p id="soccerResultDetail"></p>
   <div class="save-record"><label for="soccerPlayer">축구 선수 이름</label><div class="save-row"><input id="soccerPlayer" maxlength="12" autocomplete="nickname" placeholder="예: 슈팅왕" /><button type="button" id="soccerSave">💾 기록 저장</button></div><p id="soccerSaveMsg" role="status" aria-live="polite"></p></div>
   <button type="button" class="arcade-action soccer-action" id="soccerAgain">🔄 다시 도전하기</button>
