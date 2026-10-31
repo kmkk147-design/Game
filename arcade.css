@@ -90,3 +90,66 @@
  .mole-hit-star{font-size:20px}
  .mole-hammer{font-size:51px}
 }
+
+/* Enhanced SVG creatures and firefighter rescue */
+.mole-face .critter-svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 4px 3px #75523938)}
+.mole-hole[data-kind="none"] .critter-svg{display:none}
+.mole-hole[data-kind="mole"] .critter-cat{display:none}
+.mole-hole[data-kind="cat"] .critter-mole{display:none}
+.mole-hole.up .critter-svg{animation:critterBob 1.2s ease-in-out infinite alternate}
+.mole-hole.teasing .critter-cat{animation:catWiggle .28s ease-in-out infinite alternate}
+.mole-hole.teasing .cat-tongue{transform-origin:60px 85px;animation:catSvgTongue .22s ease-out infinite alternate;opacity:1}
+.mole-hole.whacked .critter-mole{animation:critterBonk .28s ease-out}
+.critter-svg .mole-sparkle,.critter-svg .cat-sparkle{opacity:.88}
+.mole-hole.teasing .cat-sparkle{animation:critterSpark .4s infinite alternate}
+.mole-hit-star{font-size:clamp(15px,2.5vw,25px)!important;z-index:8}
+.mole-pop.bad{color:#ffebfa;text-shadow:0 3px 1px #a73d75}
+.mole-arena{background:radial-gradient(ellipse at 50% 2%,#fffde6 0%,transparent 38%),linear-gradient(180deg,#d8f3ff 0 30%,#f8edff 30% 55%,#f7e1c1 55% 100%)}
+.mole-hole:after{background:linear-gradient(#f2cda3,#dca978)!important}
+@keyframes critterBob{from{transform:translateY(1px)}to{transform:translateY(-3px)}}
+@keyframes catWiggle{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+@keyframes catSvgTongue{from{transform:scaleY(.35)}to{transform:scaleY(1.12)}}
+@keyframes critterBonk{30%{transform:rotate(-11deg) scale(.95)}70%{transform:rotate(9deg) scale(1.05)}}
+@keyframes critterSpark{from{opacity:.6;transform:scale(.85)}to{opacity:1;transform:scale(1.1)}}
+.fire-rescue-status{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px 14px;margin:-4px 0 13px;font-size:13px;font-weight:850;color:#48788e}
+.fire-rescue-status span{padding:8px 11px;border-radius:13px;background:#edfaff}
+.fire-rescue-status span:first-child{color:#166a91;background:#dff7fb;font-size:14px}
+.fire-rescue-status strong{color:#167da9;font-size:19px;margin-left:4px}
+.fire-window.waiting{border-color:#fff0a8;box-shadow:0 0 0 3px #ffe080,0 0 18px #ffc968aa;background:linear-gradient(#d7f4ff,#fff3ce);animation:residentWindowGlow .8s infinite alternate}
+.fire-window.waiting .resident-emoji{display:block}
+.resident-emoji{display:none;position:absolute;z-index:7;left:50%;top:49%;transform:translate(-50%,-50%);font-size:clamp(19px,3.8vw,33px);line-height:1;filter:drop-shadow(0 2px 1px #65483755);pointer-events:none;animation:residentWave .48s ease-in-out infinite alternate}
+.fire-truck{display:flex;align-items:center;flex-direction:column;gap:0;padding:0 5px 8px;background:transparent;border:none;cursor:pointer;line-height:1.06;z-index:8;min-width:85px;touch-action:manipulation;filter:drop-shadow(0 4px 0 #6f9589)}
+.fire-truck small{display:block;padding:3px 7px;border-radius:9px;background:#e4f7ff;color:#267b9f;font-size:11px;font-weight:950;white-space:nowrap;line-height:1.2;border:2px solid #8ed9ff}
+.fire-truck.selected{filter:drop-shadow(0 0 8px #ffed61);animation:truckSelected .45s infinite alternate}
+.fire-truck.selected small{background:#ffdf83;color:#9c4218;border-color:#ef9844}
+.fire-truck:disabled{opacity:.65;cursor:default}
+.fire-truck.nudge{animation:truckNudge .28s 3}
+.fire-ladder{position:absolute;z-index:11;height:20px;transform-origin:0 50%;transform:rotate(var(--ladder-angle));pointer-events:none}
+.fire-ladder[hidden]{display:none}
+.ladder-rail{position:absolute;inset:1px 0 2px 0;border-top:3px solid #e9574e;border-bottom:3px solid #e9574e;border-radius:7px;background:repeating-linear-gradient(90deg,transparent 0 14px,#e18439 14px 18px,transparent 18px 31px),linear-gradient(#ffe39a,#f9eabd);box-shadow:0 3px 2px #794c3c55;transform-origin:left center}
+.fire-ladder.active .ladder-rail{animation:ladderGrow 1.45s ease-in-out both}
+.ladder-firefighter,.ladder-passenger{position:absolute;display:block;z-index:2;top:-27px;left:0;font-size:27px;white-space:nowrap;filter:drop-shadow(0 2px 2px #0005)}
+.fire-ladder.active .ladder-firefighter{animation:firefighterClimb 1.45s ease-in-out both}
+.fire-ladder.active .ladder-passenger{animation:passengerDown 1.45s ease-in-out both}
+.fire-rescue-pop{display:none;position:absolute;z-index:15;pointer-events:none;font-size:clamp(15px,2.9vw,23px);color:#fff;white-space:nowrap;font-weight:1000;text-shadow:0 2px 2px #168bb2;letter-spacing:-.5px}
+.fire-rescue-pop.show{display:block;animation:floatScore .95s ease-out both}
+@keyframes residentWindowGlow{to{box-shadow:0 0 0 3px #ffb456,0 0 25px #ffc968ee}}
+@keyframes residentWave{from{transform:translate(-50%,-48%) rotate(-10deg)}to{transform:translate(-50%,-53%) rotate(10deg)}}
+@keyframes truckSelected{to{transform:translateY(-3px) scale(1.05)}}
+@keyframes truckNudge{25%,75%{transform:translateX(-6px)}50%{transform:translateX(6px)}}
+@keyframes ladderGrow{0%{transform:scaleX(0);opacity:.2}25%,78%{transform:scaleX(1);opacity:1}100%{transform:scaleX(0);opacity:.2}}
+@keyframes firefighterClimb{0%,8%{left:0;opacity:1}36%,56%{left:calc(100% - 22px);opacity:1}95%,100%{left:0;opacity:1}}
+@keyframes passengerDown{0%,42%{left:calc(100% - 22px);opacity:0}54%{opacity:1}88%{left:0;opacity:1}100%{left:0;opacity:0}}
+@media(max-width:540px){
+ .fire-rescue-status{font-size:10px;margin:-5px 0 10px;gap:4px}
+ .fire-rescue-status span{padding:7px 9px}
+ .fire-rescue-status strong{font-size:14px}
+ .fire-truck{left:1%;bottom:1%;font-size:44px;min-width:62px}
+ .fire-truck small{font-size:9px;padding:2px 4px}
+ .ladder-firefighter,.ladder-passenger{font-size:21px;top:-22px}
+ .fire-rescue-pop{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mole-hole.up .critter-svg,.mole-hole.teasing .critter-cat,.fire-window.waiting .resident-emoji{animation:none}
+ .fire-ladder.active .ladder-rail,.fire-ladder.active .ladder-firefighter,.fire-ladder.active .ladder-passenger{animation-duration:.1s}
+}
