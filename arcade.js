@@ -27,63 +27,135 @@ function setGame(id){
 $all('.game-tab').forEach(tab=>tab.addEventListener('click',()=>setGame(tab.dataset.game)));
 $all('.game-tab').forEach((tab,index)=>tab.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const tabs=$all('.game-tab');const idx=(index+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;setGame(tabs[idx].dataset.game);tabs[idx].focus();}));
 
-// Whack-a-mole: independent 30s game, 9 hit targets, short enter / hit / sink animation.
-const mo={running:false,interval:null,timers:new Set(),active:-1,activeUntil:0,nextAt:0,deadline:0,last:-1,score:0,hits:0,misses:0,combo:0,best:0};
+// Whack-a-mole: 30-second arcade game with illustrated moles and decoy cats.
+// Tapping a mole gains points, while tapping a cat deducts 20 points.
+// Cats stick out their tongues and tease before sliding back into the hole.
+const mo={running:false,interval:null,timers:new Set(),active:-1,activeKind:null,activeUntil:0,nextAt:0,deadline:0,last:-1,score:0,hits:0,misses:0,catsHit:0,catsAvoided:0,catStreak:0,combo:0,best:0};
 const holes=[];
+const moleFaceMarkup=`<span class="critter critter-mole" aria-hidden="true">
+  <i class="critter-body"></i><i class="critter-ear ear-l"></i><i class="critter-ear ear-r"></i>
+  <i class="critter-head"></i><i class="critter-eye eye-l"></i><i class="critter-eye eye-r"></i>
+  <i class="critter-muzzle"></i><i class="critter-nose"></i><i class="critter-paw paw-l"></i><i class="critter-paw paw-r"></i>
+</span>`;
+const catFaceMarkup=`<span class="critter critter-cat" aria-hidden="true">
+  <i class="critter-body"></i><i class="critter-ear ear-l"></i><i class="critter-ear ear-r"></i>
+  <i class="critter-head"></i><i class="cat-stripe stripe-l"></i><i class="cat-stripe stripe-r"></i>
+  <i class="critter-eye eye-l"></i><i class="critter-eye eye-r"></i><i class="critter-muzzle"></i>
+  <i class="critter-nose"></i><i class="cat-whisker whisker-l"></i><i class="cat-whisker whisker-r"></i>
+  <i class="cat-tongue"></i><i class="critter-paw paw-l"></i><i class="critter-paw paw-r"></i>
+</span>`;
 for(let i=0;i<9;i++){
- const b=document.createElement('button');b.type='button';b.className='mole-hole';b.dataset.index=String(i);b.setAttribute('aria-label',(i+1)+'번 두더지 구멍');
- const face=document.createElement('span');face.className='mole-face';face.textContent='🐹';
- const star=document.createElement('span');star.className='mole-hit-star';star.textContent='✨🥰✨';b.append(face,star);b.addEventListener('click',e=>hitMole(i,e));holes.push(b);$('moleGrid').append(b);
+ const b=document.createElement('button');
+ b.type='button';b.className='mole-hole';b.dataset.index=String(i);b.dataset.kind='mole';
+ b.setAttribute('aria-label',(i+1)+'번 빈 구멍');
+ const face=document.createElement('span');face.className='mole-face';
+ face.innerHTML=moleFaceMarkup+catFaceMarkup;
+ const star=document.createElement('span');star.className='mole-hit-star';star.textContent='✨🥰✨';
+ b.append(face,star);b.addEventListener('click',e=>hitMole(i,e));
+ holes.push(b);$('moleGrid').append(b);
 }
 function moTimer(fn,ms){const id=setTimeout(()=>{mo.timers.delete(id);fn();},ms);mo.timers.add(id);}
-function clearMoleTimers(){if(mo.interval)clearInterval(mo.interval);mo.interval=null;for(const t of mo.timers)clearTimeout(t);mo.timers.clear();}
-function stopMole(){mo.running=false;clearMoleTimers();mo.active=-1;holes.forEach(h=>h.classList.remove('up','whacked'));$('moleHammer').classList.remove('swing');$('moleStart').disabled=false;}
-function moleValues(){ $('moleScore').textContent=mo.score+'점';$('moleCombo').textContent=String(mo.combo); }
+function clearMoleTimers(){
+ if(mo.interval)clearInterval(mo.interval);mo.interval=null;
+ for(const t of mo.timers)clearTimeout(t);mo.timers.clear();
+}
+function stopMole(){
+ mo.running=false;clearMoleTimers();mo.active=-1;mo.activeKind=null;
+ holes.forEach(h=>{h.classList.remove('up','whacked','teasing','sinking');h.setAttribute('aria-label',(Number(h.dataset.index)+1)+'번 빈 구멍');});
+ $('moleHammer').classList.remove('swing');$('moleStart').disabled=false;
+}
+function moleValues(){
+ $('moleScore').textContent=mo.score+'점';$('moleCombo').textContent=String(mo.combo);
+}
 function startMole(){
- stopMole();mo.running=true;mo.score=mo.hits=mo.misses=mo.combo=mo.best=0;mo.active=-1;mo.last=-1;
+ stopMole();mo.running=true;mo.score=mo.hits=mo.misses=mo.catStreak=mo.catsHit=mo.catsAvoided=mo.combo=mo.best=0;
+ mo.active=-1;mo.activeKind=null;mo.last=-1;
  mo.deadline=performance.now()+30000;mo.nextAt=performance.now()+350;
  $('moleTime').textContent='30초';$('moleTime').parentElement.classList.remove('urgent');moleValues();
  $('moleResult').hidden=true;$('moleStart').disabled=true;$('moleStart').textContent='🔨 두더지 잡는 중!';
- $('moleTip').textContent='튀어나오는 두더지를 톡톡 눌러요!';
+ $('moleTip').textContent='두더지 +10~30점 · 고양이 −20점! 🐱';
  beep(530,90);mo.interval=setInterval(tickMole,65);tickMole();
 }
 function spawnMole(now){
  const candidates=holes.map((_,i)=>i).filter(i=>i!==mo.last);
- const idx=candidates[Math.floor(Math.random()*candidates.length)];mo.last=idx;mo.active=idx;
- mo.activeUntil=now+Math.max(800,1350-mo.hits*8);
- holes[idx].classList.remove('whacked');holes[idx].classList.add('up');holes[idx].querySelector('.mole-face').textContent=mo.hits%5===4?'🐭':'🐹';
- holes[idx].setAttribute('aria-label',(idx+1)+'번 두더지 나타남!');
+ if(!candidates.length)return;
+ const idx=candidates[Math.floor(Math.random()*candidates.length)];
+ const isCat=mo.catStreak<2&&Math.random()<.30;
+ mo.catStreak=isCat?mo.catStreak+1:0;
+ mo.last=idx;mo.active=idx;mo.activeKind=isCat?'cat':'mole';
+ mo.activeUntil=now+Math.max(850,1370-mo.hits*9);
+ const hole=holes[idx];hole.dataset.kind=mo.activeKind;
+ hole.classList.remove('whacked','teasing','sinking');
+ hole.querySelector('.mole-hit-star').textContent=isCat?'😛 메롱!':'✨🥰✨';
+ hole.classList.add('up');
+ hole.setAttribute('aria-label',(idx+1)+'번 '+(isCat?'고양이! 때리지 마세요':'두더지! 눌러 잡으세요'));
+ $('moleTip').textContent=isCat?'🐱 고양이는 건드리지 마세요!':'🐾 두더지예요! 뿅망치로 잡아요!';
 }
 function tickMole(){
- if(!mo.running)return;const now=performance.now();
- const left=Math.max(0,Math.ceil((mo.deadline-now)/1000));$('moleTime').textContent=left+'초';$('moleTime').parentElement.classList.toggle('urgent',left<=5);
+ if(!mo.running)return;
+ const now=performance.now(),left=Math.max(0,Math.ceil((mo.deadline-now)/1000));
+ $('moleTime').textContent=left+'초';$('moleTime').parentElement.classList.toggle('urgent',left<=5);
  if(now>=mo.deadline){finishMole();return;}
- if(mo.active!==-1&&now>=mo.activeUntil){const i=mo.active;mo.active=-1;mo.misses++;mo.combo=0;moleValues();holes[i].classList.remove('up');holes[i].setAttribute('aria-label',(i+1)+'번 빈 구멍');mo.nextAt=now+230;}
+ if(mo.active!==-1&&now>=mo.activeUntil){
+  const idx=mo.active,kind=mo.activeKind;mo.active=-1;mo.activeKind=null;
+  if(kind==='mole'){mo.misses++;mo.combo=0;moleValues();}
+  else if(kind==='cat')mo.catsAvoided++;
+  const hole=holes[idx];hole.classList.remove('up');hole.classList.add('sinking');
+  hole.setAttribute('aria-label',(idx+1)+'번 빈 구멍');
+  moTimer(()=>hole.classList.remove('sinking'),280);
+  mo.nextAt=now+260;
+ }
  if(mo.active===-1&&now>=mo.nextAt)spawnMole(now);
 }
 function swingHammer(evt){
  const arena=$('moleArena'),pos=arena.getBoundingClientRect(),h=$('moleHammer');
  const x=evt.clientX-pos.left,y=evt.clientY-pos.top;
- h.style.left=Math.max(0,Math.min(pos.width-65,x-38))+'px';h.style.top=Math.max(0,Math.min(pos.height-70,y-76))+'px';
+ h.style.left=Math.max(0,Math.min(pos.width-65,x-38))+'px';
+ h.style.top=Math.max(0,Math.min(pos.height-70,y-76))+'px';
  h.classList.remove('swing');void h.offsetWidth;h.classList.add('swing');
+}
+function popMole(i,text){
+ const pop=$('molePop'),r=$('moleArena').getBoundingClientRect(),b=holes[i].getBoundingClientRect();
+ pop.textContent=text;pop.style.left=(b.left-r.left+b.width*.08)+'px';pop.style.top=(b.top-r.top)+'px';
+ pop.classList.remove('visible');void pop.offsetWidth;pop.classList.add('visible');
 }
 function hitMole(i,e){
  if(!mo.running||i!==mo.active)return;
  const now=performance.now();if(now>=mo.deadline){finishMole();return;}
  if(now>=mo.activeUntil){tickMole();return;}
- mo.active=-1;mo.hits++;mo.combo++;mo.best=Math.max(mo.best,mo.combo);
+ const kind=mo.activeKind;mo.active=-1;mo.activeKind=null;
+ const hole=holes[i];hole.classList.remove('up');
+ swingHammer(e);
+ if(kind==='cat'){
+  mo.catsHit++;mo.combo=0;mo.score=Math.max(0,mo.score-20);
+  moleValues();hole.classList.add('teasing');
+  hole.setAttribute('aria-label',(i+1)+'번 고양이가 메롱하며 놀려요');
+  hole.querySelector('.mole-hit-star').textContent='😛 메롱!';
+  popMole(i,'😜 메롱! −20점');
+  $('moleTip').textContent='앗! 고양이는 때리면 안 돼요! −20점';
+  beep(450,130,'sawtooth',.05);
+  moTimer(()=>beep(285,160,'triangle',.05),140);
+  moTimer(()=>{hole.classList.remove('teasing');hole.classList.add('sinking');},610);
+  moTimer(()=>{hole.classList.remove('sinking');hole.setAttribute('aria-label',(i+1)+'번 빈 구멍');},930);
+  mo.nextAt=now+850;
+  return;
+ }
+ mo.hits++;mo.combo++;mo.best=Math.max(mo.best,mo.combo);
  const gain=10+Math.min(20,(mo.combo-1)*2);mo.score+=gain;moleValues();
- holes[i].classList.remove('up');holes[i].classList.add('whacked');holes[i].setAttribute('aria-label',(i+1)+'번 두더지 맞음');
- swingHammer(e);const pop=$('molePop'),r=$('moleArena').getBoundingClientRect(),b=holes[i].getBoundingClientRect();
- pop.textContent='✨ +'+gain+' 🥰';pop.style.left=(b.left-r.left+b.width*.13)+'px';pop.style.top=(b.top-r.top)+'px';pop.classList.remove('visible');void pop.offsetWidth;pop.classList.add('visible');
+ hole.classList.add('whacked');
+ hole.setAttribute('aria-label',(i+1)+'번 두더지를 잡았어요');
+ hole.querySelector('.mole-hit-star').textContent='✨🥰✨';
+ popMole(i,'✨ +'+gain+'점 🥰');
  beep(380,95,'triangle',.095);moTimer(()=>beep(620,100,'sine',.065),70);
- mo.nextAt=now+360;moTimer(()=>holes[i].classList.remove('whacked'),420);
+ mo.nextAt=now+380;
+ moTimer(()=>{hole.classList.remove('whacked');hole.setAttribute('aria-label',(i+1)+'번 빈 구멍');},370);
 }
 function finishMole(){
  if(!mo.running)return;stopMole();$('moleTime').textContent='0초';$('moleTip').textContent='30초 도전 완료!';
- $('moleResult').hidden=false;$('moleResultEmoji').textContent=mo.hits>=16?'🏆':'🐹';
+ $('moleResult').hidden=false;
+ $('moleResultEmoji').textContent=mo.hits>=16?'🏆':'🐾';
  $('moleResultTitle').textContent=mo.hits>=16?'두더지 달인!':'두더지 잡기 완료!';
- $('moleResultDetail').textContent=`${mo.hits}마리 잡았어요! 최종 ${mo.score}점 · 최고 연속 ${mo.best}번 🎉`;
+ $('moleResultDetail').textContent=`${mo.hits}마리 잡았어요! 고양이 ${mo.catsHit}번 실수 · 최종 ${mo.score}점 · 최고 연속 ${mo.best}번 🎉`;
  $('moleStart').textContent='▶ 다시 시작';cheer();
 }
 $('moleStart').addEventListener('click',startMole);$('moleAgain').addEventListener('click',startMole);
