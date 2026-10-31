@@ -15,7 +15,7 @@
 .trace-result-detail{background:#f7f4ff;border-radius:13px;color:#5e527b!important;padding:9px 12px;font-size:12px!important;margin:0 0 17px!important;line-height:1.6}
 @media(max-width:540px){.trace-penalties{font-size:10px}.trace-result-detail{font-size:11px!important}}
 </style>
-<link rel="stylesheet" href="/arcade.css?v=4">
+<link rel="stylesheet" href="/arcade.css?v=5">
 </head>
 <body>
 <div class="wrap">
@@ -36,29 +36,33 @@
 <div id="resultOverlay" class="result-overlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden><div class="result-card"><div class="win-spark" id="resultStars"></div><div class="result-sticker" id="resultEmoji">🎉</div><h2 id="resultTitle">참 잘했어요!</h2><p id="resultDescription">멋지게 그렸어요!</p><div class="result-percentage" id="resultPercent">⭐ 95점</div><p class="trace-result-detail" id="resultBreakdown"></p><div class="result-buttons"><button class="btn secondary" id="retryBtn">↺ 다시 도전</button><button class="btn primary" id="nextBtn">다른 그림 ➜</button></div></div></div>
 </section></main>
 <section id="moleScreen" class="arcade-screen mole-screen" role="tabpanel" aria-labelledby="tab-mole" hidden>
- <div class="arcade-intro"><div><span class="arcade-tag mole-tag">🕹️ ARCADE · 30 SEC</span><h2>🐹 두더지 팡팡!</h2><p>귀여운 두더지는 잡고, 메롱하는 고양이는 피하세요!</p></div><span class="arcade-bubble" aria-hidden="true">🔨</span></div>
+ <div class="arcade-intro"><div><span class="arcade-tag mole-tag">🕹️ ARCADE · 30 SEC</span><h2>🐹 두더지 팡팡!</h2><p>두더지는 잡고 고양이는 피해요! 두세 마리가 동시에 팡팡!</p></div><span class="arcade-bubble" aria-hidden="true">🔨</span></div>
  <div class="arcade-stats"><div><small>⏳ 남은 시간</small><strong id="moleTime">30초</strong></div><div><small>🏆 점수</small><strong id="moleScore">0점</strong></div><div><small>🔥 연속 성공</small><strong id="moleCombo">0</strong></div></div>
- <div class="mole-rules"><span>🐾 두더지 <strong>+10~30점</strong></span><span>🐱 고양이 <strong>−20점</strong></span></div>
+ <div class="mole-rules"><span>🐾 두더지 <strong>+10~30점</strong></span><span>🐱 고양이 <strong>−20점</strong></span><span>⚡ 후반엔 <strong>3마리 동시!</strong></span></div>
  <div class="mole-arena" id="moleArena">
   <div class="mole-stars" aria-hidden="true">✦ 🎪 ✨ ⭐ ✦</div>
   <div class="mole-grid" id="moleGrid" aria-label="두더지 구멍 9개"></div>
   <div class="mole-hammer" id="moleHammer" aria-hidden="true">🔨</div>
   <div class="mole-pop" id="molePop" aria-hidden="true"></div>
  </div>
- <div class="arcade-actions"><button type="button" class="arcade-action mole-action" id="moleStart">▶ 두더지 게임 시작</button><span id="moleTip" class="action-tip">30초 동안 두더지만 잡아요! 고양이를 때리면 감점 🐱</span></div>
+ <div class="arcade-actions"><button type="button" class="arcade-action mole-action" id="moleStart">▶ 두더지 게임 시작</button><span id="moleTip" class="action-tip">두더지는 +점수, 고양이는 −20점! 여러 마리가 동시에 나와요 🐱</span></div>
  <div class="arcade-result" id="moleResult" hidden role="status"><span id="moleResultEmoji">🎉</span><h3 id="moleResultTitle">끝!</h3><p id="moleResultDetail"></p><button type="button" id="moleAgain" class="arcade-action mole-action">🔄 또 도전하기</button></div>
 </section>
 <section id="fireScreen" class="arcade-screen fire-screen" role="tabpanel" aria-labelledby="tab-fire" hidden>
- <div class="arcade-intro"><div><span class="arcade-tag fire-tag">🚨 FIRE STATION · 60 SEC</span><h2>🚒 출동! 꼬마 소방관</h2><p>불난 창문을 3초 안에 눌러 불을 꺼 주세요!</p></div><span class="arcade-bubble" aria-hidden="true">🧑‍🚒</span></div>
+ <div class="arcade-intro"><div><span class="arcade-tag fire-tag">🚨 FIRE STATION · 60 SEC</span><h2>🚒 출동! 꼬마 소방관</h2><p>🔥 불을 끄고, 🧒 사람을 발견하면 🚒 소방차로 구조해요!</p></div><span class="arcade-bubble" aria-hidden="true">🧑‍🚒</span></div>
  <div class="arcade-stats fire-stats"><div><small>⏳ 남은 시간</small><strong id="fireTime">60초</strong></div><div><small>💧 불 끈 횟수</small><strong id="fireHits">0</strong></div><div><small>🏆 점수</small><strong id="fireScore">0점</strong></div><div><small>🏠 탄 집</small><strong id="fireBurns">0</strong></div></div>
  <div class="fire-difficulty" id="fireDifficulty" role="status" aria-live="polite">🌱 1단계 · 한 곳씩 불이 나요</div>
+ <div class="fire-rescue-status"><span>🛟 구조 성공 <strong id="fireRescued">0명</strong></span><span>🧒 사람 발견 → <b>🚒 소방차</b> 선택 → 사람 있는 창문 터치!</span></div>
  <div class="fire-scene" id="fireScene">
   <div class="fire-sky"><span>☀️</span><span>☁️</span><span>☁️</span></div>
   <div class="fire-apartment"><div class="fire-roof"><span>🏢 햇살 아파트</span><span class="roof-light">🚨</span></div><div class="fire-windows" id="fireWindows" aria-label="아파트 창문 25개"></div><div class="fire-lobby">🚪 <span>햇살 아파트 · 안전 제일!</span> 🌼</div></div>
-  <div class="fire-truck" aria-hidden="true">🚒</div><div class="fire-ground" aria-hidden="true">🌳　🌼　🌿　🌻　🌳</div>
+  <button type="button" id="fireTruck" class="fire-truck" aria-pressed="false" aria-label="🚒 사다리차 선택하여 사람 구조하기">🚒<small>사다리차</small></button>
+  <div class="fire-ground" aria-hidden="true">🌳　🌼　🌿　🌻　🌳</div>
+  <div class="fire-ladder" id="fireLadder" hidden aria-hidden="true"><div class="ladder-rail"><span class="ladder-firefighter">👨‍🚒</span><span class="ladder-passenger">🧒</span></div></div>
+  <div class="fire-rescue-pop" id="fireRescuePop" aria-hidden="true"></div>
   <div class="fire-splash" id="fireSplash" aria-hidden="true"></div>
  </div>
- <div class="arcade-actions"><button type="button" class="arcade-action fire-action" id="fireStart">▶ 소방서 게임 시작</button><span id="fireTip" class="action-tip">불은 3초 뒤 번져요! 🔥 → 💦</span></div>
+ <div class="arcade-actions"><button type="button" class="arcade-action fire-action" id="fireStart">▶ 소방서 게임 시작</button><span id="fireTip" class="action-tip">불 🔥 터치=진화 · 사람 🧒 발견=소방차🚒 → 창문 터치!</span></div>
  <div class="arcade-result fire-result" id="fireResult" hidden role="status"><span id="fireResultEmoji">🏆</span><h3 id="fireResultTitle">구조 활동 완료!</h3><p id="fireResultDetail"></p>
   <div class="save-record"><label for="firePlayer">내 소방관 이름</label><div class="save-row"><input id="firePlayer" maxlength="12" autocomplete="nickname" placeholder="예: 용감한 소방관" /><button type="button" id="fireSave">💾 기록 저장</button></div><p id="fireSaveMsg" role="status" aria-live="polite"></p></div>
   <button type="button" id="fireAgain" class="arcade-action fire-action">🔄 다시 출동!</button>
@@ -243,6 +247,6 @@ window.GameTrace={stop:function(){if(mode==='running'){
 chooseShape(0);
 })();
 </script>
-<script src="/arcade.js?v=4"></script>
+<script src="/arcade.js?v=5"></script>
 </body>
 </html>
