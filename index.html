@@ -21,7 +21,7 @@
 .trace-result-detail{background:#f7f4ff;border-radius:13px;color:#5e527b!important;padding:9px 12px;font-size:12px!important;margin:0 0 17px!important;line-height:1.6}
 @media(max-width:540px){.trace-penalties{font-size:10px}.trace-result-detail{font-size:11px!important}}
 </style>
-<link rel="stylesheet" href="/arcade.css?v=10">
+<link rel="stylesheet" href="/arcade.css?v=11">
 <style>
 #gardenScreen{padding:0!important;overflow:visible!important}
 #gardenScreen > :not(.garden-match-embed){display:none!important}
@@ -60,7 +60,21 @@
   <div class="mole-pop" id="molePop" aria-hidden="true"></div>
  </div>
  <div class="arcade-actions"><button type="button" class="arcade-action mole-action" id="moleStart">▶ 두더지 게임 시작</button><span id="moleTip" class="action-tip">두더지는 +점수, 고양이는 −20점! 여러 마리가 동시에 나와요 🐱</span></div>
- <div class="arcade-result" id="moleResult" hidden role="status"><span id="moleResultEmoji">🎉</span><h3 id="moleResultTitle">끝!</h3><p id="moleResultDetail"></p><button type="button" id="moleAgain" class="arcade-action mole-action">🔄 또 도전하기</button></div>
+ <div class="arcade-result mole-result" id="moleResult" hidden role="status">
+  <span id="moleResultEmoji">🎉</span><h3 id="moleResultTitle">끝!</h3><p id="moleResultDetail"></p>
+  <div class="save-record mole-save-record">
+   <label for="molePlayer">🏅 내 선수 이름</label>
+   <div class="save-row"><input id="molePlayer" maxlength="12" autocomplete="nickname" placeholder="예: 리안이, 이준이" aria-label="기록에 저장할 이름" /><button type="button" id="moleSave">💾 기록 저장</button></div>
+   <p id="moleSaveMsg" role="status" aria-live="polite"></p>
+  </div>
+  <button type="button" id="moleAgain" class="arcade-action mole-action">🔄 또 도전하기</button>
+ </div>
+ <div class="leaderboard mole-leaderboard">
+  <div class="leaderboard-head"><div><h3>🏆 두더지 게임 순위표</h3><p>60초 동안 획득한 점수순 · 동점이면 두더지를 많이 잡은 순 · 이 기기 기록</p></div>
+   <button type="button" class="board-refresh" id="moleRankRefresh" aria-label="두더지 순위 새로고침">↻</button>
+  </div>
+  <ol id="moleRankList" class="rank-list"><li class="rank-empty">첫 번째 두더지왕에 도전해 보세요!</li></ol>
+ </div>
 </section>
 <section id="fireScreen" class="arcade-screen fire-screen" role="tabpanel" aria-labelledby="tab-fire" hidden>
  <div class="arcade-intro"><div><span class="arcade-tag fire-tag">🚨 FIRE STATION · 60 SEC</span><h2>🚒 출동! 꼬마 소방관</h2><p>🔥 불을 끄고, 🧒 사람을 발견하면 🚒 소방차로 구조해요!</p></div><span class="arcade-bubble" aria-hidden="true">🧑‍🚒</span></div>
@@ -345,7 +359,7 @@ window.GameTrace={stop:function(){if(mode==='running'){
 chooseShape(0);
 })();
 </script>
-<script src="/arcade.js?v=12"></script>
+<script src="/arcade.js?v=13"></script>
 <script>
 (function(){
  const frame=document.getElementById('gardenMatchEmbed');
