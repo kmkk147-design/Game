@@ -361,9 +361,9 @@ try{$('firePlayer').value=localStorage.getItem('game-fire-player')||'';}catch(_)
 renderRank();
 // 5-shot soccer penalty shootout. Keeper destinations are precommitted
 // for all five kicks *before* the player can choose; selection never affects RNG.
-const SOCCER_STORE='game-soccer-rank-v1';
+const SOCCER_STORE='game-soccer-rank-v2'; // new difficulty rules; preserve legacy leaderboard separately
 const soccerZones=Array.from(document.querySelectorAll('#soccerZones .soccer-zone'));
-const so={phase:'idle',round:0,goals:0,plans:[],results:[],deadline:0,shotStart:0,spentMs:0,tick:null,timers:new Set(),epoch:0,saved:false};
+const so={phase:'idle',round:0,goals:0,plans:[],stageZones:[],results:[],deadline:0,shotStart:0,spentMs:0,tick:null,timers:new Set(),epoch:0,saved:false};
 function soTimer(fn,ms){
  const epoch=so.epoch;
  const t=setTimeout(()=>{so.timers.delete(t);if(epoch===so.epoch)fn();},ms);
@@ -374,13 +374,40 @@ function clearSoccerTimers(){
  for(const id of so.timers)clearTimeout(id);so.timers.clear();
 }
 function setSoccerZoneButtons(enabled){
- for(const b of soccerZones)b.disabled=!enabled;
+ const open=so.stageZones[so.round]||[];
+ soccerZones.forEach((b,i)=>{
+  const closed=!open.includes(i);
+  b.classList.toggle('closed',closed);
+  b.disabled=!enabled||closed;
+  b.setAttribute('aria-disabled',String(!enabled||closed));
+  b.setAttribute('aria-label',(closed?'이 단계에서 막혀 있는 구역: ':'슈팅 가능한 구역: ')+
+   ['왼쪽 위','센터 위','오른쪽 위','왼쪽 아래','센터 아래','오른쪽 아래'][i]);
+ });
 }
+function soccerPlanShots(){
+ // Both the open zones and goalkeeper choices are finalized BEFORE the first shot.
+ // The player can never influence the keeper's random selection by tapping.
+ so.stageZones=Array.from({length:5},(_,round)=>{
+  const ids=[0,1,2,3,4,5];
+  for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]];}
+  return ids.slice(0,6-round).sort((a,b)=>a-b);
+ });
+ so.plans=so.stageZones.map(open=>open[Math.floor(Math.random()*open.length)]);
+}
+
 function resetSoccerVisuals(){
  const keeper=$('soccerKeeper'),ball=$('soccerBall');
- keeper.classList.remove('diving','saved');keeper.style.left='50%';keeper.style.top='67%';
- ball.classList.remove('kicked','scored','stopped');ball.style.removeProperty('--shot-x');ball.style.removeProperty('--shot-y');
- for(const b of soccerZones)b.classList.remove('chosen','blocked','scored');
+ keeper.classList.remove('diving','saved','low-dive');
+ keeper.style.left='50%';keeper.style.top='65%';
+ ['--keeper-x','--keeper-y','--keeper-rotate'].forEach(k=>keeper.style.removeProperty(k));
+ ball.classList.remove('kicked','scored','stopped');
+ ['--shot-x','--shot-y'].forEach(k=>ball.style.removeProperty(k));
+ for(const b of soccerZones)b.classList.remove('chosen','blocked','scored','closed');
+ $('soccerGoal').classList.remove('net-shaking');
+ $('soccerNetFlash').classList.remove('flashing');
+ $('soccerSpeedLines').classList.remove('flying');
+ $('soccerImpact').className='soccer-impact';$('soccerImpact').textContent='';
+ const area=$('soccerArena');area.classList.remove('soccer-scored','soccer-saved');
  $('soccerCelebration').textContent='';$('soccerCelebration').classList.remove('visible','goal','save','late');
 }
 function updateSoccerValues(){
@@ -400,8 +427,8 @@ function stopSoccer(){
 }
 function startSoccer(){
  stopSoccer();so.round=0;so.goals=0;so.spentMs=0;so.results=[];so.saved=false;
- // Precommit all 5 keeper zones before accepting the first click.
- so.plans=Array.from({length:5},()=>Math.floor(Math.random()*6));
+ // Each shot has 6, 5, 4, 3, then 2 open directions.
+ soccerPlanShots();
  $('soccerResult').hidden=true;$('soccerSave').disabled=false;$('soccerSaveMsg').textContent='';
  $('soccerStart').disabled=true;$('soccerStart').textContent='⚽ 5번의 슈팅 진행 중';
  updateSoccerValues();prepareSoccerShot();
@@ -412,7 +439,10 @@ function prepareSoccerShot(){
  so.shotStart=performance.now();so.deadline=so.shotStart+10000;
  $('soccerTime').textContent='10초';$('soccerTime').parentElement.classList.remove('urgent');
  $('soccerRemaining').textContent=(5-so.round)+'개';
- $('soccerInstruction').textContent='⚽ '+(so.round+1)+'번째 슈팅! 왼쪽·센터·오른쪽의 위/아래 중 골라 주세요!';
+ const choices=so.stageZones[so.round].length;
+ $('soccerStage').textContent=(so.round+1)+'단계';
+ $('soccerChoices').textContent='🎯 '+choices+'개 방향에서 선택하세요!';
+ $('soccerInstruction').textContent='⚽ '+(so.round+1)+'번째 슛! 밝게 표시된 '+choices+'곳 중 선택! 회색 구역은 잠겼어요. 골키퍼는 이미 한 곳을 정했어요!';
  setSoccerZoneButtons(true);beep(650,105,'sine',.05);
  clearInterval(so.tick);so.tick=setInterval(tickSoccer,65);
 }
@@ -426,36 +456,74 @@ function resolveSoccerShot(selected,timeout=false){
  if(so.phase!=='aiming')return false;
  const now=performance.now();
  if(!timeout&&now>=so.deadline){timeout=true;selected=null;}
- if(selected!==null&&(!Number.isInteger(selected)||selected<0||selected>=6))return false;
+ if(selected!==null&&(!Number.isInteger(selected)||selected<0||selected>=6||
+   !so.stageZones[so.round].includes(selected)))return false;
  so.phase='resolving';clearInterval(so.tick);so.tick=null;setSoccerZoneButtons(false);
- const blocked=so.plans[so.round]; // frozen before the round began
+ const blocked=so.plans[so.round]; // Precommitted at start, independent of the tap
  const scored=!timeout&&selected!==blocked;
  so.spentMs+=timeout?10000:Math.min(10000,Math.max(0,now-so.shotStart));
  if(scored)so.goals++;
- so.results.push({goal:scored,timeout:!!timeout,shot:selected,keeper:blocked});
- const keeper=$('soccerKeeper'),keeperColumn=blocked%3,keeperRow=Math.floor(blocked/3);
- keeper.classList.add('diving');keeper.style.left=((keeperColumn+.5)/3*100)+'%';
- keeper.style.top=((keeperRow+.5)/2*100)+'%';
+ so.results.push({goal:scored,timeout:!!timeout,shot:selected,keeper:blocked,open:so.stageZones[so.round].length});
+ const keeper=$('soccerKeeper'),goal=$('soccerGoal'),arena=$('soccerArena');
+ const goalRect=goal.getBoundingClientRect(),arenaRect=arena.getBoundingClientRect();
+ const keeperZone=soccerZones[blocked].getBoundingClientRect();
+ const x=keeperZone.left+keeperZone.width/2-(goalRect.left+goalRect.width*.5);
+ const y=keeperZone.top+keeperZone.height/2-(goalRect.top+goalRect.height*.65);
+ // Dynamic lunge to exactly the precommitted target: left/right dive or vertical stretch.
+ const column=blocked%3,row=Math.floor(blocked/3);
+ const rotate=column===0?-68:column===2?68:row===0?-10:16;
+ keeper.style.setProperty('--keeper-x',x+'px');
+ keeper.style.setProperty('--keeper-y',y+'px');
+ keeper.style.setProperty('--keeper-rotate',rotate+'deg');
+ keeper.classList.toggle('low-dive',row===1);
+ const hit=$('soccerImpact');
+ const targetRect=selected===null?keeperZone:soccerZones[selected].getBoundingClientRect();
+ hit.style.left=(targetRect.left+targetRect.width/2-arenaRect.left)+'px';
+ hit.style.top=(targetRect.top+targetRect.height/2-arenaRect.top)+'px';
  if(!timeout){
-  const zone=soccerZones[selected],scene=$('soccerArena').getBoundingClientRect(),
-   ball=$('soccerBall').getBoundingClientRect(),target=zone.getBoundingClientRect();
-  const x=(target.left+target.width/2)-(ball.left+ball.width/2);
-  const y=(target.top+target.height/2)-(ball.top+ball.height/2);
-  $('soccerBall').style.setProperty('--shot-x',x+'px');
-  $('soccerBall').style.setProperty('--shot-y',y+'px');
-  $('soccerBall').classList.remove('kicked');void $('soccerBall').offsetWidth;
-  $('soccerBall').classList.add('kicked');
+  const zone=soccerZones[selected],ball=$('soccerBall').getBoundingClientRect();
+  const shotX=targetRect.left+targetRect.width/2-ball.left-ball.width/2;
+  const shotY=targetRect.top+targetRect.height/2-ball.top-ball.height/2;
+  const ballElement=$('soccerBall');
+  ballElement.style.setProperty('--shot-x',shotX+'px');
+  ballElement.style.setProperty('--shot-y',shotY+'px');
+  // Airborne ball and a separate flying goalkeeper; the animated paths meet
+  // at the exact same goal zone when the keeper saves.
+  ballElement.classList.remove('kicked');void ballElement.offsetWidth;
+  ballElement.classList.add('kicked');
+  const trail=$('soccerSpeedLines'),length=Math.hypot(shotX,shotY);
+  trail.style.left=(ball.left+ball.width/2-arenaRect.left)+'px';
+  trail.style.top=(ball.top+ball.height/2-arenaRect.top)+'px';
+  trail.style.width=Math.max(30,length)+'px';
+  trail.style.setProperty('--trail-angle',(Math.atan2(shotY,shotX)*180/Math.PI)+'deg');
+  trail.classList.remove('flying');void trail.offsetWidth;trail.classList.add('flying');
+  keeper.classList.remove('diving');void keeper.offsetWidth;keeper.classList.add('diving');
   zone.classList.add('chosen',scored?'scored':'blocked');
  }else $('soccerTime').textContent='0초';
- if(!scored&&!timeout)keeper.classList.add('saved');
- const c=$('soccerCelebration');
- c.className='soccer-celebration visible '+(scored?'goal':timeout?'late':'save');
- c.textContent=scored?'🎊 골~! 멋진 슛!':timeout?'⏰ 시간 초과! 한 번 놓쳤어요':'🧤 골키퍼가 막았어요!';
- $('soccerInstruction').textContent=timeout?'시간을 놓쳤어요. 다음 슈팅에 도전해요!':scored?'🥳 축하해요! 골 성공!':'아까워요! 다음엔 다른 방향을 노려 봐요!';
- if(scored){beep(660,125,'sine',.085);soTimer(()=>beep(990,150,'sine',.09),110);}
- else{beep(timeout?255:340,185,'triangle',.065);}
+ const message=scored?'🎊 골~! 멋진 슛!':timeout?'⏰ 시간 초과!':'🧤 슈퍼 세이브!';
+ $('soccerInstruction').textContent=timeout?'10초를 넘겨 한 번의 기회를 사용했어요.':scored?
+  '🥳 골 성공! 골키퍼가 몸을 날렸지만 다른 곳으로 슛했어요!':'🧤 키퍼가 몸을 던져 공을 막았어요! 다음 슛에 도전!';
+ // Wait until the flying ball reaches the goal before playing the save/goal effect.
+ soTimer(()=>{
+  const c=$('soccerCelebration');c.textContent=message;
+  c.className='soccer-celebration visible '+(scored?'goal':timeout?'late':'save');
+  if(!timeout){
+   hit.textContent=scored?'✨⚽✨':'🧤💥';
+   hit.className='soccer-impact '+(scored?'goal-burst':'save-burst');
+   if(scored){
+    arena.classList.add('soccer-scored');
+    goal.classList.add('net-shaking');$('soccerNetFlash').classList.add('flashing');
+    beep(680,145,'sine',.085);soTimer(()=>beep(1040,180,'sine',.095),130);
+   }else{
+    arena.classList.add('soccer-saved');keeper.classList.add('saved');
+    $('soccerBall').classList.add('stopped');
+    beep(230,160,'triangle',.08);
+    soTimer(()=>beep(370,110,'sine',.055),100);
+   }
+  }else beep(260,200,'triangle',.06);
+ },timeout?40:600);
  so.round++;updateSoccerValues();
- soTimer(()=>{if(so.round>=5)finishSoccer();else prepareSoccerShot();},1150);
+ soTimer(()=>{if(so.round>=5)finishSoccer();else prepareSoccerShot();},timeout?1200:1900);
  return true;
 }
 function finishSoccer(){
@@ -663,5 +731,5 @@ partyProgress();partyTreasures();
 // If a phone goes to sleep, use the monotonic deadline and process expiration on resume.
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(mo.running)tickMole();if(fi.running)tickFire();if(so.phase==='aiming')tickSoccer();});
 window.addEventListener('pagehide',()=>{stopMole();stopFire();stopSoccer();stopGarden();});
-window.gameArcadeDebug={getState:()=>({current,mole:{...mo,timers:undefined},fire:{running:fi.running,score:fi.score,hits:fi.hits,rescued:fi.rescued,residents:fi.residents.size,rescueMode:fi.rescueMode,burns:fi.burned.size,flames:fi.flames.size},soccer:{phase:so.phase,round:so.round,goals:so.goals,shots:so.results.map(x=>({...x})),spentMs:so.spentMs,saved:so.saved},garden:{phase:ga.phase,round:ga.round,gifts:[...ga.gifts],wrongRound:ga.wrongRound,completed:ga.completed,target:ga.sequence[ga.round]}})};
+window.gameArcadeDebug={getState:()=>({current,mole:{...mo,timers:undefined},fire:{running:fi.running,score:fi.score,hits:fi.hits,rescued:fi.rescued,residents:fi.residents.size,rescueMode:fi.rescueMode,burns:fi.burned.size,flames:fi.flames.size},soccer:{phase:so.phase,round:so.round,goals:so.goals,plans:[...so.plans],stageZones:so.stageZones.map(x=>[...x]),shots:so.results.map(x=>({...x})),spentMs:so.spentMs,saved:so.saved},garden:{phase:ga.phase,round:ga.round,gifts:[...ga.gifts],wrongRound:ga.wrongRound,completed:ga.completed,target:ga.sequence[ga.round]}})};
 })();
