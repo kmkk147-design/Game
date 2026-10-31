@@ -50,8 +50,8 @@
 <div id="resultOverlay" class="result-overlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden><div class="result-card"><div class="win-spark" id="resultStars"></div><div class="result-sticker" id="resultEmoji">🎉</div><h2 id="resultTitle">참 잘했어요!</h2><p id="resultDescription">멋지게 그렸어요!</p><div class="result-percentage" id="resultPercent">⭐ 95점</div><p class="trace-result-detail" id="resultBreakdown"></p><div class="result-buttons"><button class="btn secondary" id="retryBtn">↺ 다시 도전</button><button class="btn primary" id="nextBtn">다른 그림 ➜</button></div></div></div>
 </section></main>
 <section id="moleScreen" class="arcade-screen mole-screen" role="tabpanel" aria-labelledby="tab-mole" hidden>
- <div class="arcade-intro"><div><span class="arcade-tag mole-tag">🕹️ ARCADE · 30 SEC</span><h2>🐹 두더지 팡팡!</h2><p>두더지는 잡고 고양이는 피해요! 두세 마리가 동시에 팡팡!</p></div><span class="arcade-bubble" aria-hidden="true">🔨</span></div>
- <div class="arcade-stats"><div><small>⏳ 남은 시간</small><strong id="moleTime">30초</strong></div><div><small>🏆 점수</small><strong id="moleScore">0점</strong></div><div><small>🔥 연속 성공</small><strong id="moleCombo">0</strong></div></div>
+ <div class="arcade-intro"><div><span class="arcade-tag mole-tag">🕹️ ARCADE · 60 SEC</span><h2>🐹 두더지 팡팡!</h2><p>두더지는 잡고 고양이는 피해요! 두세 마리가 동시에 팡팡!</p></div><span class="arcade-bubble" aria-hidden="true">🔨</span></div>
+ <div class="arcade-stats"><div><small>⏳ 남은 시간</small><strong id="moleTime">60초</strong></div><div><small>🏆 점수</small><strong id="moleScore">0점</strong></div><div><small>🔥 연속 성공</small><strong id="moleCombo">0</strong></div></div>
  <div class="mole-rules"><span>🐾 두더지 <strong>+10~30점</strong></span><span>🐱 고양이 <strong>−20점</strong></span><span>⚡ 후반엔 <strong>3마리 동시!</strong></span></div>
  <div class="mole-arena" id="moleArena">
   <div class="mole-stars" aria-hidden="true">✦ 🎪 ✨ ⭐ ✦</div>
@@ -345,7 +345,7 @@ window.GameTrace={stop:function(){if(mode==='running'){
 chooseShape(0);
 })();
 </script>
-<script src="/arcade.js?v=10"></script>
+<script src="/arcade.js?v=11"></script>
 <script>
 (function(){
  const frame=document.getElementById('gardenMatchEmbed');
