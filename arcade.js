@@ -2,9 +2,9 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const $all=sel=>Array.from(document.querySelectorAll(sel));
-const scenes={trace:$('tracingScreen'),mole:$('moleScreen'),fire:$('fireScreen'),soccer:$('soccerScreen')};
+const scenes={trace:$('tracingScreen'),mole:$('moleScreen'),fire:$('fireScreen'),soccer:$('soccerScreen'),garden:$('gardenScreen')};
 let current='trace';
-const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','10초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','30초 안에 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 여섯 방향 중 골키퍼가 없는 곳을 선택해 5골에 도전해요!']};
+const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','10초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','30초 안에 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 여섯 방향 중 골키퍼가 없는 곳을 선택해 5골에 도전해요!'],garden:['리안이·이준이의 <em>마법 정원!</em> 🌈','리안이가 꽃씨 색깔을 고르고 이준이가 물을 줘요. 꽃 6송이를 피우면 꽃왕관 선물!']};
 let sound=null;
 function beep(freq=500,ms=90,type='sine',volume=.07){
  if($('soundBtn').textContent.includes('꺼짐'))return;
@@ -19,6 +19,7 @@ function setGame(id){
  else if(current==='mole')stopMole();
  else if(current==='fire')stopFire();
  else if(current==='soccer')stopSoccer();
+ else if(current==='garden')stopGarden();
  current=id;
  Object.keys(scenes).forEach(key=>{scenes[key].hidden=key!==id;});
  $all('.game-tab').forEach(btn=>{const selected=btn.dataset.game===id;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',String(selected));btn.tabIndex=selected?0:-1;});
@@ -520,8 +521,182 @@ $('soccerRankRefresh').addEventListener('click',()=>renderSoccerRank());
 try{$('soccerPlayer').value=localStorage.getItem('game-soccer-player')||'';}catch(_){}
 setSoccerZoneButtons(false);renderSoccerRank();
 
+// Gentle, untimed co-operative game for a 4-year-old.
+// Characters are original vector illustrations reflecting the children's visible
+// hairstyles and clothing, NOT the user-provided personal photographs.
+const GARDEN_STORE='game-garden-crowns-v1';
+const gardenColors=[
+ {id:'pink',name:'분홍색',petal:'#fb7eba',highlight:'#ffb5d7',flower:'🌸'},
+ {id:'yellow',name:'노란색',petal:'#ffcc4b',highlight:'#fff4a2',flower:'🌼'},
+ {id:'blue',name:'하늘색',petal:'#71c8f6',highlight:'#c4f0ff',flower:'🩵'},
+ {id:'purple',name:'보라색',petal:'#bd94f7',highlight:'#e8d1ff',flower:'💜'}
+];
+const ga={phase:'idle',round:0,blooms:0,mistakes:0,queue:[],positions:[],selected:-1,epoch:0,timers:new Set(),completed:0};
+const gardenChoices=Array.from(document.querySelectorAll('#gardenChoices .garden-choice'));
+const gardenBeds=[];
+function gardenGirlArt(){
+ return '<svg class="garden-avatar-svg" viewBox="0 0 184 224" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
+ '<defs><radialGradient id="g-rian-skin" cx="35%" cy="22%" r="80%"><stop stop-color="#ffe9cb"/><stop offset="1" stop-color="#edb195"/></radialGradient>'+
+ '<linearGradient id="g-rian-hair" x2=".8" y2="1"><stop stop-color="#46404b"/><stop offset=".65" stop-color="#1f1d2e"/><stop offset="1" stop-color="#343047"/></linearGradient>'+
+ '<linearGradient id="g-rian-dress" x2="1" y2="1"><stop stop-color="#fffaf0"/><stop offset="1" stop-color="#f1dbc2"/></linearGradient></defs>'+
+ '<ellipse cx="93" cy="214" rx="62" ry="7" fill="#9d72b388"/>'+
+ '<path d="M66 162 L59 208 L84 214 L95 180 L108 214 L132 208 L119 162Z" fill="#e5b5a1"/>'+
+ '<path d="M60 202 Q74 198 83 205 L84 217 L55 217Z M108 205 Q121 197 132 202 L138 217 L106 217Z" fill="#fa7fa7" stroke="#c85b88" stroke-width="2"/>'+
+ '<path d="M69 110 L49 168 L135 168 L116 110Z" fill="#bb91ef" stroke="#9563dc" stroke-width="3"/>'+
+ '<path d="M55 110 Q92 98 128 110 L132 151 Q92 164 50 151Z" fill="url(#g-rian-dress)" stroke="#dfc8b0" stroke-width="2"/>'+
+ '<path d="M64 115 L60 141 M120 115 L124 141" fill="none" stroke="#fff" stroke-width="4"/>'+
+ '<path class="garden-arm-left" d="M54 116 Q27 137 24 112 L29 99 Q43 118 59 109" fill="#f0bea6" stroke="#c99885" stroke-width="2"/>'+
+ '<path class="garden-arm-right" d="M126 116 Q152 133 157 102 L148 95 Q144 115 125 108" fill="#f0bea6" stroke="#c99885" stroke-width="2"/>'+
+ '<path d="M92 23 Q38 11 34 82 L38 141 Q54 159 65 129 L121 128 Q136 151 149 136 L151 80 Q151 14 92 23Z" fill="url(#g-rian-hair)" stroke="#242334" stroke-width="2.5"/>'+
+ '<ellipse cx="92" cy="78" rx="49" ry="55" fill="url(#g-rian-skin)" stroke="#d59d84" stroke-width="2"/>'+
+ '<path d="M42 67 Q43 22 85 21 Q135 11 144 68 Q118 51 95 49 Q69 54 42 67Z" fill="url(#g-rian-hair)"/>'+
+ '<path d="M43 55 Q58 64 69 56 Q79 65 91 55 Q103 64 116 53 Q129 63 141 53" fill="none" stroke="#1e1b2a" stroke-width="17" stroke-linecap="round"/>'+
+ '<path d="M53 43 Q92 13 132 38" fill="none" stroke="#6e6172" stroke-width="3" opacity=".42" stroke-linecap="round"/>'+
+ '<ellipse cx="59" cy="93" rx="9" ry="5.5" fill="#fba99e" opacity=".67"/><ellipse cx="125" cy="93" rx="9" ry="5.5" fill="#fba99e" opacity=".67"/>'+
+ '<path d="M59 76 Q71 69 82 77 M101 77 Q112 69 124 76" fill="none" stroke="#3a3035" stroke-width="3.5" stroke-linecap="round"/>'+
+ '<ellipse cx="71" cy="80" rx="5.2" ry="6.5" fill="#25232c"/><ellipse cx="112" cy="80" rx="5.2" ry="6.5" fill="#25232c"/>'+
+ '<circle cx="69.4" cy="77.5" r="2.2" fill="#fff"/><circle cx="110.4" cy="77.5" r="2.2" fill="#fff"/>'+
+ '<path d="M91 87 Q87 91 92 92" stroke="#d39082" stroke-width="1.6" fill="none"/>'+
+ '<path d="M78 103 Q92 117 108 103 Q93 128 78 103" fill="#b85869" stroke="#9e455b" stroke-width="1.4"/>'+
+ '<path d="M83 106 Q92 111 103 106" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>'+
+ '<path d="M51 36 Q43 32 41 44 L30 42 L40 51 L30 59 L47 56" fill="#f9c05e" stroke="#e9a53e" stroke-width="1"/>'+
+ '</svg>';
+}
+function gardenBoyArt(){
+ return '<svg class="garden-avatar-svg" viewBox="0 0 184 224" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
+ '<defs><radialGradient id="g-ijun-skin" cx="37%" cy="25%" r="87%"><stop stop-color="#ffe8c9"/><stop offset="1" stop-color="#eeb69b"/></radialGradient>'+
+ '<linearGradient id="g-ijun-shirt" x2="1" y2="1"><stop stop-color="#4479b8"/><stop offset="1" stop-color="#243d7c"/></linearGradient></defs>'+
+ '<ellipse cx="91" cy="214" rx="62" ry="7" fill="#729fa18a"/>'+
+ '<path d="M69 155 L65 205 L86 211 L92 179 L101 211 L126 205 L117 154" fill="#f1be9e"/>'+
+ '<path d="M60 203 Q74 199 84 206 L85 217 L56 217Z M103 206 Q119 200 131 203 L134 217 L101 217Z" fill="#68b8e6" stroke="#318cae" stroke-width="2"/>'+
+ '<path d="M59 147 L125 147 L128 183 Q100 192 55 183Z" fill="#263965"/>'+
+ '<path d="M54 109 L129 109 L135 156 Q91 168 46 156Z" fill="url(#g-ijun-shirt)" stroke="#244874" stroke-width="2"/>'+
+ '<path d="M58 123 L124 123" stroke="#79a1d4" stroke-width="3" opacity=".55"/>'+
+ '<path class="garden-arm-left" d="M53 119 Q29 141 22 115 L30 102 Q39 123 59 111" fill="#efbf9d" stroke="#cb9984" stroke-width="2"/>'+
+ '<path class="garden-arm-right" d="M129 119 Q156 134 159 108 L150 97 Q144 122 125 111" fill="#efbf9d" stroke="#cb9984" stroke-width="2"/>'+
+ '<path d="M60 110 L68 145 Q92 153 117 144 L125 109" fill="#ef7083" stroke="#b85366" stroke-width="2.5"/>'+
+ '<path d="M67 108 Q92 115 117 108" fill="none" stroke="#fff1db" stroke-width="4"/>'+
+ '<path d="M69 124 L116 124 M70 133 L117 133" stroke="#fff5ea" stroke-width="3"/>'+
+ '<ellipse cx="92" cy="70" rx="52" ry="55" fill="url(#g-ijun-skin)" stroke="#dda18a" stroke-width="2"/>'+
+ '<path d="M42 59 Q36 27 60 19 Q72 7 83 13 Q113 5 132 22 Q156 34 143 61 Q129 51 118 36 Q89 40 65 32 Q56 54 42 59" fill="#35313c" stroke="#252533" stroke-width="1.8"/>'+
+ '<path d="M64 23 Q82 13 98 22" stroke="#695d65" stroke-width="3" opacity=".5" fill="none"/>'+
+ '<ellipse cx="57" cy="91" rx="10" ry="6.5" fill="#fca79c" opacity=".6"/><ellipse cx="126" cy="91" rx="10" ry="6.5" fill="#fca79c" opacity=".6"/>'+
+ '<path d="M56 67 Q69 60 82 67 M101 67 Q116 60 128 68" stroke="#3f3130" stroke-width="3.5" stroke-linecap="round" fill="none"/>'+
+ '<ellipse cx="70" cy="74" rx="6" ry="6.9" fill="#26232d"/><ellipse cx="114" cy="74" rx="6" ry="6.9" fill="#26232d"/>'+
+ '<circle cx="68.6" cy="71.8" r="2.1" fill="#fff"/><circle cx="112.6" cy="71.8" r="2.1" fill="#fff"/>'+
+ '<ellipse cx="91" cy="88" rx="3" ry="2" fill="#dd9f8b"/>'+
+ '<path d="M79 101 Q92 115 106 101" fill="none" stroke="#a5655d" stroke-width="3" stroke-linecap="round"/>'+
+ '</svg>';
+}
+const gaBeds=$('gardenBeds');
+for(let i=0;i<6;i++){
+ const b=document.createElement('button');b.type='button';b.className='garden-bed';b.dataset.bed=String(i);
+ b.setAttribute('aria-label',(i+1)+'번 마법 꽃밭');
+ b.innerHTML='<span class="garden-dirt" aria-hidden="true"></span><span class="garden-plant" aria-hidden="true"><span class="garden-stem"></span><span class="garden-leaves"></span><span class="garden-petals">'+Array.from({length:6},()=>'<i></i>').join('')+'<em></em></span></span><span class="garden-bed-stars" aria-hidden="true">✨💦✨</span>';
+ b.addEventListener('click',()=>waterGarden(i));
+ gaBeds.append(b);gardenBeds.push(b);
+}
+$('gardenRianArt').innerHTML=gardenGirlArt();$('gardenIjunArt').innerHTML=gardenBoyArt();
+function readGardenCrowns(){
+ try{const n=Number(localStorage.getItem(GARDEN_STORE)||0);return Number.isInteger(n)&&n>=0?Math.min(n,1000000):0;}catch(_){return 0;}
+}
+ga.completed=readGardenCrowns();$('gardenCollection').textContent=ga.completed+'개';
+function gTimer(fn,ms){
+ const version=ga.epoch;
+ const t=setTimeout(()=>{ga.timers.delete(t);if(ga.epoch===version)fn();},ms);
+ ga.timers.add(t);return t;
+}
+function stopGarden(){
+ ga.epoch++;for(const t of ga.timers)clearTimeout(t);ga.timers.clear();ga.phase='idle';
+ gardenChoices.forEach(b=>{b.disabled=true;b.classList.remove('chosen','try-again','hint');});
+ gardenBeds.forEach(b=>b.disabled=true);
+ $('gardenStart').disabled=false;
+ $('gardenScene').classList.remove('finished');
+ $('gardenRian').classList.remove('celebrate');$('gardenIjun').classList.remove('celebrate');
+}
+function shuffledGarden(list){const a=list.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function startGarden(){
+ stopGarden();ga.phase='choose';ga.round=0;ga.blooms=0;ga.mistakes=0;ga.selected=-1;
+ ga.positions=shuffledGarden([0,1,2,3,4,5]);
+ ga.queue=shuffledGarden(['pink','yellow','blue','purple',gardenColors[Math.floor(Math.random()*4)].id,gardenColors[Math.floor(Math.random()*4)].id]);
+ $('gardenResult').hidden=true;$('gardenStart').disabled=true;$('gardenStart').textContent='🌱 꽃정원 가꾸는 중!';
+ $('gardenCount').textContent='0 / 6';$('gardenCollection').textContent=ga.completed+'개';
+ $('gardenMagic').textContent='';
+ gardenBeds.forEach((bed,i)=>{
+  bed.className='garden-bed';bed.disabled=true;bed.style.removeProperty('--flower-color');bed.style.removeProperty('--flower-light');
+  bed.setAttribute('aria-label',(i+1)+'번 빈 마법 꽃밭');
+ });
+ nextGardenTurn();beep(560,130,'sine',.065);
+}
+function nextGardenTurn(){
+ if(ga.round>=6){finishGarden();return;}
+ ga.phase='choose';ga.selected=ga.positions[ga.round];const wanted=gardenColors.find(x=>x.id===ga.queue[ga.round]);
+ $('gardenPrompt').textContent='🌸 리안이가 찾는 '+wanted.name+' 꽃씨를 골라 주세요! ('+(ga.round+1)+'/6)';
+ $('gardenRianQuote').textContent=wanted.name+'을(를) 골라 줘!';$('gardenIjunQuote').textContent='물뿌리개 준비! 💦';
+ gardenChoices.forEach(b=>{b.disabled=false;b.classList.remove('chosen','try-again','hint');});
+ gardenBeds.forEach(b=>{b.disabled=true;b.classList.remove('waiting','sparkling');});
+ $('gardenMagic').textContent='';
+}
+function pickGardenColor(id){
+ if(ga.phase!=='choose')return;
+ const wanted=ga.queue[ga.round],btn=gardenChoices.find(b=>b.dataset.color===id);
+ if(!btn)return;
+ if(id!==wanted){
+  ga.mistakes++;btn.classList.remove('try-again');void btn.offsetWidth;btn.classList.add('try-again');
+  $('gardenPrompt').textContent='💖 괜찮아! '+gardenColors.find(x=>x.id===wanted).name+'을(를) 다시 찾아볼까?';
+  $('gardenRianQuote').textContent='다시 골라 보자! 🌸';beep(340,85,'sine',.025);
+  if(ga.mistakes%2===0)gardenChoices.find(b=>b.dataset.color===wanted).classList.add('hint');
+  return;
+ }
+ ga.phase='water';btn.classList.add('chosen');
+ gardenChoices.forEach(b=>b.disabled=true);
+ const bed=gardenBeds[ga.selected];bed.disabled=false;bed.classList.add('waiting');
+ $('gardenPrompt').textContent='💦 정답! 이제 이준이 차례예요. 반짝이는 화분을 톡 눌러 물을 주세요!';
+ $('gardenRianQuote').textContent='우와! 정답이야! ✨';
+ $('gardenIjunQuote').textContent='내가 물 줄게! 💦';beep(690,115,'sine',.06);
+}
+function waterGarden(i){
+ if(ga.phase!=='water'||i!==ga.selected)return;
+ ga.phase='blooming';const color=gardenColors.find(x=>x.id===ga.queue[ga.round]);
+ const bed=gardenBeds[i];bed.disabled=true;bed.classList.remove('waiting');
+ bed.style.setProperty('--flower-color',color.petal);
+ bed.style.setProperty('--flower-light',color.highlight);
+ bed.classList.add('bloomed','sparkling');
+ bed.setAttribute('aria-label',(i+1)+'번 '+color.name+' 꽃이 활짝 피었어요');
+ $('gardenMagic').textContent='💦 ✨ '+color.flower+' ✨';$('gardenMagic').classList.remove('burst');
+ void $('gardenMagic').offsetWidth;$('gardenMagic').classList.add('burst');
+ $('gardenRian').classList.add('celebrate');$('gardenIjun').classList.add('celebrate');
+ $('gardenRianQuote').textContent='꽃이 활짝 피었어! 🌸';
+ $('gardenIjunQuote').textContent='물 주기 성공! 💦';
+ ga.blooms++;ga.round++;$('gardenCount').textContent=ga.blooms+' / 6';
+ $('gardenPrompt').textContent='✨ 짜잔! '+color.name+' 꽃이 피었어요! '+(ga.blooms===6?'무지개 정원 완성!':'다음 꽃도 가꿔 볼까요?');
+ beep(740,130,'sine',.065);gTimer(()=>beep(980,130,'sine',.06),115);
+ gTimer(()=>{
+  $('gardenRian').classList.remove('celebrate');$('gardenIjun').classList.remove('celebrate');
+  if(ga.round>=6)finishGarden();else nextGardenTurn();
+ },900);
+}
+function finishGarden(){
+ if(ga.phase==='finished')return;
+ ga.phase='finished';ga.completed++;
+ try{localStorage.setItem(GARDEN_STORE,String(ga.completed));}catch(_){}
+ $('gardenCollection').textContent=ga.completed+'개';
+ $('gardenScene').classList.add('finished');
+ $('gardenRian').classList.add('celebrate');$('gardenIjun').classList.add('celebrate');
+ $('gardenPrompt').textContent='🌈 김리안과 권이준의 마법 꽃정원 완성! 꽃왕관을 선물합니다! 👑';
+ $('gardenResultDetail').textContent='꽃 6송이 모두 성공! 👑 '+ga.completed+'번째 꽃왕관을 받았어요! 둘이 힘을 합쳐서 정말 멋져요!';
+ $('gardenResult').hidden=false;$('gardenStart').disabled=false;
+ $('gardenStart').textContent='▶ 새로운 꽃정원';
+ $('gardenMagic').textContent='🌈👑💝';$('gardenMagic').classList.add('burst');
+ gardenChoices.forEach(b=>b.disabled=true);gardenBeds.forEach(b=>b.disabled=true);
+ cheer();
+}
+gardenChoices.forEach(btn=>btn.addEventListener('click',()=>pickGardenColor(btn.dataset.color)));
+$('gardenStart').addEventListener('click',startGarden);
+$('gardenAgain').addEventListener('click',startGarden);
+
 // If a phone goes to sleep, use the monotonic deadline and process expiration on resume.
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(mo.running)tickMole();if(fi.running)tickFire();if(so.phase==='aiming')tickSoccer();});
-window.addEventListener('pagehide',()=>{stopMole();stopFire();stopSoccer();});
-window.gameArcadeDebug={getState:()=>({current,mole:{...mo,timers:undefined},fire:{running:fi.running,score:fi.score,hits:fi.hits,rescued:fi.rescued,residents:fi.residents.size,rescueMode:fi.rescueMode,burns:fi.burned.size,flames:fi.flames.size},soccer:{phase:so.phase,round:so.round,goals:so.goals,shots:so.results.map(x=>({...x})),spentMs:so.spentMs,saved:so.saved}})};
+window.addEventListener('pagehide',()=>{stopMole();stopFire();stopSoccer();stopGarden();});
+window.gameArcadeDebug={getState:()=>({current,mole:{...mo,timers:undefined},fire:{running:fi.running,score:fi.score,hits:fi.hits,rescued:fi.rescued,residents:fi.residents.size,rescueMode:fi.rescueMode,burns:fi.burned.size,flames:fi.flames.size},soccer:{phase:so.phase,round:so.round,goals:so.goals,shots:so.results.map(x=>({...x})),spentMs:so.spentMs,saved:so.saved},garden:{phase:ga.phase,round:ga.round,blooms:ga.blooms,mistakes:ga.mistakes,completed:ga.completed,target:ga.queue[ga.round],selected:ga.selected}})};
 })();
