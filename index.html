@@ -21,7 +21,7 @@
 .trace-result-detail{background:#f7f4ff;border-radius:13px;color:#5e527b!important;padding:9px 12px;font-size:12px!important;margin:0 0 17px!important;line-height:1.6}
 @media(max-width:540px){.trace-penalties{font-size:10px}.trace-result-detail{font-size:11px!important}}
 </style>
-<link rel="stylesheet" href="/arcade.css?v=8">
+<link rel="stylesheet" href="/arcade.css?v=10">
 <style>
 #gardenScreen{padding:0!important;overflow:visible!important}
 #gardenScreen > :not(.garden-match-embed){display:none!important}
@@ -84,13 +84,15 @@
  <div class="leaderboard"><div class="leaderboard-head"><div><h3>🏅 소방관 명예의 전당</h3><p>이 기기의 기록을 저장해 순위를 확인해요</p></div><button type="button" class="board-refresh" id="rankRefresh" aria-label="순위 새로고침">↻</button></div><ol id="fireRankList" class="rank-list"><li class="rank-empty">아직 기록이 없어요. 첫 번째 소방관이 되어 주세요!</li></ol></div>
 </section>
 <section id="soccerScreen" class="arcade-screen soccer-screen" role="tabpanel" aria-labelledby="tab-soccer" hidden>
- <div class="arcade-intro"><div><span class="arcade-tag soccer-tag">⚽ PENALTY SHOOTOUT · 5 SHOTS</span><h2>⚽ 승부차기 챌린지!</h2><p>골키퍼는 이미 막을 곳을 정했어요! 10초 안에 여섯 곳 중 하나를 골라 슛!</p></div><span class="arcade-bubble soccer-bubble" aria-hidden="true">🏆</span></div>
+ <div class="arcade-intro"><div><span class="arcade-tag soccer-tag">⚽ PENALTY SHOOTOUT · 5 SHOTS</span><h2>⚽ 승부차기 챌린지!</h2><p>5번의 승부차기! 1단계 6곳에서 시작해 매번 공격 가능한 곳이 하나씩 줄어요. 골키퍼는 미리 막을 방향을 정합니다!</p></div><span class="arcade-bubble soccer-bubble" aria-hidden="true">🏆</span></div>
  <div class="arcade-stats soccer-stats"><div><small>⏳ 슛 남은 시간</small><strong id="soccerTime">10초</strong></div><div><small>⚽ 남은 슈팅</small><strong id="soccerRemaining">5개</strong></div><div><small>🥅 성공한 골</small><strong id="soccerGoals">0 / 5</strong></div></div>
  <div id="soccerProgress" class="soccer-progress" aria-label="다섯 번 슈팅 기록">⚽ ⚽ ⚽ ⚽ ⚽</div>
- <div id="soccerArena" class="soccer-arena" aria-label="축구 골대와 여섯 개 슈팅 방향">
-  <div class="soccer-fans" aria-hidden="true">🎉　✨　🙌　🎺　🌟　🎉</div>
+ <div class="soccer-level-banner" id="soccerLevelBanner" aria-live="polite"><span id="soccerStage">1단계</span><strong id="soccerChoices">6개 방향 중 슈팅!</strong><small>선택 가능한 곳을 노려요 · 키퍼는 선택 전 방향 확정</small></div>
+ <div id="soccerArena" class="soccer-arena" aria-label="축구 골대와 단계별로 좁아지는 슈팅 방향">
+  <div class="soccer-fans" aria-hidden="true">🏟️　🎺　🙌　⭐　🙌　🎉</div>
+  <div class="soccer-stadium-board" aria-hidden="true"><span>🏆 KIDS CUP</span><span>⚽ PENALTY</span></div>
   <div class="soccer-goal" id="soccerGoal">
-   <div class="soccer-net" aria-hidden="true"></div>
+   <div class="soccer-net" aria-hidden="true"></div><div class="soccer-net-flash" id="soccerNetFlash" aria-hidden="true"></div>
    <div class="soccer-zones" id="soccerZones" role="group" aria-label="슛할 방향 선택">
     <button type="button" class="soccer-zone" data-zone="0" aria-label="왼쪽 위로 슈팅"><span>↖</span><small>왼쪽 위</small></button>
     <button type="button" class="soccer-zone" data-zone="1" aria-label="가운데 위로 슈팅"><span>↑</span><small>센터 위</small></button>
@@ -100,27 +102,34 @@
     <button type="button" class="soccer-zone" data-zone="5" aria-label="오른쪽 아래로 슈팅"><span>↘</span><small>오른쪽 아래</small></button>
    </div>
    <div id="soccerKeeper" class="soccer-keeper" aria-hidden="true">
-    <svg viewBox="0 0 90 124" xmlns="http://www.w3.org/2000/svg">
-     <ellipse cx="46" cy="118" rx="28" ry="5" fill="#092e21" opacity=".2"/>
-     <path d="M30 77 L25 108 L37 112 L45 88 L53 112 L66 108 L61 77 Z" fill="#28345e" stroke="#1c2851" stroke-width="3" stroke-linejoin="round"/>
-     <path d="M27 107 L38 110 L38 119 L21 119 Z M53 109 L64 106 L72 119 L54 119 Z" fill="#fff9ed" stroke="#e2e5f4" stroke-width="2"/>
-     <path d="M29 48 L15 52 L5 76 L15 83 L28 65 L30 78 L61 78 L62 64 L76 83 L86 76 L74 51 L60 47 Z" fill="#ffd35f" stroke="#d99e26" stroke-width="3" stroke-linejoin="round"/>
-     <path d="M29 48 Q44 65 61 48 M33 74 L58 74" fill="none" stroke="#ffeb9e" stroke-width="3"/>
-     <circle cx="9" cy="83" r="8" fill="#edb4ab" stroke="#d68a79" stroke-width="2"/><circle cx="81" cy="83" r="8" fill="#edb4ab" stroke="#d68a79" stroke-width="2"/>
-     <path d="M34 30 Q26 7 45 6 Q66 8 57 32" fill="#3f3027"/>
-     <ellipse cx="45" cy="31" rx="19" ry="22" fill="#f7c3a4" stroke="#dda386" stroke-width="2"/>
-     <path d="M27 28 Q29 8 45 9 Q65 9 63 28 L56 20 L36 20 Z" fill="#48362d"/>
-     <ellipse cx="37" cy="31" rx="2.5" ry="3.5" fill="#382c2a"/><ellipse cx="53" cy="31" rx="2.5" ry="3.5" fill="#382c2a"/>
-     <path d="M39 42 Q45 46 51 42" fill="none" stroke="#ad6e60" stroke-width="2" stroke-linecap="round"/>
+    <svg viewBox="0 0 110 146" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs><linearGradient id="keeperJersey" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe078"/><stop offset=".6" stop-color="#ffc142"/><stop offset="1" stop-color="#ee9935"/></linearGradient><radialGradient id="keeperSkin"><stop stop-color="#ffe5be"/><stop offset="1" stop-color="#ddaa8e"/></radialGradient></defs>
+      <ellipse cx="55" cy="139" rx="37" ry="5" fill="#1b4334" opacity=".22"/>
+      <g class="keeper-leg-left"><path d="M42 92 L31 128 L44 134 L58 105 Z" fill="#343963" stroke="#222b54" stroke-width="2"/><path d="M27 130 Q38 125 47 132 L49 140 L22 140 Z" fill="#fff9ec" stroke="#d6dae3" stroke-width="2"/></g>
+      <g class="keeper-leg-right"><path d="M61 99 L71 131 L84 128 L74 91 Z" fill="#343963" stroke="#222b54" stroke-width="2"/><path d="M67 132 Q78 126 88 129 L93 140 L66 140 Z" fill="#fff9ec" stroke="#d6dae3" stroke-width="2"/></g>
+      <path d="M36 78 L74 78 L75 104 Q55 110 35 103Z" fill="#24375b"/>
+      <path d="M32 51 Q55 43 78 51 L83 91 Q53 99 27 90 Z" fill="url(#keeperJersey)" stroke="#cb8b32" stroke-width="2"/>
+      <path d="M38 54 L72 54 M42 86 L69 86" stroke="#fff1bd" stroke-width="3" stroke-linecap="round"/><text x="55" y="80" text-anchor="middle" font-weight="900" font-size="22" fill="#8c5b28">1</text>
+      <g class="keeper-arm-left"><path d="M33 55 Q20 56 14 81" fill="none" stroke="#ffc454" stroke-width="15" stroke-linecap="round"/><path d="M13 75 L5 77 Q-2 88 8 98 Q22 102 25 89 L23 79Z" fill="#fff" stroke="#77abc5" stroke-width="3"/><path d="M8 82 L7 92 M13 81 L13 94 M19 83 L19 92" stroke="#9bd3e5" stroke-width="2"/></g>
+      <g class="keeper-arm-right"><path d="M76 55 Q92 56 97 81" fill="none" stroke="#ffc454" stroke-width="15" stroke-linecap="round"/><path d="M90 79 L86 88 Q89 102 102 98 Q113 91 105 77 L96 75Z" fill="#fff" stroke="#77abc5" stroke-width="3"/><path d="M93 82 L94 92 M99 81 L100 94 M104 82 L105 92" stroke="#9bd3e5" stroke-width="2"/></g>
+      <rect x="48" y="42" width="14" height="13" rx="5" fill="#e5a783"/>
+      <ellipse cx="55" cy="30" rx="24" ry="26" fill="url(#keeperSkin)" stroke="#d69c7e" stroke-width="2"/>
+      <path d="M31 30 Q27 3 52 3 Q82 -2 80 27 L70 18 Q53 22 36 16Z" fill="#3c302d"/>
+      <path d="M35 14 Q48 5 62 10" fill="none" stroke="#645048" stroke-width="3" opacity=".4"/>
+      <ellipse cx="46" cy="30" rx="3.3" ry="4.4" fill="#342c2d"/><ellipse cx="65" cy="30" rx="3.3" ry="4.4" fill="#342c2d"/>
+      <circle cx="45" cy="28.5" r="1.1" fill="white"/><circle cx="64" cy="28.5" r="1.1" fill="white"/>
+      <path d="M49 42 Q55 47 62 41" fill="none" stroke="#af7063" stroke-width="2.6" stroke-linecap="round"/>
+      <ellipse cx="34" cy="37" rx="5" ry="3.4" fill="#f2aaaa" opacity=".65"/><ellipse cx="76" cy="37" rx="5" ry="3.4" fill="#f2aaaa" opacity=".65"/>
     </svg>
+    <div class="soccer-glove-ball" aria-hidden="true">⚽</div>
    </div>
   </div>
   <div class="soccer-pitch-decor" aria-hidden="true"><span class="soccer-pitch-circle"></span></div>
-  <div id="soccerBall" class="soccer-ball" aria-hidden="true">⚽</div>
+  <div class="soccer-speed-lines" id="soccerSpeedLines" aria-hidden="true"></div><div id="soccerBall" class="soccer-ball" aria-hidden="true">⚽</div><div id="soccerImpact" class="soccer-impact" aria-hidden="true"></div>
   <div id="soccerCelebration" class="soccer-celebration" aria-live="polite"></div>
  </div>
  <div class="soccer-caption" id="soccerInstruction" aria-live="polite">준비되면 시작하세요! 5번의 슈팅에 도전합니다.</div>
- <div class="arcade-actions"><button type="button" class="arcade-action soccer-action" id="soccerStart">▶ 축구 게임 시작</button><span class="action-tip">각 슛 10초 · 키퍼의 위치는 선택 전에 확정!</span></div>
+ <div class="arcade-actions"><button type="button" class="arcade-action soccer-action" id="soccerStart">▶ 축구 게임 시작</button><span class="action-tip">각 슛 10초 · 6→5→4→3→2곳 · 골키퍼가 몸을 던져 막아요!</span></div>
  <div class="arcade-result soccer-result" id="soccerResult" hidden role="status"><span id="soccerResultEmoji">🏆</span><h3 id="soccerResultTitle">승부차기 종료!</h3><p id="soccerResultDetail"></p>
   <div class="save-record"><label for="soccerPlayer">축구 선수 이름</label><div class="save-row"><input id="soccerPlayer" maxlength="12" autocomplete="nickname" placeholder="예: 슈팅왕" /><button type="button" id="soccerSave">💾 기록 저장</button></div><p id="soccerSaveMsg" role="status" aria-live="polite"></p></div>
   <button type="button" class="arcade-action soccer-action" id="soccerAgain">🔄 다시 도전하기</button>
@@ -336,7 +345,7 @@ window.GameTrace={stop:function(){if(mode==='running'){
 chooseShape(0);
 })();
 </script>
-<script src="/arcade.js?v=8"></script>
+<script src="/arcade.js?v=10"></script>
 <script>
 (function(){
  const frame=document.getElementById('gardenMatchEmbed');
