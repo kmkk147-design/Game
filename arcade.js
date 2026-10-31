@@ -2,9 +2,9 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const $all=sel=>Array.from(document.querySelectorAll(sel));
-const scenes={trace:$('tracingScreen'),mole:$('moleScreen'),fire:$('fireScreen')};
+const scenes={trace:$('tracingScreen'),mole:$('moleScreen'),fire:$('fireScreen'),soccer:$('soccerScreen')};
 let current='trace';
-const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','10초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','30초 안에 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!']};
+const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','10초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','30초 안에 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 여섯 방향 중 골키퍼가 없는 곳을 선택해 5골에 도전해요!']};
 let sound=null;
 function beep(freq=500,ms=90,type='sine',volume=.07){
  if($('soundBtn').textContent.includes('꺼짐'))return;
@@ -17,12 +17,14 @@ function setGame(id){
  if(id===current)return;
  if(current==='trace')window.GameTrace?.stop?.();
  else if(current==='mole')stopMole();
- else stopFire();
+ else if(current==='fire')stopFire();
+ else if(current==='soccer')stopSoccer();
  current=id;
  Object.keys(scenes).forEach(key=>{scenes[key].hidden=key!==id;});
  $all('.game-tab').forEach(btn=>{const selected=btn.dataset.game===id;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',String(selected));btn.tabIndex=selected?0:-1;});
  $('heroTitle').innerHTML=labels[id][0];$('heroDesc').textContent=labels[id][1];
  if(id==='fire')renderRank();
+ if(id==='soccer')renderSoccerRank();
 }
 $all('.game-tab').forEach(tab=>tab.addEventListener('click',()=>setGame(tab.dataset.game)));
 $all('.game-tab').forEach((tab,index)=>tab.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const tabs=$all('.game-tab');const idx=(index+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;setGame(tabs[idx].dataset.game);tabs[idx].focus();}));
@@ -356,8 +358,170 @@ $('firePlayer').addEventListener('keydown',e=>{if(e.key==='Enter')saveFire();});
 $('rankRefresh').addEventListener('click',()=>renderRank());
 try{$('firePlayer').value=localStorage.getItem('game-fire-player')||'';}catch(_){}
 renderRank();
+// 5-shot soccer penalty shootout. Keeper destinations are precommitted
+// for all five kicks *before* the player can choose; selection never affects RNG.
+const SOCCER_STORE='game-soccer-rank-v1';
+const soccerZones=Array.from(document.querySelectorAll('#soccerZones .soccer-zone'));
+const so={phase:'idle',round:0,goals:0,plans:[],results:[],deadline:0,shotStart:0,spentMs:0,tick:null,timers:new Set(),epoch:0,saved:false};
+function soTimer(fn,ms){
+ const epoch=so.epoch;
+ const t=setTimeout(()=>{so.timers.delete(t);if(epoch===so.epoch)fn();},ms);
+ so.timers.add(t);return t;
+}
+function clearSoccerTimers(){
+ if(so.tick!==null){clearInterval(so.tick);so.tick=null;}
+ for(const id of so.timers)clearTimeout(id);so.timers.clear();
+}
+function setSoccerZoneButtons(enabled){
+ for(const b of soccerZones)b.disabled=!enabled;
+}
+function resetSoccerVisuals(){
+ const keeper=$('soccerKeeper'),ball=$('soccerBall');
+ keeper.classList.remove('diving','saved');keeper.style.left='50%';keeper.style.top='67%';
+ ball.classList.remove('kicked','scored','stopped');ball.style.removeProperty('--shot-x');ball.style.removeProperty('--shot-y');
+ for(const b of soccerZones)b.classList.remove('chosen','blocked','scored');
+ $('soccerCelebration').textContent='';$('soccerCelebration').classList.remove('visible','goal','save','late');
+}
+function updateSoccerValues(){
+ $('soccerGoals').textContent=so.goals+' / 5';
+ $('soccerRemaining').textContent=Math.max(0,5-so.round)+'개';
+ const indicators=Array.from({length:5},(_,i)=>{
+  const value=so.results[i];
+  return '<span class="soccer-ball-mark '+(value?(value.goal?'goal':'miss'):'pending')+
+   '" aria-label="'+(value?(value.goal?'성공':value.timeout?'시간 초과':'막힘'):'남은 슈팅')+'">'+
+   (value?(value.goal?'⚽':'✖'):'⚽')+'</span>';
+ });
+ $('soccerProgress').innerHTML=indicators.join('');
+}
+function stopSoccer(){
+ so.epoch++;clearSoccerTimers();so.phase='idle';
+ setSoccerZoneButtons(false);resetSoccerVisuals();$('soccerStart').disabled=false;
+}
+function startSoccer(){
+ stopSoccer();so.round=0;so.goals=0;so.spentMs=0;so.results=[];so.saved=false;
+ // Precommit all 5 keeper zones before accepting the first click.
+ so.plans=Array.from({length:5},()=>Math.floor(Math.random()*6));
+ $('soccerResult').hidden=true;$('soccerSave').disabled=false;$('soccerSaveMsg').textContent='';
+ $('soccerStart').disabled=true;$('soccerStart').textContent='⚽ 5번의 슈팅 진행 중';
+ updateSoccerValues();prepareSoccerShot();
+}
+function prepareSoccerShot(){
+ if(so.round>=5){finishSoccer();return;}
+ resetSoccerVisuals();so.phase='aiming';
+ so.shotStart=performance.now();so.deadline=so.shotStart+10000;
+ $('soccerTime').textContent='10초';$('soccerTime').parentElement.classList.remove('urgent');
+ $('soccerRemaining').textContent=(5-so.round)+'개';
+ $('soccerInstruction').textContent='⚽ '+(so.round+1)+'번째 슈팅! 왼쪽·센터·오른쪽의 위/아래 중 골라 주세요!';
+ setSoccerZoneButtons(true);beep(650,105,'sine',.05);
+ clearInterval(so.tick);so.tick=setInterval(tickSoccer,65);
+}
+function tickSoccer(){
+ if(so.phase!=='aiming')return;
+ const now=performance.now(),left=Math.max(0,Math.ceil((so.deadline-now)/1000));
+ $('soccerTime').textContent=left+'초';$('soccerTime').parentElement.classList.toggle('urgent',left<=3);
+ if(now>=so.deadline)resolveSoccerShot(null,true);
+}
+function resolveSoccerShot(selected,timeout=false){
+ if(so.phase!=='aiming')return false;
+ const now=performance.now();
+ if(!timeout&&now>=so.deadline){timeout=true;selected=null;}
+ if(selected!==null&&(!Number.isInteger(selected)||selected<0||selected>=6))return false;
+ so.phase='resolving';clearInterval(so.tick);so.tick=null;setSoccerZoneButtons(false);
+ const blocked=so.plans[so.round]; // frozen before the round began
+ const scored=!timeout&&selected!==blocked;
+ so.spentMs+=timeout?10000:Math.min(10000,Math.max(0,now-so.shotStart));
+ if(scored)so.goals++;
+ so.results.push({goal:scored,timeout:!!timeout,shot:selected,keeper:blocked});
+ const keeper=$('soccerKeeper'),keeperColumn=blocked%3,keeperRow=Math.floor(blocked/3);
+ keeper.classList.add('diving');keeper.style.left=((keeperColumn+.5)/3*100)+'%';
+ keeper.style.top=((keeperRow+.5)/2*100)+'%';
+ if(!timeout){
+  const zone=soccerZones[selected],scene=$('soccerArena').getBoundingClientRect(),
+   ball=$('soccerBall').getBoundingClientRect(),target=zone.getBoundingClientRect();
+  const x=(target.left+target.width/2)-(ball.left+ball.width/2);
+  const y=(target.top+target.height/2)-(ball.top+ball.height/2);
+  $('soccerBall').style.setProperty('--shot-x',x+'px');
+  $('soccerBall').style.setProperty('--shot-y',y+'px');
+  $('soccerBall').classList.remove('kicked');void $('soccerBall').offsetWidth;
+  $('soccerBall').classList.add('kicked');
+  zone.classList.add('chosen',scored?'scored':'blocked');
+ }else $('soccerTime').textContent='0초';
+ if(!scored&&!timeout)keeper.classList.add('saved');
+ const c=$('soccerCelebration');
+ c.className='soccer-celebration visible '+(scored?'goal':timeout?'late':'save');
+ c.textContent=scored?'🎊 골~! 멋진 슛!':timeout?'⏰ 시간 초과! 한 번 놓쳤어요':'🧤 골키퍼가 막았어요!';
+ $('soccerInstruction').textContent=timeout?'시간을 놓쳤어요. 다음 슈팅에 도전해요!':scored?'🥳 축하해요! 골 성공!':'아까워요! 다음엔 다른 방향을 노려 봐요!';
+ if(scored){beep(660,125,'sine',.085);soTimer(()=>beep(990,150,'sine',.09),110);}
+ else{beep(timeout?255:340,185,'triangle',.065);}
+ so.round++;updateSoccerValues();
+ soTimer(()=>{if(so.round>=5)finishSoccer();else prepareSoccerShot();},1150);
+ return true;
+}
+function finishSoccer(){
+ if(so.phase==='finished')return;
+ clearSoccerTimers();so.phase='finished';setSoccerZoneButtons(false);
+ $('soccerTime').textContent='0초';$('soccerRemaining').textContent='0개';
+ $('soccerStart').textContent='▶ 새로운 승부차기';$('soccerStart').disabled=false;
+ $('soccerResult').hidden=false;
+ const goals=so.goals;
+ $('soccerResultEmoji').textContent=goals===5?'🏆':goals>=3?'🥳':'⚽';
+ $('soccerResultTitle').textContent=goals===5?'5골 모두 성공! 완벽해요!':goals>=3?'멋진 승부차기!':'5번의 슈팅 완료!';
+ $('soccerResultDetail').textContent='총 5번 중 '+goals+'골 성공 · '+(5-goals)+'번 실패 · 평균 선택 시간 '+(so.spentMs/5000).toFixed(1)+'초';
+ $('soccerSave').disabled=false;so.saved=false;$('soccerSaveMsg').textContent='';
+ renderSoccerRank();$('soccerResult').scrollIntoView({behavior:'smooth',block:'nearest'});
+ if(goals>=3)cheer();
+}
+function soccerRankData(){
+ try{
+  const data=JSON.parse(localStorage.getItem(SOCCER_STORE)||'[]');
+  return Array.isArray(data)?data.filter(x=>x&&Number.isInteger(x.goals)&&x.goals>=0&&x.goals<=5&&
+    Number.isFinite(x.timeMs)&&x.timeMs>=0&&typeof x.name==='string').slice(0,100):[];
+ }catch(_){return [];}
+}
+function soccerRankSort(a,b){
+ return b.goals-a.goals||a.timeMs-b.timeMs||a.at-b.at;
+}
+function renderSoccerRank(highlight=''){
+ const list=$('soccerRankList');list.replaceChildren();
+ const items=soccerRankData().sort(soccerRankSort).slice(0,20);
+ if(!items.length){const li=document.createElement('li');li.className='rank-empty';
+ li.textContent='아직 기록이 없어요. 첫 번째 득점왕에 도전하세요!';list.append(li);return;}
+ items.forEach((entry,i)=>{
+  const li=document.createElement('li');if(highlight&&entry.id===highlight)li.classList.add('soccer-rank-current');
+  const pos=document.createElement('span');pos.className='rank-pos';pos.textContent=['🥇','🥈','🥉'][i]||String(i+1);
+  const info=document.createElement('span');info.textContent=entry.name;
+  const meta=document.createElement('small');meta.className='rank-date';
+  meta.textContent=new Date(entry.at).toLocaleDateString('ko-KR')+' · 5번 중 '+entry.goals+'골 · 평균 '+(entry.timeMs/5000).toFixed(1)+'초';
+  info.append(meta);
+  const pts=document.createElement('span');pts.className='rank-points';pts.textContent=entry.goals+'골';
+  li.append(pos,info,pts);list.append(li);
+ });
+}
+function saveSoccerRank(){
+ if(so.phase!=='finished'||so.saved)return;
+ const name=$('soccerPlayer').value.trim().slice(0,12)||'멋진 축구선수';
+ const entry={id:String(Date.now())+'-'+Math.floor(Math.random()*1e9),name,goals:so.goals,timeMs:so.spentMs,at:Date.now()};
+ try{
+  const data=soccerRankData();data.push(entry);data.sort(soccerRankSort);
+  const pos=data.findIndex(x=>x.id===entry.id)+1;
+  localStorage.setItem(SOCCER_STORE,JSON.stringify(data.slice(0,100)));
+  localStorage.setItem('game-soccer-player',name);
+  so.saved=true;$('soccerSave').disabled=true;
+  $('soccerSaveMsg').textContent='🏆 기록 저장 완료! 이 기기 '+pos+'등이에요!';
+  renderSoccerRank(entry.id);
+ }catch(_){$('soccerSaveMsg').textContent='⚠️ 브라우저 저장이 차단됐어요. 일반 모드에서 다시 해 주세요.';}
+}
+soccerZones.forEach((zone,i)=>zone.addEventListener('click',()=>resolveSoccerShot(i)));
+$('soccerStart').addEventListener('click',startSoccer);
+$('soccerAgain').addEventListener('click',startSoccer);
+$('soccerSave').addEventListener('click',saveSoccerRank);
+$('soccerPlayer').addEventListener('keydown',e=>{if(e.key==='Enter')saveSoccerRank();});
+$('soccerRankRefresh').addEventListener('click',()=>renderSoccerRank());
+try{$('soccerPlayer').value=localStorage.getItem('game-soccer-player')||'';}catch(_){}
+setSoccerZoneButtons(false);renderSoccerRank();
+
 // If a phone goes to sleep, use the monotonic deadline and process expiration on resume.
-document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(mo.running)tickMole();if(fi.running)tickFire();});
-window.addEventListener('pagehide',()=>{stopMole();stopFire();});
-window.gameArcadeDebug={getState:()=>({current,mole:{...mo,timers:undefined},fire:{running:fi.running,score:fi.score,hits:fi.hits,rescued:fi.rescued,residents:fi.residents.size,rescueMode:fi.rescueMode,burns:fi.burned.size,flames:fi.flames.size}})};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(mo.running)tickMole();if(fi.running)tickFire();if(so.phase==='aiming')tickSoccer();});
+window.addEventListener('pagehide',()=>{stopMole();stopFire();stopSoccer();});
+window.gameArcadeDebug={getState:()=>({current,mole:{...mo,timers:undefined},fire:{running:fi.running,score:fi.score,hits:fi.hits,rescued:fi.rescued,residents:fi.residents.size,rescueMode:fi.rescueMode,burns:fi.burned.size,flames:fi.flames.size},soccer:{phase:so.phase,round:so.round,goals:so.goals,shots:so.results.map(x=>({...x})),spentMs:so.spentMs,saved:so.saved}})};
 })();
