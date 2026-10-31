@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#fff8ee">
-<meta name="description" content="아이들을 위한 미니게임 3종: 선 따라 그리기 100점 만점의 단계별 이탈 감점, 두더지 잡기, 소방서 불 끄기.">
+<meta name="description" content="어린이를 위한 미니게임 4종: 그림 그리기, 두더지 잡기, 소방서 구조, 5번의 승부차기 축구 게임.">
 <title>Game · 키즈 플레이 아케이드</title>
 <style>
 :root{--ink:#22314c;--muted:#80899a;--purple:#7158e8;--orange:#ff8b4a;--cream:#fff8ee;--stroke:#e9e3d9;--green:#23ad83;--red:#ec5266;--shadow:0 22px 65px rgba(81,71,64,.09);font-family:ui-rounded,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-synthesis:none}
@@ -15,7 +15,7 @@
 .trace-result-detail{background:#f7f4ff;border-radius:13px;color:#5e527b!important;padding:9px 12px;font-size:12px!important;margin:0 0 17px!important;line-height:1.6}
 @media(max-width:540px){.trace-penalties{font-size:10px}.trace-result-detail{font-size:11px!important}}
 </style>
-<link rel="stylesheet" href="/arcade.css?v=5">
+<link rel="stylesheet" href="/arcade.css?v=6">
 </head>
 <body>
 <div class="wrap">
@@ -25,6 +25,7 @@
  <button type="button" class="game-tab active" id="tab-trace" role="tab" aria-selected="true" aria-controls="tracingScreen" data-game="trace"><span class="tab-emoji">🖍️</span><span>색칠공부</span></button>
  <button type="button" class="game-tab" id="tab-mole" role="tab" aria-selected="false" aria-controls="moleScreen" data-game="mole"><span class="tab-emoji">🐹</span><span>두더지 게임</span></button>
  <button type="button" class="game-tab" id="tab-fire" role="tab" aria-selected="false" aria-controls="fireScreen" data-game="fire"><span class="tab-emoji">🚒</span><span>소방서 게임</span></button>
+ <button type="button" class="game-tab" id="tab-soccer" role="tab" aria-selected="false" aria-controls="soccerScreen" data-game="soccer"><span class="tab-emoji">⚽</span><span>축구 게임</span></button>
 </nav>
 <main class="layout" id="tracingScreen" role="tabpanel" aria-labelledby="tab-trace">
 <aside class="side" aria-label="그림 고르기"><h2 class="section-title">🎁 어떤 그림을 그릴까?</h2><div class="active-shape"><span class="shape-emoji" id="shapeEmoji">☀️</span><h2 id="shapeName">동그라미</h2><p>마음에 드는 그림을 골라요!</p></div><div id="shapesGrid" class="shapes-grid"></div><div class="tip">💡 <strong>그리는 방법</strong><br>시작 버튼을 누르고 10초 안에 손을 떼지 않고 점선을 한 번에 따라가요. 선을 벗어난 거리와 그린 길이에 따라 조금씩 점수가 깎여요. <b>80점 이상</b> 합격! 🎉</div></aside>
@@ -68,6 +69,51 @@
   <button type="button" id="fireAgain" class="arcade-action fire-action">🔄 다시 출동!</button>
  </div>
  <div class="leaderboard"><div class="leaderboard-head"><div><h3>🏅 소방관 명예의 전당</h3><p>이 기기의 기록을 저장해 순위를 확인해요</p></div><button type="button" class="board-refresh" id="rankRefresh" aria-label="순위 새로고침">↻</button></div><ol id="fireRankList" class="rank-list"><li class="rank-empty">아직 기록이 없어요. 첫 번째 소방관이 되어 주세요!</li></ol></div>
+</section>
+<section id="soccerScreen" class="arcade-screen soccer-screen" role="tabpanel" aria-labelledby="tab-soccer" hidden>
+ <div class="arcade-intro"><div><span class="arcade-tag soccer-tag">⚽ PENALTY SHOOTOUT · 5 SHOTS</span><h2>⚽ 승부차기 챌린지!</h2><p>골키퍼는 이미 막을 곳을 정했어요! 10초 안에 여섯 곳 중 하나를 골라 슛!</p></div><span class="arcade-bubble soccer-bubble" aria-hidden="true">🏆</span></div>
+ <div class="arcade-stats soccer-stats"><div><small>⏳ 슛 남은 시간</small><strong id="soccerTime">10초</strong></div><div><small>⚽ 남은 슈팅</small><strong id="soccerRemaining">5개</strong></div><div><small>🥅 성공한 골</small><strong id="soccerGoals">0 / 5</strong></div></div>
+ <div id="soccerProgress" class="soccer-progress" aria-label="다섯 번 슈팅 기록">⚽ ⚽ ⚽ ⚽ ⚽</div>
+ <div id="soccerArena" class="soccer-arena" aria-label="축구 골대와 여섯 개 슈팅 방향">
+  <div class="soccer-fans" aria-hidden="true">🎉　✨　🙌　🎺　🌟　🎉</div>
+  <div class="soccer-goal" id="soccerGoal">
+   <div class="soccer-net" aria-hidden="true"></div>
+   <div class="soccer-zones" id="soccerZones" role="group" aria-label="슛할 방향 선택">
+    <button type="button" class="soccer-zone" data-zone="0" aria-label="왼쪽 위로 슈팅"><span>↖</span><small>왼쪽 위</small></button>
+    <button type="button" class="soccer-zone" data-zone="1" aria-label="가운데 위로 슈팅"><span>↑</span><small>센터 위</small></button>
+    <button type="button" class="soccer-zone" data-zone="2" aria-label="오른쪽 위로 슈팅"><span>↗</span><small>오른쪽 위</small></button>
+    <button type="button" class="soccer-zone" data-zone="3" aria-label="왼쪽 아래로 슈팅"><span>↙</span><small>왼쪽 아래</small></button>
+    <button type="button" class="soccer-zone" data-zone="4" aria-label="가운데 아래로 슈팅"><span>↓</span><small>센터 아래</small></button>
+    <button type="button" class="soccer-zone" data-zone="5" aria-label="오른쪽 아래로 슈팅"><span>↘</span><small>오른쪽 아래</small></button>
+   </div>
+   <div id="soccerKeeper" class="soccer-keeper" aria-hidden="true">
+    <svg viewBox="0 0 90 124" xmlns="http://www.w3.org/2000/svg">
+     <ellipse cx="46" cy="118" rx="28" ry="5" fill="#092e21" opacity=".2"/>
+     <path d="M30 77 L25 108 L37 112 L45 88 L53 112 L66 108 L61 77 Z" fill="#28345e" stroke="#1c2851" stroke-width="3" stroke-linejoin="round"/>
+     <path d="M27 107 L38 110 L38 119 L21 119 Z M53 109 L64 106 L72 119 L54 119 Z" fill="#fff9ed" stroke="#e2e5f4" stroke-width="2"/>
+     <path d="M29 48 L15 52 L5 76 L15 83 L28 65 L30 78 L61 78 L62 64 L76 83 L86 76 L74 51 L60 47 Z" fill="#ffd35f" stroke="#d99e26" stroke-width="3" stroke-linejoin="round"/>
+     <path d="M29 48 Q44 65 61 48 M33 74 L58 74" fill="none" stroke="#ffeb9e" stroke-width="3"/>
+     <circle cx="9" cy="83" r="8" fill="#edb4ab" stroke="#d68a79" stroke-width="2"/><circle cx="81" cy="83" r="8" fill="#edb4ab" stroke="#d68a79" stroke-width="2"/>
+     <path d="M34 30 Q26 7 45 6 Q66 8 57 32" fill="#3f3027"/>
+     <ellipse cx="45" cy="31" rx="19" ry="22" fill="#f7c3a4" stroke="#dda386" stroke-width="2"/>
+     <path d="M27 28 Q29 8 45 9 Q65 9 63 28 L56 20 L36 20 Z" fill="#48362d"/>
+     <ellipse cx="37" cy="31" rx="2.5" ry="3.5" fill="#382c2a"/><ellipse cx="53" cy="31" rx="2.5" ry="3.5" fill="#382c2a"/>
+     <path d="M39 42 Q45 46 51 42" fill="none" stroke="#ad6e60" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+   </div>
+  </div>
+  <div class="soccer-pitch-decor" aria-hidden="true"><span class="soccer-pitch-circle"></span></div>
+  <div id="soccerBall" class="soccer-ball" aria-hidden="true">⚽</div>
+  <div id="soccerCelebration" class="soccer-celebration" aria-live="polite"></div>
+ </div>
+ <div class="soccer-caption" id="soccerInstruction" aria-live="polite">준비되면 시작하세요! 5번의 슈팅에 도전합니다.</div>
+ <div class="arcade-actions"><button type="button" class="arcade-action soccer-action" id="soccerStart">▶ 축구 게임 시작</button><span class="action-tip">각 슛 10초 · 키퍼의 위치는 선택 전에 확정!</span></div>
+ <div class="arcade-result soccer-result" id="soccerResult" hidden role="status"><span id="soccerResultEmoji">🏆</span><h3 id="soccerResultTitle">승부차기 종료!</h3><p id="soccerResultDetail"></p>
+  <div class="save-record"><label for="soccerPlayer">축구 선수 이름</label><div class="save-row"><input id="soccerPlayer" maxlength="12" autocomplete="nickname" placeholder="예: 슈팅왕" /><button type="button" id="soccerSave">💾 기록 저장</button></div><p id="soccerSaveMsg" role="status" aria-live="polite"></p></div>
+  <button type="button" class="arcade-action soccer-action" id="soccerAgain">🔄 다시 도전하기</button>
+ </div>
+ <div class="leaderboard soccer-leaderboard"><div class="leaderboard-head"><div><h3>🏅 승부차기 명예의 전당</h3><p>5번 중 성공한 골이 많은 선수 우선 · 동점이면 빠른 슈팅 우선 · 이 기기 기록</p></div><button type="button" class="board-refresh" id="soccerRankRefresh" aria-label="축구 순위 새로고침">↻</button></div>
+ <ol id="soccerRankList" class="rank-list"><li class="rank-empty">첫 번째 승부차기 기록을 만들어 보세요!</li></ol></div>
 </section>
 <div class="copyright">made with 💛 for little artists · GAME</div></div><div id="confetti" class="confetti" aria-hidden="true"></div>
 <script>
@@ -247,6 +293,6 @@ window.GameTrace={stop:function(){if(mode==='running'){
 chooseShape(0);
 })();
 </script>
-<script src="/arcade.js?v=5"></script>
+<script src="/arcade.js?v=6"></script>
 </body>
 </html>
