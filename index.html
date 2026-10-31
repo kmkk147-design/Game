@@ -30,6 +30,51 @@
 </style>
 </head>
 <body>
+<script>
+/* Lock the visual playfield while a timed game is running, including iOS Safari.
+   Lock/unlock restores document scroll exactly and never alters game timers. */
+(function(){
+ let current=null,previous=null;
+ function scrollTarget(id,offset){
+  const target=document.getElementById(id);
+  const y=window.scrollY||document.documentElement.scrollTop||0;
+  if(!target)return y;
+  const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+  return Math.max(0,Math.min(max,Math.round(y+target.getBoundingClientRect().top-offset)));
+ }
+ function unlock(owner){
+  if(!current||(owner&&current!==owner))return;
+  const state=previous;current=null;previous=null;
+  if(!state)return;
+  document.body.style.cssText=state.body;
+  document.documentElement.style.cssText=state.html;
+  window.scrollTo(0,state.y);
+ }
+ function lock(owner,id,offset=64){
+  if(current===owner)return;
+  if(current)unlock();
+  const y=scrollTarget(id,offset);
+  previous={body:document.body.style.cssText,html:document.documentElement.style.cssText,y};
+  current=owner;
+  document.documentElement.style.overflow='hidden';
+  document.documentElement.style.overscrollBehavior='none';
+  const body=document.body;
+  body.style.position='fixed';
+  body.style.top='-'+y+'px';
+  body.style.left='0';
+  body.style.right='0';
+  body.style.width='100%';
+  body.style.overflow='hidden';
+  body.style.overscrollBehavior='none';
+ }
+ function blockScroll(e){if(current&&e.cancelable)e.preventDefault();}
+ // Passive touch handlers cannot prevent rubber-band scrolling on iPhones.
+ document.addEventListener('touchmove',blockScroll,{capture:true,passive:false});
+ document.addEventListener('wheel',blockScroll,{capture:true,passive:false});
+ window.addEventListener('pagehide',()=>unlock());
+ window.GamePlayLock={lock,unlock,getOwner:()=>current};
+})();
+</script>
 <div class="wrap">
 <header><a href="/" class="brand" aria-label="Game 홈"><span class="brandmark">🖍️</span><span class="brandtext">GAME<small>PLAY & SMILE</small></span></a><button id="soundBtn" type="button" class="sound" aria-label="소리 켜기 또는 끄기">🔊 소리 켜짐</button></header>
 <div class="hero"><div class="eyebrow">🌈 리안이와 이준이의 5가지 미니게임 · 그림 24개</div><h1 id="heroTitle">선 따라 <em>쓱쓱!</em> 🎨</h1><p id="heroDesc">20초 동안 손 떼지 않고 한 번에 그려요! 성공하면 폭죽 선물!</p></div>
@@ -233,7 +278,7 @@ function enableAudio(){if(!soundOn)return;try{if(!audioCtx){const A=window.Audio
 function tone(freq,duration=.12,type='sine',vol=.09,delay=0){if(!soundOn||!audioCtx)return;try{const t=audioCtx.currentTime+delay,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+duration+.02);}catch(e){}}
 function successSound(){[523,659,784,1046].forEach((n,i)=>tone(n,.21,'sine',.11,i*.14));}
 function failSound(){[390,330,265].forEach((n,i)=>tone(n,.19,'triangle',.065,i*.16));}
-function begin(){if(mode==='running')return;enableAudio();hideResult();resetInk();resetTimer();mode='running';deadline=performance.now()+TRACE_DURATION_MS;setStatus('한 번만! 손가락을 떼면 바로 채점해요 💜');$('startBtn').style.display='none';$('finishBtn').style.display='none';$('clearBtn').style.display='none';$('finishBtn').disabled=true;$('clearBtn').disabled=true;$('board').classList.add('playing');$('drawingHint').textContent='✏️ 손을 떼지 않고 한 번에 그려요!';renderShapeButtons();interval=setInterval(tick,70);tick();tone(587,.12);}
+function begin(){if(mode==='running')return;enableAudio();hideResult();resetInk();resetTimer();window.GamePlayLock?.lock('trace','timerBox',52);mode='running';deadline=performance.now()+TRACE_DURATION_MS;setStatus('한 번만! 손가락을 떼면 바로 채점해요 💜');$('startBtn').style.display='none';$('finishBtn').style.display='none';$('clearBtn').style.display='none';$('finishBtn').disabled=true;$('clearBtn').disabled=true;$('board').classList.add('playing');$('drawingHint').textContent='✏️ 손을 떼지 않고 한 번에 그려요!';renderShapeButtons();interval=setInterval(tick,70);tick();tone(587,.12);}
 function tick(){if(mode!=='running')return;const left=Math.max(0,Math.ceil((deadline-performance.now())/1000));if(left!==lastSecond){lastSecond=left;$('timer').textContent=left+'초';const danger=left<=5;$('timerBox').classList.toggle('danger',danger);$('remainingAlert').hidden=!danger;if(danger&&left>0){$('remainingAlert').textContent='⏰ '+left+'초! 틱탁 틱탁!';tone(left<=3?830:650,left<=3?.15:.09,'square',.035);if(left<=3)tone(1040,.07,'square',.024,.18);}else if(left>5){$('remainingAlert').hidden=true;}}if(left<=0){end('timeout');}}
 
 /* Pointer coordinates stay in SVG space without clipping: clipping caused sudden line jumps on touch. */
@@ -359,20 +404,20 @@ function stopDraw(e){
 }
 function removeInk(){if(mode!=='running')return;resetInk();$('finishBtn').disabled=true;$('drawingHint').textContent='✏️ 다시 천천히 따라가요!';}
 function finish(){if(mode!=='running')return;calculateScore();end(score>=80?'win':'fail');}
-function end(reason){if(mode!=='running')return;clearInterval(interval);interval=0;mode='result';activePointer=null;activeStroke=null;$('board').classList.remove('playing');$('remainingAlert').hidden=true;$('timerBox').classList.remove('danger');$('startBtn').style.display='';$('startBtn').disabled=false;$('startBtn').textContent='▶ 다시 시작하기';$('finishBtn').disabled=true;$('clearBtn').disabled=true;renderShapeButtons();const overlay=$('resultOverlay');overlay.className='result-overlay '+reason;overlay.hidden=false;$('resultStars').textContent=reason==='win'?'🌟 ✨ 🌟':reason==='timeout'?'💥 💨 💥':'💛 ✨ 💛';$('resultEmoji').textContent=reason==='win'?'🥳':reason==='timeout'?'💥':'🥺';$('resultTitle').textContent=reason==='win'?'우와! 합격이에요!':reason==='timeout'?'펑! 시간 초과 · 실패!':'아깝다! 도전 실패!';$('resultDescription').textContent=reason==='win'?'정말 멋지게 따라 그렸어요! 불꽃놀이 선물!':reason==='timeout'?'20초가 지났어요. 다음 판에 다시 도전해 봐요!':'한 번의 기회였어요! 다음 판에는 더 정확하게 그려봐요!';$('resultPercent').textContent='⭐ '+score+'점 / 100점';
+function end(reason){if(mode!=='running')return;clearInterval(interval);interval=0;mode='result';window.GamePlayLock?.unlock('trace');activePointer=null;activeStroke=null;$('board').classList.remove('playing');$('remainingAlert').hidden=true;$('timerBox').classList.remove('danger');$('startBtn').style.display='';$('startBtn').disabled=false;$('startBtn').textContent='▶ 다시 시작하기';$('finishBtn').disabled=true;$('clearBtn').disabled=true;renderShapeButtons();const overlay=$('resultOverlay');overlay.className='result-overlay '+reason;overlay.hidden=false;$('resultStars').textContent=reason==='win'?'🌟 ✨ 🌟':reason==='timeout'?'💥 💨 💥':'💛 ✨ 💛';$('resultEmoji').textContent=reason==='win'?'🥳':reason==='timeout'?'💥':'🥺';$('resultTitle').textContent=reason==='win'?'우와! 합격이에요!':reason==='timeout'?'펑! 시간 초과 · 실패!':'아깝다! 도전 실패!';$('resultDescription').textContent=reason==='win'?'정말 멋지게 따라 그렸어요! 불꽃놀이 선물!':reason==='timeout'?'20초가 지났어요. 다음 판에 다시 도전해 봐요!':'한 번의 기회였어요! 다음 판에는 더 정확하게 그려봐요!';$('resultPercent').textContent='⭐ '+score+'점 / 100점';
 const b=scoreBreakdown;
 $('resultBreakdown').textContent='감점 내역: 빈 구간 -'+b.missing+'점 · 살짝 이탈 -'+b.minor+'점 · 중간 이탈 -'+b.medium+'점 · 크게 이탈 -'+b.major+'점'+(b.repeated?' · 반복 -'+b.repeated+'점':'');$('nextBtn').textContent=reason==='win'?'다음 그림 ➜':'다른 그림 ➜';$('retryBtn').focus();if(reason==='win'){successSound();fireworks();}else{failSound();if(reason==='timeout'){const flash=document.createElement('div');flash.className='bomb-flash';document.body.appendChild(flash);setTimeout(()=>flash.remove(),700);}}}
 function hideResult(){$('resultOverlay').hidden=true;}
 function fireworks(){const holder=$('confetti');holder.replaceChildren();const colors=['#ff6b91','#ffce55','#82dbb0','#8a75f4','#62c9f2','#fc9d62'];for(let i=0;i<125;i++){const piece=document.createElement('i');piece.className='confetti-piece';piece.style.background=colors[i%colors.length];const angle=Math.random()*Math.PI*2,dist=95+Math.random()*Math.max(window.innerWidth,window.innerHeight)*.75;piece.style.setProperty('--dx',Math.cos(angle)*dist+'px');piece.style.setProperty('--dy',Math.sin(angle)*dist+'px');piece.style.setProperty('--rotate',(Math.random()*1100-550)+'deg');piece.style.setProperty('--dur',(1.3+Math.random()*1.2)+'s');piece.style.setProperty('--delay',(Math.random()*.32)+'s');piece.style.width=(5+Math.random()*9)+'px';piece.style.height=(8+Math.random()*11)+'px';holder.append(piece);}setTimeout(()=>holder.replaceChildren(),3200);}
 $('startBtn').addEventListener('click',begin);$('finishBtn').addEventListener('click',finish);$('clearBtn').addEventListener('click',removeInk);$('retryBtn').addEventListener('click',begin);$('nextBtn').addEventListener('click',()=>{chooseShape((selected+1)%shapes.length);begin();});$('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊 소리 켜짐':'🔇 소리 꺼짐';if(soundOn){enableAudio();tone(740,.12);}});svg.addEventListener('pointerdown',startDraw);svg.addEventListener('pointermove',moveDraw);svg.addEventListener('pointerup',stopDraw);svg.addEventListener('pointercancel',stopDraw);svg.addEventListener('touchmove',e=>{if(mode==='running')e.preventDefault();},{passive:false});svg.addEventListener('lostpointercapture',e=>{if(e.pointerId===activePointer){activePointer=null;activeStroke=null;if(mode==='running'){calculateScore();end('fail');}}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&mode==='running')tick();});window.addEventListener('pageshow',()=>{if(mode==='running'){if(!interval)interval=setInterval(tick,70);tick();}});
 window.GameTrace={stop:function(){if(mode==='running'){
- clearInterval(interval);interval=0;mode='ready';$('board').classList.remove('playing');
+ window.GamePlayLock?.unlock('trace');clearInterval(interval);interval=0;mode='ready';$('board').classList.remove('playing');
  activeStroke=null;activePointer=null;chooseShape(selected);
  }}};
 chooseShape(0);
 })();
 </script>
-<script src="/arcade.js?v=14"></script>
+<script src="/arcade.js?v=15"></script>
 <script>
 (function(){
  const frame=document.getElementById('gardenMatchEmbed');
