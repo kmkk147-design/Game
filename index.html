@@ -321,7 +321,10 @@ function appendPoint(p){
  const last=activeStroke.last,dist=Math.hypot(p.x-last.x,p.y-last.y);
  if(dist<2)return false;
  // Ignore abnormal jumps from OS gestures/coalesced pointer events rather than drawing a long stray line.
- if(dist>135){totalDrawn+=dist;majorOff+=dist*1.5;activeStroke.d+=' M '+pathCoord(p);activeStroke.last=p;return true;}
+ // A fast finger movement can produce sparse pointer events on mobile Safari.
+ // Do not classify a long distance between events as an error by itself:
+ // evaluate the actual segment against the guide, just like short segments.
+ // Off-path shortcuts still lose points through scoreSegment's distance penalties.
  activeStroke.d+=' L '+pathCoord(p);
  scoreSegment(last,p);activeStroke.last=p;return true;
 }
@@ -329,8 +332,17 @@ function moveDraw(e){
  if(mode!=='running'||activePointer===null||e.pointerId!==activePointer||!activeStroke)return;
  e.preventDefault();
  let samples=[e];
- if(e.pointerType!=='touch'&&typeof e.getCoalescedEvents==='function'){
-  const c=e.getCoalescedEvents();if(c&&c.length)samples=c;
+ // Use coalesced touch points too: rapid strokes otherwise cut corners
+ // because only the last browser-dispatched coordinate is observed.
+ if(typeof e.getCoalescedEvents==='function'){
+  try{
+   const c=e.getCoalescedEvents();
+   if(c&&c.length){
+    samples=Array.from(c);
+    const tail=samples[samples.length-1];
+    if(!tail||Math.hypot(tail.clientX-e.clientX,tail.clientY-e.clientY)>.5)samples.push(e);
+   }
+  }catch(_){samples=[e];}
  }
  let dirty=false;
  for(const sample of samples){const p=point(sample);if(p&&inBoard(p))dirty=appendPoint(p)||dirty;}
