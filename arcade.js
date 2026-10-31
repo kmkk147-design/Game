@@ -27,135 +27,147 @@ function setGame(id){
 $all('.game-tab').forEach(tab=>tab.addEventListener('click',()=>setGame(tab.dataset.game)));
 $all('.game-tab').forEach((tab,index)=>tab.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const tabs=$all('.game-tab');const idx=(index+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;setGame(tabs[idx].dataset.game);tabs[idx].focus();}));
 
-// Whack-a-mole: 30-second arcade game with illustrated moles and decoy cats.
-// Tapping a mole gains points, while tapping a cat deducts 20 points.
-// Cats stick out their tongues and tease before sliding back into the hole.
-const mo={running:false,interval:null,timers:new Set(),active:-1,activeKind:null,activeUntil:0,nextAt:0,deadline:0,last:-1,score:0,hits:0,misses:0,catsHit:0,catsAvoided:0,catStreak:0,combo:0,best:0};
+// Whack-a-mole: 9 illustrated targets; simultaneous waves of 1, 2, then 3.
+const mo={running:false,interval:null,timers:new Set(),active:new Map(),nextAt:0,deadline:0,lastWave:[],score:0,hits:0,misses:0,catsHit:0,catsAvoided:0,combo:0,best:0};
 const holes=[];
-const moleFaceMarkup=`<span class="critter critter-mole" aria-hidden="true">
-  <i class="critter-body"></i><i class="critter-ear ear-l"></i><i class="critter-ear ear-r"></i>
-  <i class="critter-head"></i><i class="critter-eye eye-l"></i><i class="critter-eye eye-r"></i>
-  <i class="critter-muzzle"></i><i class="critter-nose"></i><i class="critter-paw paw-l"></i><i class="critter-paw paw-r"></i>
-</span>`;
-const catFaceMarkup=`<span class="critter critter-cat" aria-hidden="true">
-  <i class="critter-body"></i><i class="critter-ear ear-l"></i><i class="critter-ear ear-r"></i>
-  <i class="critter-head"></i><i class="cat-stripe stripe-l"></i><i class="cat-stripe stripe-r"></i>
-  <i class="critter-eye eye-l"></i><i class="critter-eye eye-r"></i><i class="critter-muzzle"></i>
-  <i class="critter-nose"></i><i class="cat-whisker whisker-l"></i><i class="cat-whisker whisker-r"></i>
-  <i class="cat-tongue"></i><i class="critter-paw paw-l"></i><i class="critter-paw paw-r"></i>
-</span>`;
+function moleArt(id){
+ return '<svg class="critter-svg critter-mole" viewBox="0 0 120 120" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">'+
+ '<defs><radialGradient id="mf'+id+'" cx="33%" cy="23%" r="90%"><stop stop-color="#ffe2b6"/><stop offset=".52" stop-color="#bb865d"/><stop offset="1" stop-color="#784a35"/></radialGradient>'+
+ '<linearGradient id="mb'+id+'" x2=".7" y2="1"><stop stop-color="#c79a6c"/><stop offset="1" stop-color="#805139"/></linearGradient></defs>'+
+ '<ellipse cx="60" cy="112" rx="40" ry="6" fill="#50392c" opacity=".12"/>'+
+ '<path d="M22 118 Q18 77 57 74 Q104 70 101 118" fill="url(#mb'+id+')"/>'+
+ '<circle cx="26" cy="38" r="15" fill="#9c664c" stroke="#81503b" stroke-width="2"/><circle cx="94" cy="38" r="15" fill="#9c664c" stroke="#81503b" stroke-width="2"/>'+
+ '<circle cx="26" cy="38" r="9" fill="#efb7b1"/><circle cx="94" cy="38" r="9" fill="#efb7b1"/>'+
+ '<ellipse cx="60" cy="59" rx="44" ry="45" fill="url(#mf'+id+')" stroke="#87563d" stroke-width="1.2"/>'+
+ '<path d="M36 25 Q57 11 80 25" fill="none" stroke="#fff1d7" stroke-width="3" opacity=".45" stroke-linecap="round"/>'+
+ '<ellipse cx="29" cy="75" rx="11" ry="8" fill="#f5a6a3" opacity=".75"/><ellipse cx="91" cy="75" rx="11" ry="8" fill="#f5a6a3" opacity=".75"/>'+
+ '<ellipse cx="43" cy="56" rx="9.8" ry="12" fill="#342423"/><ellipse cx="77" cy="56" rx="9.8" ry="12" fill="#342423"/>'+
+ '<ellipse cx="39.5" cy="52" rx="3.5" ry="4.6" fill="#fff"/><ellipse cx="73.5" cy="52" rx="3.5" ry="4.6" fill="#fff"/>'+
+ '<circle cx="46" cy="61" r="1.6" fill="#fff" opacity=".85"/><circle cx="80" cy="61" r="1.6" fill="#fff" opacity=".85"/>'+
+ '<ellipse cx="60" cy="80" rx="23" ry="18" fill="#f8e5ce"/><path d="M51 89 Q60 98 69 89" fill="none" stroke="#865446" stroke-width="2.6" stroke-linecap="round"/>'+
+ '<path d="M54 94 L54 101 Q60 104 60 98 Q60 104 66 101 L66 94" fill="#fff" stroke="#e0c1ab" stroke-width=".9"/>'+
+ '<path d="M50 76 Q60 67 70 76 Q60 86 50 76" fill="#ed9ca8" stroke="#bb6a78" stroke-width="1"/>'+
+ '<ellipse cx="31" cy="106" rx="16" ry="11" transform="rotate(-20 31 106)" fill="#b98763"/><ellipse cx="89" cy="106" rx="16" ry="11" transform="rotate(20 89 106)" fill="#b98763"/>'+
+ '<path d="M21 105 L26 110 M29 102 L34 109 M86 109 L91 102 M94 110 L99 105" stroke="#78503f" stroke-width="1.7" stroke-linecap="round"/>'+
+ '<g class="mole-sparkle" fill="#fff"><path d="M12 18 L15 10 L18 18 L26 21 L18 24 L15 32 L12 24 L4 21Z"/><circle cx="103" cy="19" r="3"/></g>'+
+ '</svg>';
+}
+function catArt(id){
+ return '<svg class="critter-svg critter-cat" viewBox="0 0 120 120" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">'+
+ '<defs><radialGradient id="cf'+id+'" cx="33%" cy="21%" r="89%"><stop stop-color="#fff4cb"/><stop offset=".54" stop-color="#f3b578"/><stop offset="1" stop-color="#d7834c"/></radialGradient></defs>'+
+ '<ellipse cx="60" cy="112" rx="40" ry="6" fill="#553729" opacity=".12"/>'+
+ '<path d="M24 118 Q17 77 60 76 Q104 74 96 118" fill="#efa363"/>'+
+ '<path d="M20 55 Q12 26 17 10 Q36 12 49 32 L70 32 Q86 9 104 10 Q111 31 100 55" fill="#e5a164" stroke="#c47b48" stroke-width="2.2"/>'+
+ '<path d="M24 41 L24 20 Q40 24 43 42 M77 42 Q82 23 97 20 L97 41" fill="#f8bdc1"/>'+
+ '<path d="M17 61 Q12 24 60 25 Q105 23 103 63 Q103 99 60 101 Q17 99 17 61Z" fill="url(#cf'+id+')" stroke="#cf8752" stroke-width="1.2"/>'+
+ '<path d="M56 29 L53 43 M64 29 L67 43 M40 33 L45 44 M80 33 L75 44" stroke="#ca804c" stroke-width="4" stroke-linecap="round" opacity=".85"/>'+
+ '<ellipse cx="27" cy="75" rx="11" ry="8" fill="#ffa6aa" opacity=".7"/><ellipse cx="93" cy="75" rx="11" ry="8" fill="#ffa6aa" opacity=".7"/>'+
+ '<ellipse cx="42" cy="56" rx="10.8" ry="12.7" fill="#548372"/><ellipse cx="78" cy="56" rx="10.8" ry="12.7" fill="#548372"/>'+
+ '<ellipse cx="42" cy="57" rx="4.9" ry="9.3" fill="#283931"/><ellipse cx="78" cy="57" rx="4.9" ry="9.3" fill="#283931"/>'+
+ '<ellipse cx="39.5" cy="51" rx="4.6" ry="4.9" fill="#fff"/><ellipse cx="75.5" cy="51" rx="4.6" ry="4.9" fill="#fff"/>'+
+ '<path d="M33 43 Q42 39 51 43 M69 43 Q78 39 87 43" fill="none" stroke="#96623c" stroke-width="2" stroke-linecap="round"/>'+
+ '<path d="M60 83 C43 92 37 81 39 73 C44 64 52 68 60 72 C68 68 76 64 81 73 C83 81 77 92 60 83Z" fill="#fff4e8"/>'+
+ '<path d="M55 72 Q60 68 65 72 L60 79 Z" fill="#ed869b"/><path d="M60 79 L60 84 M60 84 Q54 88 50 83 M60 84 Q66 88 70 83" fill="none" stroke="#96614b" stroke-width="2.2" stroke-linecap="round"/>'+
+ '<path d="M38 77 L14 74 M40 82 L15 86 M82 77 L106 74 M80 82 L105 86" stroke="#a87557" stroke-width="1.9" stroke-linecap="round"/>'+
+ '<ellipse cx="30" cy="106" rx="15" ry="11" transform="rotate(-19 30 106)" fill="#f1b77c"/><ellipse cx="90" cy="106" rx="15" ry="11" transform="rotate(19 90 106)" fill="#f1b77c"/>'+
+ '<path d="M23 105 L29 111 M31 102 L36 109 M84 109 L89 102 M91 111 L97 105" stroke="#c58a57" stroke-width="1.6" stroke-linecap="round"/>'+
+ '<path class="cat-tongue" d="M56 84 Q60 79 64 84 L66 96 Q60 106 54 96 Z" fill="#ec5c91" stroke="#db3977" stroke-width="1"/>'+
+ '<g class="cat-sparkle" fill="#fff"><path d="M11 28 L14 18 L17 28 L27 31 L17 34 L14 44 L11 34 L1 31Z"/></g>'+
+ '</svg>';
+}
 for(let i=0;i<9;i++){
- const b=document.createElement('button');
- b.type='button';b.className='mole-hole';b.dataset.index=String(i);b.dataset.kind='mole';
- b.setAttribute('aria-label',(i+1)+'번 빈 구멍');
- const face=document.createElement('span');face.className='mole-face';
- face.innerHTML=moleFaceMarkup+catFaceMarkup;
- const star=document.createElement('span');star.className='mole-hit-star';star.textContent='✨🥰✨';
- b.append(face,star);b.addEventListener('click',e=>hitMole(i,e));
- holes.push(b);$('moleGrid').append(b);
+ const b=document.createElement('button');b.type='button';b.className='mole-hole';
+ b.dataset.index=String(i);b.dataset.kind='none';b.setAttribute('aria-label',(i+1)+'번 빈 구멍');
+ const face=document.createElement('span');face.className='mole-face';face.innerHTML=moleArt(i)+catArt(i);
+ const star=document.createElement('span');star.className='mole-hit-star';star.textContent='✨';
+ b.append(face,star);b.addEventListener('click',e=>hitMole(i,e));holes.push(b);$('moleGrid').append(b);
 }
 function moTimer(fn,ms){const id=setTimeout(()=>{mo.timers.delete(id);fn();},ms);mo.timers.add(id);}
-function clearMoleTimers(){
- if(mo.interval)clearInterval(mo.interval);mo.interval=null;
- for(const t of mo.timers)clearTimeout(t);mo.timers.clear();
+function clearMoleTimers(){if(mo.interval)clearInterval(mo.interval);mo.interval=null;for(const t of mo.timers)clearTimeout(t);mo.timers.clear();}
+function resetHole(i){
+ const h=holes[i];h.classList.remove('up','whacked','teasing','sinking');
+ h.dataset.kind='none';h.setAttribute('aria-label',(i+1)+'번 빈 구멍');
 }
-function stopMole(){
- mo.running=false;clearMoleTimers();mo.active=-1;mo.activeKind=null;
- holes.forEach(h=>{h.classList.remove('up','whacked','teasing','sinking');h.setAttribute('aria-label',(Number(h.dataset.index)+1)+'번 빈 구멍');});
- $('moleHammer').classList.remove('swing');$('moleStart').disabled=false;
-}
-function moleValues(){
- $('moleScore').textContent=mo.score+'점';$('moleCombo').textContent=String(mo.combo);
+function stopMole(){mo.running=false;clearMoleTimers();mo.active.clear();mo.lastWave=[];holes.forEach((_,i)=>resetHole(i));$('moleHammer').classList.remove('swing');$('moleStart').disabled=false;}
+function moleValues(){$('moleScore').textContent=mo.score+'점';$('moleCombo').textContent=String(mo.combo);}
+function waveSize(elapsed){if(elapsed<7)return 1;if(elapsed<17)return 2;return 3;}
+function spawnWave(now){
+ const elapsed=Math.max(0,(30000-(mo.deadline-now))/1000);
+ const candidates=holes.map((_,i)=>i).filter(i=>!mo.active.has(i)&&!mo.lastWave.includes(i));
+ const n=Math.min(waveSize(elapsed),candidates.length),chosen=[];
+ for(let j=0;j<n;j++){
+  const index=Math.floor(Math.random()*candidates.length),i=candidates.splice(index,1)[0];
+  const p=elapsed<8?.22:elapsed<20?.32:.39;
+  const kind=j===0&&n>1?'mole':Math.random()<p?'cat':'mole';
+  const until=now+Math.max(1050,1600-elapsed*12);
+  mo.active.set(i,{kind,until});chosen.push(i);
+  const h=holes[i];h.dataset.kind=kind;h.classList.remove('whacked','teasing','sinking');
+  h.querySelector('.mole-hit-star').textContent=kind==='cat'?'😝 메롱!':'✨💛✨';
+  h.classList.add('up');h.setAttribute('aria-label',(i+1)+'번 '+(kind==='cat'?'고양이! 누르면 감점':'두더지! 눌러 잡기'));
+ }
+ mo.lastWave=chosen;
+ $('moleTip').textContent=n>1?'⚡ '+n+'마리 동시 등장! 두더지만 톡톡!':'🐾 두더지를 잡고 고양이는 피하세요!';
 }
 function startMole(){
- stopMole();mo.running=true;mo.score=mo.hits=mo.misses=mo.catStreak=mo.catsHit=mo.catsAvoided=mo.combo=mo.best=0;
- mo.active=-1;mo.activeKind=null;mo.last=-1;
- mo.deadline=performance.now()+30000;mo.nextAt=performance.now()+350;
+ stopMole();mo.running=true;mo.score=mo.hits=mo.misses=mo.catsHit=mo.catsAvoided=mo.combo=mo.best=0;
+ mo.deadline=performance.now()+30000;mo.nextAt=performance.now()+320;
  $('moleTime').textContent='30초';$('moleTime').parentElement.classList.remove('urgent');moleValues();
  $('moleResult').hidden=true;$('moleStart').disabled=true;$('moleStart').textContent='🔨 두더지 잡는 중!';
- $('moleTip').textContent='두더지 +10~30점 · 고양이 −20점! 🐱';
- beep(530,90);mo.interval=setInterval(tickMole,65);tickMole();
-}
-function spawnMole(now){
- const candidates=holes.map((_,i)=>i).filter(i=>i!==mo.last);
- if(!candidates.length)return;
- const idx=candidates[Math.floor(Math.random()*candidates.length)];
- const isCat=mo.catStreak<2&&Math.random()<.30;
- mo.catStreak=isCat?mo.catStreak+1:0;
- mo.last=idx;mo.active=idx;mo.activeKind=isCat?'cat':'mole';
- mo.activeUntil=now+Math.max(850,1370-mo.hits*9);
- const hole=holes[idx];hole.dataset.kind=mo.activeKind;
- hole.classList.remove('whacked','teasing','sinking');
- hole.querySelector('.mole-hit-star').textContent=isCat?'😛 메롱!':'✨🥰✨';
- hole.classList.add('up');
- hole.setAttribute('aria-label',(idx+1)+'번 '+(isCat?'고양이! 때리지 마세요':'두더지! 눌러 잡으세요'));
- $('moleTip').textContent=isCat?'🐱 고양이는 건드리지 마세요!':'🐾 두더지예요! 뿅망치로 잡아요!';
+ $('moleTip').textContent='두더지 +10~30점 · 고양이 −20점!';beep(530,90);
+ mo.interval=setInterval(tickMole,65);tickMole();
 }
 function tickMole(){
  if(!mo.running)return;
  const now=performance.now(),left=Math.max(0,Math.ceil((mo.deadline-now)/1000));
  $('moleTime').textContent=left+'초';$('moleTime').parentElement.classList.toggle('urgent',left<=5);
  if(now>=mo.deadline){finishMole();return;}
- if(mo.active!==-1&&now>=mo.activeUntil){
-  const idx=mo.active,kind=mo.activeKind;mo.active=-1;mo.activeKind=null;
-  if(kind==='mole'){mo.misses++;mo.combo=0;moleValues();}
-  else if(kind==='cat')mo.catsAvoided++;
-  const hole=holes[idx];hole.classList.remove('up');hole.classList.add('sinking');
-  hole.setAttribute('aria-label',(idx+1)+'번 빈 구멍');
-  moTimer(()=>hole.classList.remove('sinking'),280);
-  mo.nextAt=now+260;
+ for(const [i,item] of [...mo.active.entries()]){
+  if(now<item.until)continue;mo.active.delete(i);
+  if(item.kind==='mole'){mo.misses++;mo.combo=0;moleValues();}else mo.catsAvoided++;
+  const h=holes[i];h.classList.remove('up');h.classList.add('sinking');
+  h.setAttribute('aria-label',(i+1)+'번 빈 구멍');
+  moTimer(()=>h.classList.remove('sinking'),300);
  }
- if(mo.active===-1&&now>=mo.nextAt)spawnMole(now);
+ if(!mo.active.size&&now>=mo.nextAt){spawnWave(now);mo.nextAt=now+440;}
 }
 function swingHammer(evt){
  const arena=$('moleArena'),pos=arena.getBoundingClientRect(),h=$('moleHammer');
  const x=evt.clientX-pos.left,y=evt.clientY-pos.top;
- h.style.left=Math.max(0,Math.min(pos.width-65,x-38))+'px';
- h.style.top=Math.max(0,Math.min(pos.height-70,y-76))+'px';
+ h.style.left=Math.max(0,Math.min(pos.width-65,x-38))+'px';h.style.top=Math.max(0,Math.min(pos.height-70,y-76))+'px';
  h.classList.remove('swing');void h.offsetWidth;h.classList.add('swing');
 }
-function popMole(i,text){
+function molePopup(i,message,bad){
  const pop=$('molePop'),r=$('moleArena').getBoundingClientRect(),b=holes[i].getBoundingClientRect();
- pop.textContent=text;pop.style.left=(b.left-r.left+b.width*.08)+'px';pop.style.top=(b.top-r.top)+'px';
- pop.classList.remove('visible');void pop.offsetWidth;pop.classList.add('visible');
+ pop.textContent=message;pop.style.left=(b.left-r.left+b.width*.08)+'px';pop.style.top=(b.top-r.top)+'px';
+ pop.classList.toggle('bad',bad);pop.classList.remove('visible');void pop.offsetWidth;pop.classList.add('visible');
 }
-function hitMole(i,e){
- if(!mo.running||i!==mo.active)return;
- const now=performance.now();if(now>=mo.deadline){finishMole();return;}
- if(now>=mo.activeUntil){tickMole();return;}
- const kind=mo.activeKind;mo.active=-1;mo.activeKind=null;
- const hole=holes[i];hole.classList.remove('up');
- swingHammer(e);
- if(kind==='cat'){
-  mo.catsHit++;mo.combo=0;mo.score=Math.max(0,mo.score-20);
-  moleValues();hole.classList.add('teasing');
-  hole.setAttribute('aria-label',(i+1)+'번 고양이가 메롱하며 놀려요');
-  hole.querySelector('.mole-hit-star').textContent='😛 메롱!';
-  popMole(i,'😜 메롱! −20점');
-  $('moleTip').textContent='앗! 고양이는 때리면 안 돼요! −20점';
-  beep(450,130,'sawtooth',.05);
-  moTimer(()=>beep(285,160,'triangle',.05),140);
-  moTimer(()=>{hole.classList.remove('teasing');hole.classList.add('sinking');},610);
-  moTimer(()=>{hole.classList.remove('sinking');hole.setAttribute('aria-label',(i+1)+'번 빈 구멍');},930);
-  mo.nextAt=now+850;
-  return;
+function hitMole(i,evt){
+ if(!mo.running)return;const item=mo.active.get(i),now=performance.now();
+ if(!item)return;if(now>=mo.deadline){finishMole();return;}if(now>=item.until){tickMole();return;}
+ mo.active.delete(i);const h=holes[i];h.classList.remove('up');swingHammer(evt);
+ if(item.kind==='cat'){
+  mo.catsHit++;mo.combo=0;mo.score=Math.max(0,mo.score-20);moleValues();
+  h.classList.add('teasing');h.querySelector('.mole-hit-star').textContent='😜 메롱!';
+  molePopup(i,'😜 메롱! −20점',true);
+  $('moleTip').textContent='앗, 고양이는 피해야 해요! 😝';
+  beep(445,110,'triangle',.06);moTimer(()=>beep(290,145,'sawtooth',.04),140);
+  moTimer(()=>{h.classList.remove('teasing');h.classList.add('sinking');},600);
+  moTimer(()=>{h.classList.remove('sinking');h.setAttribute('aria-label',(i+1)+'번 빈 구멍');},930);
+ }else{
+  mo.hits++;mo.combo++;mo.best=Math.max(mo.best,mo.combo);
+  const gain=10+Math.min(20,(mo.combo-1)*2);mo.score+=gain;moleValues();
+  h.classList.add('whacked');h.querySelector('.mole-hit-star').textContent='✨🥰✨';
+  molePopup(i,'✨ +'+gain+'점',false);
+  beep(380,95,'triangle',.095);moTimer(()=>beep(620,100,'sine',.065),70);
+  moTimer(()=>h.classList.remove('whacked'),420);
  }
- mo.hits++;mo.combo++;mo.best=Math.max(mo.best,mo.combo);
- const gain=10+Math.min(20,(mo.combo-1)*2);mo.score+=gain;moleValues();
- hole.classList.add('whacked');
- hole.setAttribute('aria-label',(i+1)+'번 두더지를 잡았어요');
- hole.querySelector('.mole-hit-star').textContent='✨🥰✨';
- popMole(i,'✨ +'+gain+'점 🥰');
- beep(380,95,'triangle',.095);moTimer(()=>beep(620,100,'sine',.065),70);
- mo.nextAt=now+380;
- moTimer(()=>{hole.classList.remove('whacked');hole.setAttribute('aria-label',(i+1)+'번 빈 구멍');},370);
+ if(!mo.active.size)mo.nextAt=Math.max(mo.nextAt,now+420);
 }
 function finishMole(){
  if(!mo.running)return;stopMole();$('moleTime').textContent='0초';$('moleTip').textContent='30초 도전 완료!';
- $('moleResult').hidden=false;
- $('moleResultEmoji').textContent=mo.hits>=16?'🏆':'🐾';
+ $('moleResult').hidden=false;$('moleResultEmoji').textContent=mo.hits>=16?'🏆':'🐹';
  $('moleResultTitle').textContent=mo.hits>=16?'두더지 달인!':'두더지 잡기 완료!';
- $('moleResultDetail').textContent=`${mo.hits}마리 잡았어요! 고양이 ${mo.catsHit}번 실수 · 최종 ${mo.score}점 · 최고 연속 ${mo.best}번 🎉`;
+ $('moleResultDetail').textContent=mo.hits+'마리 잡기 성공 · 고양이 '+mo.catsHit+'번 실수 · 최종 '+mo.score+'점 · 최고 연속 '+mo.best+'번 🎉';
  $('moleStart').textContent='▶ 다시 시작';cheer();
 }
 $('moleStart').addEventListener('click',startMole);$('moleAgain').addEventListener('click',startMole);
