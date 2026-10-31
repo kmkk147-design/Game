@@ -531,7 +531,7 @@ const gardenColors=[
  {id:'blue',name:'하늘색',petal:'#71c8f6',highlight:'#c4f0ff',flower:'🩵'},
  {id:'purple',name:'보라색',petal:'#bd94f7',highlight:'#e8d1ff',flower:'💜'}
 ];
-const ga={phase:'idle',round:0,blooms:0,mistakes:0,queue:[],positions:[],selected:-1,epoch:0,timers:new Set(),completed:0};
+const ga={phase:'idle',round:0,blooms:0,mistakes:0,roundMistakes:0,queue:[],positions:[],selected:-1,epoch:0,timers:new Set(),completed:0};
 const gardenChoices=Array.from(document.querySelectorAll('#gardenChoices .garden-choice'));
 const gardenBeds=[];
 function gardenGirlArt(){
@@ -616,7 +616,7 @@ function stopGarden(){
 }
 function shuffledGarden(list){const a=list.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function startGarden(){
- stopGarden();ga.phase='choose';ga.round=0;ga.blooms=0;ga.mistakes=0;ga.selected=-1;
+ stopGarden();ga.phase='choose';ga.round=0;ga.blooms=0;ga.mistakes=0;ga.roundMistakes=0;ga.selected=-1;
  ga.positions=shuffledGarden([0,1,2,3,4,5]);
  ga.queue=shuffledGarden(['pink','yellow','blue','purple',gardenColors[Math.floor(Math.random()*4)].id,gardenColors[Math.floor(Math.random()*4)].id]);
  $('gardenResult').hidden=true;$('gardenStart').disabled=true;$('gardenStart').textContent='🌱 꽃정원 가꾸는 중!';
@@ -630,7 +630,7 @@ function startGarden(){
 }
 function nextGardenTurn(){
  if(ga.round>=6){finishGarden();return;}
- ga.phase='choose';ga.selected=ga.positions[ga.round];const wanted=gardenColors.find(x=>x.id===ga.queue[ga.round]);
+ ga.phase='choose';ga.roundMistakes=0;ga.selected=ga.positions[ga.round];const wanted=gardenColors.find(x=>x.id===ga.queue[ga.round]);
  $('gardenPrompt').textContent='🌸 리안이가 찾는 '+wanted.name+' 꽃씨를 골라 주세요! ('+(ga.round+1)+'/6)';
  $('gardenRianQuote').textContent=wanted.name+'을(를) 골라 줘!';$('gardenIjunQuote').textContent='물뿌리개 준비! 💦';
  gardenChoices.forEach(b=>{b.disabled=false;b.classList.remove('chosen','try-again','hint');});
@@ -642,10 +642,10 @@ function pickGardenColor(id){
  const wanted=ga.queue[ga.round],btn=gardenChoices.find(b=>b.dataset.color===id);
  if(!btn)return;
  if(id!==wanted){
-  ga.mistakes++;btn.classList.remove('try-again');void btn.offsetWidth;btn.classList.add('try-again');
+  ga.mistakes++;ga.roundMistakes++;btn.classList.remove('try-again');void btn.offsetWidth;btn.classList.add('try-again');
   $('gardenPrompt').textContent='💖 괜찮아! '+gardenColors.find(x=>x.id===wanted).name+'을(를) 다시 찾아볼까?';
   $('gardenRianQuote').textContent='다시 골라 보자! 🌸';beep(340,85,'sine',.025);
-  if(ga.mistakes%2===0)gardenChoices.find(b=>b.dataset.color===wanted).classList.add('hint');
+  if(ga.roundMistakes>=2)gardenChoices.find(b=>b.dataset.color===wanted).classList.add('hint');
   return;
  }
  ga.phase='water';btn.classList.add('chosen');
