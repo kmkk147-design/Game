@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#fff8ee">
-<meta name="description" content="어린이를 위한 미니게임 4종: 그림 그리기, 두더지 잡기, 소방서 구조, 5번의 승부차기 축구 게임.">
+<meta name="description" content="어린이를 위한 미니게임 5종: 색칠공부, 두더지, 소방서, 축구, 김리안과 권이준이 함께하는 마법 꽃정원.">
 <title>Game · 키즈 플레이 아케이드</title>
 <style>
 :root{--ink:#22314c;--muted:#80899a;--purple:#7158e8;--orange:#ff8b4a;--cream:#fff8ee;--stroke:#e9e3d9;--green:#23ad83;--red:#ec5266;--shadow:0 22px 65px rgba(81,71,64,.09);font-family:ui-rounded,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-synthesis:none}
@@ -15,17 +15,18 @@
 .trace-result-detail{background:#f7f4ff;border-radius:13px;color:#5e527b!important;padding:9px 12px;font-size:12px!important;margin:0 0 17px!important;line-height:1.6}
 @media(max-width:540px){.trace-penalties{font-size:10px}.trace-result-detail{font-size:11px!important}}
 </style>
-<link rel="stylesheet" href="/arcade.css?v=6">
+<link rel="stylesheet" href="/arcade.css?v=7">
 </head>
 <body>
 <div class="wrap">
 <header><a href="/" class="brand" aria-label="Game 홈"><span class="brandmark">🖍️</span><span class="brandtext">GAME<small>PLAY & SMILE</small></span></a><button id="soundBtn" type="button" class="sound" aria-label="소리 켜기 또는 끄기">🔊 소리 켜짐</button></header>
-<div class="hero"><div class="eyebrow">🌈 아이들을 위한 4가지 미니게임 · 그림 24개</div><h1 id="heroTitle">선 따라 <em>쓱쓱!</em> 🎨</h1><p id="heroDesc">10초 동안 손 떼지 않고 한 번에 그려요! 성공하면 폭죽 선물!</p></div>
+<div class="hero"><div class="eyebrow">🌈 리안이와 이준이의 5가지 미니게임 · 그림 24개</div><h1 id="heroTitle">선 따라 <em>쓱쓱!</em> 🎨</h1><p id="heroDesc">10초 동안 손 떼지 않고 한 번에 그려요! 성공하면 폭죽 선물!</p></div>
 <nav class="game-tabs" role="tablist" aria-label="게임 선택">
  <button type="button" class="game-tab active" id="tab-trace" role="tab" aria-selected="true" aria-controls="tracingScreen" data-game="trace"><span class="tab-emoji">🖍️</span><span>색칠공부</span></button>
  <button type="button" class="game-tab" id="tab-mole" role="tab" aria-selected="false" aria-controls="moleScreen" data-game="mole"><span class="tab-emoji">🐹</span><span>두더지 게임</span></button>
  <button type="button" class="game-tab" id="tab-fire" role="tab" aria-selected="false" aria-controls="fireScreen" data-game="fire"><span class="tab-emoji">🚒</span><span>소방서 게임</span></button>
  <button type="button" class="game-tab" id="tab-soccer" role="tab" aria-selected="false" aria-controls="soccerScreen" data-game="soccer"><span class="tab-emoji">⚽</span><span>축구 게임</span></button>
+ <button type="button" class="game-tab" id="tab-garden" role="tab" aria-selected="false" aria-controls="gardenScreen" data-game="garden"><span class="tab-emoji">🌈</span><span>리안·이준 정원</span></button>
 </nav>
 <main class="layout" id="tracingScreen" role="tabpanel" aria-labelledby="tab-trace">
 <aside class="side" aria-label="그림 고르기"><h2 class="section-title">🎁 어떤 그림을 그릴까?</h2><div class="active-shape"><span class="shape-emoji" id="shapeEmoji">☀️</span><h2 id="shapeName">동그라미</h2><p>마음에 드는 그림을 골라요!</p></div><div id="shapesGrid" class="shapes-grid"></div><div class="tip">💡 <strong>그리는 방법</strong><br>시작 버튼을 누르고 10초 안에 손을 떼지 않고 점선을 한 번에 따라가요. 선을 벗어난 거리와 그린 길이에 따라 조금씩 점수가 깎여요. <b>80점 이상</b> 합격! 🎉</div></aside>
@@ -114,6 +115,43 @@
  </div>
  <div class="leaderboard soccer-leaderboard"><div class="leaderboard-head"><div><h3>🏅 승부차기 명예의 전당</h3><p>5번 중 성공한 골이 많은 선수 우선 · 동점이면 빠른 슈팅 우선 · 이 기기 기록</p></div><button type="button" class="board-refresh" id="soccerRankRefresh" aria-label="축구 순위 새로고침">↻</button></div>
  <ol id="soccerRankList" class="rank-list"><li class="rank-empty">첫 번째 승부차기 기록을 만들어 보세요!</li></ol></div>
+</section>
+<section id="gardenScreen" class="arcade-screen garden-screen" role="tabpanel" aria-labelledby="tab-garden" hidden>
+ <div class="arcade-intro garden-intro"><div><span class="arcade-tag garden-tag">🌈 LITTLE MAGIC GARDEN</span><h2>🌸 리안이와 이준이의 마법 꽃정원</h2><p>리안이는 꽃 색깔을 고르고, 이준이는 물을 줘요! 함께 꽃 6송이를 피워 보세요.</p></div><span class="arcade-bubble garden-bubble" aria-hidden="true">🦋</span></div>
+ <div class="garden-stats"><div class="garden-step-stat"><small>🌼 피운 꽃</small><strong id="gardenCount">0 / 6</strong></div><div class="garden-step-stat"><small>👑 완성한 꽃정원</small><strong id="gardenCollection">0개</strong></div></div>
+ <div class="garden-scene" id="gardenScene">
+  <div class="garden-cloud garden-cloud-a" aria-hidden="true">☁️</div><div class="garden-cloud garden-cloud-b" aria-hidden="true">☁️</div>
+  <div class="garden-rainbow" id="gardenRainbow" aria-hidden="true">🌈</div>
+  <div class="garden-butterfly" aria-hidden="true">🦋</div>
+  <div class="garden-butterfly garden-butterfly-two" aria-hidden="true">🦋</div>
+  <div class="garden-characters">
+   <div class="garden-kid garden-kid-rian" id="gardenRian">
+    <div class="garden-character-art" id="gardenRianArt" role="img" aria-label="앞머리와 단발머리를 한 리안이 캐릭터"></div>
+    <span class="garden-name-badge">🌸 김리안</span><span class="garden-kid-quote" id="gardenRianQuote">예쁜 꽃을 골라 줘!</span>
+   </div>
+   <div class="garden-kid garden-kid-ijun" id="gardenIjun">
+    <div class="garden-character-art" id="gardenIjunArt" role="img" aria-label="짧은 머리를 한 이준이 캐릭터"></div>
+    <span class="garden-name-badge">💦 권이준</span><span class="garden-kid-quote" id="gardenIjunQuote">내가 물을 줄게!</span>
+   </div>
+  </div>
+  <div class="garden-grass-decor" aria-hidden="true">🌿　🌷　🍄　🌱　🌼　🌿</div>
+  <div class="garden-beds" id="gardenBeds" aria-label="마법 꽃밭 6개"></div>
+  <div class="garden-magic-burst" id="gardenMagic" aria-live="off"></div>
+ </div>
+ <div class="garden-prompt" id="gardenPrompt" role="status" aria-live="polite">🌟 시작 버튼을 누르면 리안이와 이준이가 정원에 놀러 와요!</div>
+ <div class="garden-choices" id="gardenChoices" role="group" aria-label="꽃씨 색깔 고르기">
+  <button type="button" data-color="pink" class="garden-choice" disabled><span class="garden-choice-flower">🌸</span><span>분홍색</span></button>
+  <button type="button" data-color="yellow" class="garden-choice" disabled><span class="garden-choice-flower">🌼</span><span>노란색</span></button>
+  <button type="button" data-color="blue" class="garden-choice" disabled><span class="garden-choice-flower">🩵</span><span>하늘색</span></button>
+  <button type="button" data-color="purple" class="garden-choice" disabled><span class="garden-choice-flower">💜</span><span>보라색</span></button>
+ </div>
+ <div class="arcade-actions"><button type="button" class="arcade-action garden-action" id="gardenStart">▶ 꽃정원 놀이 시작</button><span class="action-tip">⏳ 시간 제한 없음 · 잘못 눌러도 다시 도전할 수 있어요</span></div>
+ <div class="arcade-result garden-result" id="gardenResult" hidden role="status">
+  <span>👑🌈🌸</span><h3>리안이와 이준이의 꽃정원 완성!</h3>
+  <p id="gardenResultDetail">꽃 6송이가 활짝 피었어요! 정말 잘했어요!</p>
+  <button type="button" class="arcade-action garden-action" id="gardenAgain">🌸 다른 꽃정원 만들기</button>
+ </div>
+ <p class="garden-privacy">💜 두 아이의 사진을 공개 사이트에 올리지 않고, 사진의 헤어스타일과 옷차림을 참고한 동화풍 그림 캐릭터로 만들었어요.</p>
 </section>
 <div class="copyright">made with 💛 for little artists · GAME</div></div><div id="confetti" class="confetti" aria-hidden="true"></div>
 <script>
@@ -293,6 +331,6 @@ window.GameTrace={stop:function(){if(mode==='running'){
 chooseShape(0);
 })();
 </script>
-<script src="/arcade.js?v=6"></script>
+<script src="/arcade.js?v=7"></script>
 </body>
 </html>
