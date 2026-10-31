@@ -354,3 +354,109 @@
 .garden-choice[data-color=blue] .garden-choice-flower{color:#69bdf0}
 .garden-choice[data-color=purple] .garden-choice-flower{color:#a16ce2}
 @media(max-width:540px){.garden-choice-flower{font-size:36px}}
+
+/* Photo-sticker balloon party, refreshed for children who cannot read yet */
+.game-tab[data-game=garden] .tab-emoji{animation:partyTabBounce 2s ease-in-out infinite}
+.garden-topbar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 13px}
+.garden-target-panel,.garden-counter-panel{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;background:linear-gradient(130deg,#fff1fb,#fff9dc);border:3px solid #f3d9eb;border-radius:22px;padding:10px;min-height:151px}
+.garden-target-instruction,.garden-counter-panel small{font-size:17px;color:#a45394;font-weight:1000;letter-spacing:-.4px}
+.garden-counter-panel strong{font-size:32px;color:#a653b5;font-weight:1000}
+#gardenProgress{display:block;font-size:17px;letter-spacing:-1px;white-space:nowrap}
+.garden-target-balloon{position:relative;width:74px;height:83px;border-radius:52% 52% 47% 47%;background:radial-gradient(ellipse at 29% 27%,#ffffffce 0 8%,#ffffff44 10%,transparent 35%),var(--target-color,#f98cba);border:2px solid #ffffffb9;box-shadow:inset -9px -10px 0 #8e4e552b,0 5px 0 #e1b4c19c,0 9px 10px #8c507333;animation:targetFloat 1.5s ease-in-out infinite alternate}
+.garden-target-balloon:after{content:'';position:absolute;left:36%;right:36%;bottom:-10px;height:14px;background:var(--target-color,#f98cba);clip-path:polygon(50% 0,0 100%,100% 100%)}
+.garden-target-balloon.gift-time{background:radial-gradient(circle,#ffedf4 0,#ffed85 65%,#f4a8dc 100%);border-color:#fff2b8}
+.garden-photo-stage{position:relative;isolation:isolate;min-height:466px;overflow:hidden;border-radius:27px;border:5px solid #eac3ec;box-shadow:inset 0 0 0 5px #fff8fd,0 6px 14px #be85a325;background:radial-gradient(ellipse at 50% 2%,#fff7b0c0 0 8%,transparent 43%),radial-gradient(circle at 6% 21%,#fff8f6 0 6%,transparent 18%),linear-gradient(180deg,#d1f2ff 0,#f3e9ff 45%,#f9d6eb 75%,#f3bfdc 100%)}
+.garden-photo-stage:before{content:'✨　⭐　💖　🌈　✨';position:absolute;top:8px;left:0;width:100%;text-align:center;font-size:18px;letter-spacing:5px;opacity:.75;pointer-events:none}
+.garden-photo-stage:after{content:'';position:absolute;z-index:-1;bottom:-28%;left:-20%;width:140%;height:52%;border-radius:50%;background:#ffe6d17a;pointer-events:none}
+.garden-photo-heroes{position:absolute;top:31px;left:7%;right:7%;display:flex;justify-content:space-between;align-items:flex-start;z-index:3}
+.garden-photo-hero{position:relative;display:flex;align-items:center;flex-direction:column;gap:5px;width:170px;transform:rotate(-3deg);transition:transform .2s}
+.garden-photo-hero.ijun{transform:rotate(3deg)}
+.garden-photo-sticker{position:relative;display:block;width:140px;height:140px;padding:0;border:6px solid #fff;border-radius:50%;overflow:visible;background:#fff;box-shadow:0 0 0 4px #f5badd,0 8px 16px #905a9663;transform-origin:center 93%}
+.garden-photo-hero.ijun .garden-photo-sticker{box-shadow:0 0 0 4px #a6dafa,0 8px 16px #5580b266}
+.garden-photo-sticker img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 42%;border-radius:50%;background:#fff}
+.garden-sticker-crown{position:absolute;top:-24px;right:-5px;font-size:37px;transform:rotate(16deg);filter:drop-shadow(0 3px 2px #94636b7d)}
+.garden-photo-hero.ijun .garden-sticker-crown{right:auto;left:-2px;transform:rotate(-16deg)}
+.garden-photo-name{font-weight:1000;font-size:16px;background:#fff7fc;border:2px solid #fff;border-radius:999px;padding:3px 12px;color:#a54f9e;white-space:nowrap;box-shadow:0 4px 7px #a46ba53d}
+.garden-photo-hero.ijun .garden-photo-name{color:#297fa9;background:#f0f9ff}
+.garden-photo-reaction{position:absolute;top:10px;right:-4px;font-size:30px;opacity:0;transform:scale(.5);transition:opacity .17s,transform .17s}
+.garden-photo-hero.active .garden-photo-reaction{opacity:1;transform:scale(1.12)}
+.garden-photo-hero.active .garden-photo-sticker{box-shadow:0 0 0 5px #ffec85,0 0 25px 9px #ffefa983}
+.garden-photo-hero.cheer .garden-photo-sticker{animation:photoHeroCheer .42s ease-in-out 3 alternate}
+.garden-photo-hero.cheer .garden-photo-reaction{opacity:1;transform:scale(1.3)}
+.garden-balloon-field{position:absolute;bottom:24px;left:10%;right:10%;z-index:5;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:end;justify-items:center;gap:4px;min-height:185px}
+.garden-play-balloon{display:grid;place-items:center;width:100%;min-height:180px;position:relative;background:transparent;border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.garden-balloon-shape{position:relative;width:min(98%,108px);height:131px;border-radius:54% 54% 49% 49%;display:block;border:2px solid #ffffff9a;background:radial-gradient(ellipse at 32% 23%,#ffffffe8 0 8%,#ffffff66 10%,transparent 35%),linear-gradient(155deg,#ffffff7b,var(--balloon-color,#f88));box-shadow:inset -10px -12px 0 #74496c2b,0 7px 9px #94667955,0 2px 0 #ffffff90;transform-origin:50% 95%;animation:partyBalloonFloat 1.4s ease-in-out infinite alternate;animation-delay:var(--balloon-delay,0s);pointer-events:none}
+.garden-balloon-shape:after{content:'';position:absolute;bottom:-14px;left:40%;width:20%;height:18px;background:var(--balloon-color,#f88);clip-path:polygon(50% 0,0 95%,100% 95%)}
+.garden-balloon-shape:before{content:'';position:absolute;bottom:-42px;left:50%;width:2px;height:31px;border-radius:50%;background:#96768b}
+.garden-play-balloon:disabled{cursor:default}
+.garden-play-balloon.hint .garden-balloon-shape{filter:drop-shadow(0 0 12px #fffaa2) drop-shadow(0 0 7px #ffed46);border:4px solid #fff575;animation:partyHintGlow .6s ease-in-out infinite alternate}
+.garden-play-balloon.oops .garden-balloon-shape{animation:partyBalloonWiggle .33s ease}
+.garden-play-balloon.popped .garden-balloon-shape{animation:partyBalloonPop .44s ease-out forwards}
+.garden-gift{z-index:7;position:absolute;top:51%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;flex-direction:column;gap:5px;min-width:140px;min-height:150px;background:#fff2c9eb;border:6px solid #fff;border-radius:30px;box-shadow:0 6px 0 #ffcf8c,0 0 44px 22px #ffd8f3aa;animation:partyGiftJump .55s ease-in-out infinite alternate;touch-action:manipulation;cursor:pointer}
+.garden-gift[hidden]{display:none!important}
+.garden-gift-box{font-size:90px;line-height:1.25;filter:drop-shadow(0 4px 0 #eaaad6)}
+.garden-gift-callout{font-size:20px;font-weight:1000;color:#c26c9d}
+.garden-confetti-decor{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:16px;letter-spacing:7px;opacity:.72;pointer-events:none}
+.garden-photo-stage.finished{background:radial-gradient(circle at 50% 7%,#fff8ab 0 15%,transparent 47%),linear-gradient(170deg,#c9f4ff,#efd8ff 52%,#ffdee4)}
+.garden-photo-stage.finished:before{content:'🌈 ✨ 👑 🎊 🌈';font-size:32px;animation:partyRainbow .8s ease-in-out infinite alternate}
+.garden-treasures{margin:12px 0;display:flex;align-items:center;justify-content:center;gap:12px}
+.garden-treasures-label{font-size:13px;font-weight:1000;color:#a15d9d}
+.garden-treasure-slots{display:flex;gap:8px}
+.garden-treasure-slot{display:grid;place-items:center;width:51px;height:51px;border:3px dashed #edbedc;border-radius:16px;background:#fff7fc;font-size:25px;filter:grayscale(.5);opacity:.68}
+.garden-treasure-slot.won{animation:partyPrizePop .48s ease-out;background:#fff6d9;border-color:#ffce64;filter:none;opacity:1}
+.garden-prompt{margin:12px 0 9px;padding:11px 15px;min-height:58px;background:#fdf0fb;border-radius:18px;color:#9f528f;text-align:center;font-size:15px;font-weight:1000;line-height:1.5}
+.garden-action{background:#d768b2;box-shadow:0 6px 0 #b44b94}
+.garden-action:active{box-shadow:0 2px 0 #b44b94}
+.garden-result{background:linear-gradient(125deg,#f9ecff,#fff7d5,#ddf8ff)}
+.garden-crowns{text-align:center;margin:5px 0;color:#a56a9c;font-size:14px;font-weight:800}
+.garden-crowns strong{font-size:18px;color:#95529d}
+.garden-privacy{font-size:11px;text-align:center;color:#968da2;line-height:1.45;margin:11px 0 0}
+.garden-magic-burst{position:absolute;z-index:9;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;font-size:clamp(30px,6vw,55px);font-weight:1000;opacity:0;white-space:nowrap;text-shadow:0 3px 8px #a756bd72}
+.garden-magic-burst.burst{animation:partyMagic .8s ease-out both}
+@keyframes targetFloat{to{transform:translateY(-5px) rotate(4deg)}}
+@keyframes partyTabBounce{50%{transform:translateY(-2px)}}
+@keyframes partyBalloonFloat{from{transform:translateY(6px) rotate(-4deg)}to{transform:translateY(-8px) rotate(4deg)}}
+@keyframes partyBalloonWiggle{25%,75%{transform:rotate(-13deg)}50%{transform:rotate(14deg)}}
+@keyframes partyBalloonPop{0%{opacity:1;transform:scale(1)}50%{opacity:1;transform:scale(1.25)}100%{opacity:0;transform:scale(.12) rotate(20deg)}}
+@keyframes partyHeroCheer{to{transform:translateY(-15px) rotate(7deg)}}
+@keyframes partyHintGlow{to{transform:scale(1.13);filter:drop-shadow(0 0 17px #fff98b)}}
+@keyframes partyGiftJump{to{transform:translate(-50%,-60%) rotate(5deg)}}
+@keyframes partyMagic{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.25)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-100%) scale(1.4)}}
+@keyframes partyPrizePop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes partyRainbow{to{transform:scale(1.08)}}
+@media(max-width:820px){
+ .garden-photo-hero{width:140px}
+ .garden-photo-sticker{width:120px;height:120px}
+ .garden-balloon-field{left:5%;right:5%}
+}
+@media(max-width:540px){
+ .garden-intro h2{font-size:20px}
+ .garden-intro p{font-size:11px}
+ .garden-topbar{gap:7px}
+ .garden-target-panel,.garden-counter-panel{min-height:125px;padding:7px;border-width:2px;border-radius:17px}
+ .garden-target-instruction,.garden-counter-panel small{font-size:13px}
+ .garden-target-balloon{width:61px;height:68px}
+ .garden-counter-panel strong{font-size:24px}
+ #gardenProgress{font-size:13px}
+ .garden-photo-stage{min-height:370px;border-width:3px}
+ .garden-photo-heroes{left:5%;right:5%;top:33px}
+ .garden-photo-hero{width:105px}
+ .garden-photo-sticker{width:90px;height:90px;border-width:4px;box-shadow:0 0 0 3px #f5badd,0 5px 12px #905a9663}
+ .garden-photo-name{font-size:12px;padding:3px 7px}
+ .garden-sticker-crown{font-size:25px;top:-17px}
+ .garden-photo-reaction{font-size:22px;right:-9px}
+ .garden-balloon-field{left:1%;right:1%;bottom:22px;min-height:162px;gap:1px}
+ .garden-play-balloon{min-height:155px}
+ .garden-balloon-shape{width:min(94%,80px);height:100px}
+ .garden-balloon-shape:before{bottom:-30px;height:23px}
+ .garden-balloon-shape:after{bottom:-11px;height:13px}
+ .garden-confetti-decor{font-size:11px;letter-spacing:4px}
+ .garden-gift{min-width:123px;min-height:138px}
+ .garden-gift-box{font-size:77px}
+ .garden-treasures-label{font-size:12px}
+ .garden-treasure-slot{width:42px;height:42px;font-size:23px}
+ .garden-prompt{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+ .garden-photo-hero.cheer .garden-photo-sticker,.garden-play-balloon .garden-balloon-shape,.garden-target-balloon,.garden-gift{animation:none}
+}
