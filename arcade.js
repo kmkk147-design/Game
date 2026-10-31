@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const $all=sel=>Array.from(document.querySelectorAll(sel));
 const scenes={trace:$('tracingScreen'),mole:$('moleScreen'),fire:$('fireScreen'),soccer:$('soccerScreen'),garden:$('gardenScreen')};
 let current='trace';
-const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','10초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','30초 안에 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 여섯 방향 중 골키퍼가 없는 곳을 선택해 5골에 도전해요!'],garden:['리안이·이준이의 <em>풍선 보물파티!</em> 🎈','리안이와 이준이의 사진과 함께 같은 색 풍선을 팡! 선물상자를 열어 보세요!']};
+const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','10초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','60초 동안 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 여섯 방향 중 골키퍼가 없는 곳을 선택해 5골에 도전해요!'],garden:['리안이·이준이의 <em>풍선 보물파티!</em> 🎈','리안이와 이준이의 사진과 함께 같은 색 풍선을 팡! 선물상자를 열어 보세요!']};
 let sound=null;
 function beep(freq=500,ms=90,type='sine',volume=.07){
  if($('soundBtn').textContent.includes('꺼짐'))return;
@@ -93,14 +93,14 @@ function resetHole(i){
 }
 function stopMole(){mo.running=false;clearMoleTimers();mo.active.clear();mo.lastWave=[];holes.forEach((_,i)=>resetHole(i));$('moleHammer').classList.remove('swing');$('moleStart').disabled=false;}
 function moleValues(){$('moleScore').textContent=mo.score+'점';$('moleCombo').textContent=String(mo.combo);}
-function waveSize(elapsed){if(elapsed<7)return 1;if(elapsed<17)return 2;return 3;}
+function waveSize(elapsed){if(elapsed<14)return 1;if(elapsed<34)return 2;return 3;}
 function spawnWave(now){
- const elapsed=Math.max(0,(30000-(mo.deadline-now))/1000);
+ const elapsed=Math.max(0,(60000-(mo.deadline-now))/1000);
  const candidates=holes.map((_,i)=>i).filter(i=>!mo.active.has(i)&&!mo.lastWave.includes(i));
  const n=Math.min(waveSize(elapsed),candidates.length),chosen=[];
  for(let j=0;j<n;j++){
   const index=Math.floor(Math.random()*candidates.length),i=candidates.splice(index,1)[0];
-  const p=elapsed<8?.22:elapsed<20?.32:.39;
+  const p=elapsed<16?.22:elapsed<40?.32:.39;
   const kind=j===0&&n>1?'mole':Math.random()<p?'cat':'mole';
   const until=now+Math.max(1050,1600-elapsed*12);
   mo.active.set(i,{kind,until});chosen.push(i);
@@ -113,8 +113,8 @@ function spawnWave(now){
 }
 function startMole(){
  stopMole();mo.running=true;mo.score=mo.hits=mo.misses=mo.catsHit=mo.catsAvoided=mo.combo=mo.best=0;
- mo.deadline=performance.now()+30000;mo.nextAt=performance.now()+320;
- $('moleTime').textContent='30초';$('moleTime').parentElement.classList.remove('urgent');moleValues();
+ mo.deadline=performance.now()+60000;mo.nextAt=performance.now()+320;
+ $('moleTime').textContent='60초';$('moleTime').parentElement.classList.remove('urgent');moleValues();
  $('moleResult').hidden=true;$('moleStart').disabled=true;$('moleStart').textContent='🔨 두더지 잡는 중!';
  $('moleTip').textContent='두더지 +10~30점 · 고양이 −20점!';beep(530,90);
  mo.interval=setInterval(tickMole,65);tickMole();
@@ -167,7 +167,7 @@ function hitMole(i,evt){
  if(!mo.active.size)mo.nextAt=Math.max(mo.nextAt,now+420);
 }
 function finishMole(){
- if(!mo.running)return;stopMole();$('moleTime').textContent='0초';$('moleTip').textContent='30초 도전 완료!';
+ if(!mo.running)return;stopMole();$('moleTime').textContent='0초';$('moleTip').textContent='60초 도전 완료!';
  $('moleResult').hidden=false;$('moleResultEmoji').textContent=mo.hits>=16?'🏆':'🐹';
  $('moleResultTitle').textContent=mo.hits>=16?'두더지 달인!':'두더지 잡기 완료!';
  $('moleResultDetail').textContent=mo.hits+'마리 잡기 성공 · 고양이 '+mo.catsHit+'번 실수 · 최종 '+mo.score+'점 · 최고 연속 '+mo.best+'번 🎉';
