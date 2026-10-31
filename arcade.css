@@ -18,3 +18,75 @@
 @media (max-width:540px){.game-tabs{gap:6px;margin:0 0 15px}.game-tab{font-size:12px;letter-spacing:-.4px;gap:4px;border-radius:15px;min-height:55px;border-width:2px;padding:5px 2px;box-shadow:0 4px 0 #eee8e0}.game-tab .tab-emoji{font-size:22px}.arcade-screen{padding:12px;border-radius:23px}.arcade-intro{padding:9px 5px 15px}.arcade-intro h2{font-size:24px}.arcade-intro p{font-size:12px}.arcade-bubble{width:58px;height:58px;border-radius:20px;font-size:35px}.arcade-stats{gap:5px;margin:0 1px 11px}.arcade-stats>div{padding:9px 6px;border-radius:12px}.arcade-stats small{font-size:10px}.arcade-stats strong{font-size:19px}.mole-arena{min-height:355px;border-width:4px}.mole-grid{gap:5px;padding:0 5px}.mole-stars{font-size:18px;letter-spacing:13px;height:42px}.mole-face{font-size:clamp(36px,11vw,65px)}.mole-hammer{font-size:55px}.mole-hole{aspect-ratio:1.1/1}.arcade-actions{gap:9px;margin:16px 0 7px}.arcade-action{font-size:14px;min-height:53px}.action-tip{font-size:11px}.fire-scene{min-height:424px;border-width:3px}.fire-apartment{width:91%;margin-top:41px;border-width:4px}.fire-roof{padding:4px 8px;font-size:14px;min-height:43px;margin:-13px -10px 6px}.fire-windows{padding:10px 7px 4px;gap:5px}.fire-window{border-width:3px;border-radius:5px}.fire-lobby{font-size:10px;height:36px;margin:2px 5px 4px;gap:3px}.fire-truck{font-size:50px;left:2%;bottom:10px}.fire-ground{font-size:20px;letter-spacing:1px;left:30%;bottom:8px}.flame-emoji{font-size:24px}.fire-count{font-size:10px;top:-9px;right:-7px;padding:1px 3px}.fire-stats{gap:4px}.fire-stats small{font-size:9px}.fire-stats strong{font-size:17px}.leaderboard{padding:13px}.leaderboard h3{font-size:18px}.rank-list li{font-size:12px;grid-template-columns:36px minmax(0,1fr) 65px;padding:9px}.arcade-result{padding:15px;margin:14px 0}.arcade-result>span{font-size:47px}.arcade-result h3{font-size:22px}.save-row button{font-size:12px;padding:8px}}
 .fire-difficulty{margin:8px 0 14px;padding:12px 14px;border-radius:16px;background:#eaf9f0;color:#297348;font-size:14px;font-weight:900;text-align:center}
 .fire-difficulty[data-level="3"],.fire-difficulty[data-level="4"]{background:#fff0d6;color:#bd6a17}.fire-difficulty[data-level="5"]{background:#ffe6e6;color:#c42e42;animation:pulse .85s infinite}
+
+/* Mole & cat arcade: illustrated animals, flatter arena, no overgrown green turf */
+.mole-rules{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:-3px 0 13px;font-size:13px;font-weight:850;color:#65527c}
+.mole-rules span{background:#fff7e8;border:1px solid #f3dcc5;padding:8px 13px;border-radius:999px}
+.mole-rules strong{color:#a9572d}
+.mole-rules span:last-child{background:#fff0f3;border-color:#f6d8dc}
+.mole-rules span:last-child strong{color:#d34f70}
+.mole-arena{min-height:0;padding:6px 0 12px;background:radial-gradient(ellipse at 50% 0%,#fff9dc 2%,transparent 45%),linear-gradient(180deg,#c9efff 0%,#f7efff 29%,#fff1d6 100%);border-color:#dcb484;box-shadow:inset 0 0 0 5px #fff7e6}
+.mole-stars{height:32px;font-size:18px;letter-spacing:18px;opacity:.75}
+.mole-grid{max-width:580px;gap:0 10px;padding:0 13px;margin:0 auto 3px}
+.mole-hole{aspect-ratio:1.18/1;overflow:hidden;border-radius:32%;-webkit-tap-highlight-color:transparent}
+.mole-hole:before{inset:65% 7% 6%;background:radial-gradient(ellipse at center,#321b15 0%,#5f3829 62%,#b07c50 95%);box-shadow:0 3px 3px #73503855;z-index:0}
+.mole-hole:after{bottom:3%;left:2%;right:2%;height:18%;background:linear-gradient(180deg,#dfb687 0%,#be8c62 55%,#ad744c 100%);box-shadow:0 2px 0 #845635;z-index:3;pointer-events:none}
+.mole-face{bottom:8%;left:11%;right:11%;height:86%;z-index:2;display:block;filter:drop-shadow(0 5px 2px #3c231d33);transform:translateY(116%) scale(.84);opacity:0;transition:transform .21s cubic-bezier(.24,1.25,.4,1),opacity .13s}
+.mole-hole.up .mole-face{transform:translateY(0) scale(1);opacity:1}
+.mole-hole.whacked .mole-face{transform:translateY(125%) rotate(-12deg) scale(.8);opacity:.9;transition:transform .32s ease-in,opacity .32s}
+.mole-hole.teasing .mole-face{transform:translateY(-4%) rotate(4deg) scale(1.04);opacity:1;transition:transform .2s ease-out}
+.mole-hole.sinking .mole-face{transform:translateY(125%) scale(.83);opacity:.8;transition:transform .25s ease-in,opacity .25s}
+.mole-hole:not([data-kind="cat"]) .critter-cat{display:none}
+.mole-hole[data-kind="cat"] .critter-mole{display:none}
+.critter{position:absolute;inset:0;display:block;isolation:isolate}
+.critter i{position:absolute;display:block;pointer-events:none}
+.critter-body{z-index:0;bottom:0;left:24%;width:52%;height:43%;border-radius:46% 46% 18% 18%;background:#986540;box-shadow:inset -6px -4px 0 #64402740}
+.critter-ear{z-index:1;top:24%;width:22%;height:28%;border-radius:50%;background:#a26c47;border:3px solid #765035}
+.critter-ear:after{content:'';position:absolute;inset:20%;border-radius:50%;background:#d9a990}
+.critter-ear.ear-l{left:15%;transform:rotate(-25deg)}
+.critter-ear.ear-r{right:15%;transform:rotate(25deg)}
+.critter-head{z-index:2;top:10%;left:15%;width:70%;height:76%;border-radius:48% 48% 46% 46%;background:radial-gradient(ellipse at 30% 24%,#cda178 0%,#af7a50 44%,#815035 100%);box-shadow:inset -5px -4px 1px #673e3160,0 2px 3px #5d3d3240}
+.critter-eye{z-index:5;top:41%;width:9%;height:11%;border-radius:50%;background:#281b1b;box-shadow:1px 1px 0 #4c251a}
+.critter-eye:after{content:'';position:absolute;top:15%;left:15%;width:30%;height:29%;background:#fff;border-radius:50%}
+.critter-eye.eye-l{left:32%}.critter-eye.eye-r{right:32%}
+.critter-muzzle{z-index:4;top:54%;left:30%;width:40%;height:26%;border-radius:48% 48% 42% 42%;background:#edcfad;box-shadow:inset 0 -3px 0 #d6ae8c}
+.critter-nose{z-index:6;top:55%;left:46%;width:11%;height:9%;border-radius:45% 45% 60% 60%;background:#ee9f9b;box-shadow:inset 1px -1px 0 #c7716f}
+.critter-paw{z-index:7;bottom:10%;width:19%;height:16%;border-radius:45% 45% 28% 28%;background:#b78360;box-shadow:inset 0 -3px 0 #8b5b40}
+.critter-paw:after{content:'⋮';position:absolute;left:40%;top:-10%;font-size:13px;color:#6d4039;transform:rotate(90deg)}
+.critter-paw.paw-l{left:17%;transform:rotate(-24deg)}.critter-paw.paw-r{right:17%;transform:rotate(24deg)}
+/* Distinct ginger kitten with pointed ears, stripes, whiskers and an animated tongue */
+.critter-cat .critter-body{background:#d98c51;box-shadow:inset -6px -4px 0 #b96e3c55}
+.critter-cat .critter-ear{z-index:3;top:4%;width:29%;height:38%;border:0;border-radius:8px;background:#cc7e48;clip-path:polygon(0 100%,19% 2%,100% 70%,100% 100%)}
+.critter-cat .critter-ear.ear-l{left:13%;transform:rotate(-8deg)}
+.critter-cat .critter-ear.ear-r{right:13%;transform:scaleX(-1) rotate(-8deg)}
+.critter-cat .critter-ear:after{inset:26% 24% 12%;clip-path:polygon(0 100%,20% 0,100% 80%);background:#f4b6ae;border-radius:4px}
+.critter-cat .critter-head{top:22%;height:64%;border-radius:46% 46% 42% 42%;background:radial-gradient(circle at 32% 22%,#ffda99 0%,#efac64 52%,#d78346 100%);box-shadow:inset -5px -3px 0 #bb743850}
+.critter-cat .critter-eye{top:44%;width:11%;height:9%;border-radius:45% 45% 55% 55%;background:#4f3125}
+.critter-cat .critter-eye.eye-l{left:31%}.critter-cat .critter-eye.eye-r{right:31%}
+.critter-cat .critter-muzzle{top:60%;left:29%;width:42%;height:20%;background:#fff1d7}
+.critter-cat .critter-nose{top:61%;left:46%;width:10%;height:8%;background:#cf786f;clip-path:polygon(0 0,100% 0,50% 100%);border-radius:0}
+.critter-cat .critter-paw{background:#ebaa67}
+.cat-stripe{z-index:4;top:24%;width:8%;height:16%;border-radius:40%;background:#bf723a}
+.cat-stripe.stripe-l{left:36%;transform:rotate(-21deg)}.cat-stripe.stripe-r{right:36%;transform:rotate(21deg)}
+.cat-whisker{z-index:7;top:66%;width:20%;height:2px;background:#79503d;box-shadow:0 7px 0 #79503d}
+.cat-whisker.whisker-l{left:11%;transform:rotate(-12deg)}
+.cat-whisker.whisker-r{right:11%;transform:rotate(12deg)}
+.cat-tongue{z-index:8;top:69%;left:47%;width:9%;height:4%;background:#ef628b;border-radius:40% 40% 75% 75%;transform-origin:top center;transform:scaleY(0);opacity:0;transition:transform .12s}
+.mole-hole.teasing .cat-tongue{animation:catTongue .44s ease-in-out infinite alternate;opacity:1;transform:scaleY(2.8)}
+.mole-hole.teasing .critter-cat .eye-r{height:2px;top:49%;border-radius:99px;transform:rotate(-13deg)}
+.mole-hole.teasing .critter-cat .eye-r:after{display:none}
+.mole-hole.teasing .mole-hit-star{animation:moleStar .75s ease-out both;font-size:clamp(14px,2.5vw,25px);font-weight:950;color:#b84b77;text-shadow:0 2px 2px white}
+.mole-hit-star{top:1%;left:4%;right:4%;z-index:5}
+.mole-pop{white-space:nowrap;z-index:12;font-size:clamp(15px,3.8vw,23px);text-shadow:0 2px 3px #664031;font-weight:1000}
+@keyframes catTongue{from{transform:scaleY(1.1)}to{transform:scaleY(3.0)}}
+@media(max-width:540px){
+ .mole-rules{gap:6px;font-size:11px;margin-bottom:10px}
+ .mole-rules span{padding:7px 9px}
+ .mole-arena{min-height:0;border-width:4px;padding:3px 0 12px}
+ .mole-stars{height:28px;letter-spacing:12px;font-size:15px}
+ .mole-grid{gap:0 3px;padding:0 5px}
+ .mole-hole{aspect-ratio:1.22/1}
+ .critter-paw:after{font-size:8px}
+ .mole-hit-star{font-size:20px}
+ .mole-hammer{font-size:51px}
+}
