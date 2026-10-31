@@ -346,3 +346,11 @@
 @media(prefers-reduced-motion:reduce){
  .garden-butterfly,.garden-scene.finished .garden-rainbow,.garden-kid.celebrate .garden-character-art,.garden-bed.waiting,.garden-choice.hint{animation:none}
 }
+
+/* Clear, large matching-color flower symbols for pre-readers */
+.garden-choice-flower{font-family:Georgia,"Apple SD Gothic Neo",system-ui,sans-serif;font-size:43px;font-weight:1000;text-shadow:0 2px 1px #fff,0 4px 4px #a2748742}
+.garden-choice[data-color=pink] .garden-choice-flower{color:#f67bab}
+.garden-choice[data-color=yellow] .garden-choice-flower{color:#edbd39}
+.garden-choice[data-color=blue] .garden-choice-flower{color:#69bdf0}
+.garden-choice[data-color=purple] .garden-choice-flower{color:#a16ce2}
+@media(max-width:540px){.garden-choice-flower{font-size:36px}}
