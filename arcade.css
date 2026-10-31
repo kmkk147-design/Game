@@ -544,3 +544,15 @@
  .soccer-keeper.diving .keeper-arm-left,.soccer-keeper.diving .keeper-arm-right,.soccer-keeper.diving .keeper-leg-left,.soccer-keeper.diving .keeper-leg-right{animation-duration:.1s}
  .soccer-speed-lines.flying{animation-duration:.1s}
 }
+
+/* Whack-a-mole ranking */
+.mole-result{background:linear-gradient(135deg,#fff7e7,#fff1db,#fffaf6);border:2px solid #f6d9a7}
+.mole-save-record .save-row input{border-color:#f3d6a3}
+.mole-save-record .save-row input:focus{outline:3px solid #ffda91;outline-offset:1px}
+.mole-save-record .save-row button{background:#da8540}
+.mole-leaderboard{background:linear-gradient(145deg,#fffcf6,#fff6e9);border-color:#f2e2ce}
+.mole-leaderboard .board-refresh{background:#fff0d9;color:#aa733d}
+.mole-leaderboard .rank-points{color:#d47930;font-variant-numeric:tabular-nums}
+.mole-leaderboard .mole-rank-name{overflow-wrap:anywhere;min-width:0}
+.mole-leaderboard .mole-rank-current{background:#fff0ce;box-shadow:inset 0 0 0 2px #f4b95c}
+@media(max-width:540px){.mole-leaderboard{padding:13px 10px}.mole-leaderboard h3{font-size:18px}.mole-leaderboard .rank-list li{grid-template-columns:33px minmax(0,1fr) 76px;gap:5px;padding:9px 8px;font-size:12px}.mole-leaderboard .rank-list .rank-pos{font-size:18px}.mole-save-record{margin:15px auto}}
