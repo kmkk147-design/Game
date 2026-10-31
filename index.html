@@ -50,9 +50,9 @@
 <div id="resultOverlay" class="result-overlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden><div class="result-card"><div class="win-spark" id="resultStars"></div><div class="result-sticker" id="resultEmoji">🎉</div><h2 id="resultTitle">참 잘했어요!</h2><p id="resultDescription">멋지게 그렸어요!</p><div class="result-percentage" id="resultPercent">⭐ 95점</div><p class="trace-result-detail" id="resultBreakdown"></p><div class="result-buttons"><button class="btn secondary" id="retryBtn">↺ 다시 도전</button><button class="btn primary" id="nextBtn">다른 그림 ➜</button></div></div></div>
 </section></main>
 <section id="moleScreen" class="arcade-screen mole-screen" role="tabpanel" aria-labelledby="tab-mole" hidden>
- <div class="arcade-intro"><div><span class="arcade-tag mole-tag">🕹️ ARCADE · 60 SEC</span><h2>🐹 두더지 팡팡!</h2><p>두더지는 잡고 고양이는 피해요! 두세 마리가 동시에 팡팡!</p></div><span class="arcade-bubble" aria-hidden="true">🔨</span></div>
+ <div class="arcade-intro"><div><span class="arcade-tag mole-tag">🕹️ ARCADE · 60 SEC</span><h2>🐹 두더지 팡팡!</h2><p>처음 5초는 1마리! 이후 점점 빨라져 최대 7마리까지 동시에 등장해요!</p></div><span class="arcade-bubble" aria-hidden="true">🔨</span></div>
  <div class="arcade-stats"><div><small>⏳ 남은 시간</small><strong id="moleTime">60초</strong></div><div><small>🏆 점수</small><strong id="moleScore">0점</strong></div><div><small>🔥 연속 성공</small><strong id="moleCombo">0</strong></div></div>
- <div class="mole-rules"><span>🐾 두더지 <strong>+10~30점</strong></span><span>🐱 고양이 <strong>−20점</strong></span><span>⚡ 후반엔 <strong>3마리 동시!</strong></span></div>
+ <div class="mole-rules"><span>🐾 두더지 <strong>+10~30점</strong></span><span>🐱 고양이 <strong>−20점</strong></span><span>⚡ 후반엔 <strong>최대 7마리 동시!</strong></span></div>
  <div class="mole-arena" id="moleArena">
   <div class="mole-stars" aria-hidden="true">✦ 🎪 ✨ ⭐ ✦</div>
   <div class="mole-grid" id="moleGrid" aria-label="두더지 구멍 9개"></div>
@@ -183,16 +183,16 @@ const shapes=[
  {name:'다이아',emoji:'💎',level:'보통',path:'M 250 78 L 418 225 L 250 388 L 82 225 Z'},
  {name:'달',emoji:'🌙',level:'보통',path:'M 343 83 C 255 94 208 162 216 238 C 225 331 298 369 377 352 C 330 397 257 405 194 358 C 117 301 120 183 189 114 C 236 67 294 62 343 83 Z'},
  {name:'물고기',emoji:'🐟',level:'보통',path:'M 110 238 L 64 153 L 64 322 L 110 238 C 149 178 206 163 241 162 L 263 117 L 287 172 C 335 184 368 204 402 239 C 366 281 326 302 278 317 L 249 364 L 223 322 C 163 320 126 293 110 238 Z'},
- {name:'꽃',emoji:'🌸',level:'보통',path:'M 250 144 C 198 66 155 132 185 181 C 109 154 103 243 168 250 C 100 307 157 380 217 336 C 239 406 325 376 318 316 C 402 344 429 264 360 229 C 405 160 338 112 292 160 C 282 94 226 90 250 144 Z'},
+ {name:'꽃',emoji:'🌸',level:'보통',path:'M 250 146 C 238 106 212 88 190 105 C 166 121 167 156 187 182 C 143 159 110 175 108 212 C 106 231 132 246 165 250 C 112 270 112 311 144 334 C 166 350 192 350 218 333 C 224 374 256 390 290 367 C 305 358 316 336 316 314 C 357 344 395 325 401 292 C 408 265 393 245 362 226 C 400 180 377 134 343 134 C 322 130 305 141 289 158 C 284 119 265 104 250 146 Z'},
  {name:'사과',emoji:'🍎',level:'보통',path:'M 254 137 C 235 91 276 69 295 75 C 290 113 259 125 254 137 C 195 86 98 148 107 244 C 113 341 173 405 248 375 C 327 408 391 343 393 249 C 396 158 325 108 254 137 Z'},
  {name:'나무',emoji:'🌲',level:'보통',path:'M 250 65 L 181 169 L 207 169 L 131 274 L 198 274 L 150 345 L 220 345 L 220 407 L 280 407 L 280 345 L 350 345 L 302 274 L 369 274 L 293 169 L 319 169 Z'},
  {name:'우산',emoji:'☂️',level:'보통',path:'M 72 218 C 95 100 402 101 427 218 Q 385 253 343 218 Q 299 255 263 218 L 263 359 Q 264 401 219 391 L 219 367 Q 240 386 241 359 L 241 218 Q 194 252 151 218 Q 110 254 72 218 Z'},
  {name:'선물상자',emoji:'🎁',level:'보통',path:'M 114 160 L 215 160 Q 182 140 180 111 Q 177 82 204 82 Q 230 82 250 146 Q 270 82 296 82 Q 322 82 320 111 Q 317 140 285 160 L 389 160 L 389 380 L 112 380 Z'},
  {name:'고양이',emoji:'🐱',level:'도전',path:'M 131 246 L 122 101 L 209 158 Q 250 146 290 158 L 378 101 L 368 246 Q 401 262 382 292 L 396 318 Q 380 357 331 373 Q 249 405 170 373 Q 116 359 103 318 L 120 291 Q 101 261 131 246 Z'},
- {name:'나비',emoji:'🦋',level:'도전',path:'M 250 215 C 130 55 66 143 125 236 C 57 301 130 402 250 278 C 370 402 442 301 375 236 C 434 143 370 55 250 215 Z'},
- {name:'자동차',emoji:'🚗',level:'도전',path:'M 80 244 L 124 244 L 171 155 L 329 155 L 379 244 L 417 244 L 417 337 L 353 337 L 322 377 L 277 337 L 218 337 L 187 377 L 142 337 L 80 337 Z'},
- {name:'로켓',emoji:'🚀',level:'도전',path:'M 250 53 C 305 112 332 164 323 245 L 386 316 L 367 368 L 304 322 L 278 391 L 250 367 L 222 391 L 196 322 L 133 368 L 114 316 L 177 245 C 168 164 195 112 250 53 Z'},
- {name:'왕관',emoji:'👑',level:'도전',path:'M 104 160 L 165 237 L 218 130 L 250 233 L 296 120 L 349 236 L 414 157 L 381 354 L 121 354 Z'},
+ {name:'나비',emoji:'🦋',level:'도전',path:'M 250 214 C 208 163 174 112 131 117 C 86 116 64 156 94 196 C 71 215 93 241 125 243 C 89 264 83 310 119 339 C 159 373 208 323 250 280 C 292 323 341 373 381 339 C 417 310 411 264 375 243 C 407 241 429 215 406 196 C 436 156 414 116 369 117 C 326 112 292 163 250 214 Z'},
+ {name:'자동차',emoji:'🚗',level:'도전',path:'M 72 247 L 112 247 L 168 153 L 212 153 L 226 137 L 286 137 L 301 153 L 331 153 L 387 247 L 427 247 L 427 315 L 402 315 L 389 345 L 360 345 L 345 378 L 315 378 L 297 345 L 201 345 L 184 378 L 155 378 L 139 345 L 111 345 L 102 315 L 72 315 Z'},
+ {name:'로켓',emoji:'🚀',level:'도전',path:'M 250 53 C 305 112 330 164 319 222 L 345 248 L 340 270 L 389 314 L 368 366 L 325 343 L 313 365 L 293 348 L 269 398 L 250 373 L 231 398 L 207 348 L 187 365 L 175 343 L 132 366 L 111 314 L 160 270 L 155 248 L 181 222 C 170 164 195 112 250 53 Z'},
+ {name:'왕관',emoji:'👑',level:'도전',path:'M 101 151 L 163 223 L 176 178 L 202 234 L 236 109 L 263 210 L 302 116 L 346 232 L 360 174 L 412 152 L 386 324 L 369 330 L 378 354 L 122 354 L 130 329 L 114 324 Z'},
  {name:'공룡',emoji:'🦕',level:'도전',path:'M 96 300 L 156 265 L 148 198 L 202 210 L 210 135 L 257 159 L 306 109 L 315 178 L 370 183 L 387 244 L 435 248 L 415 299 L 356 320 L 336 383 L 291 383 L 276 330 L 213 341 L 184 384 L 142 384 L 143 340 Z'},
  {name:'토끼',emoji:'🐰',level:'도전',path:'M 170 247 C 148 228 137 166 159 131 C 178 97 204 107 216 174 C 222 112 252 77 277 95 C 301 115 279 173 267 196 C 349 201 391 264 363 327 C 341 370 289 385 246 385 C 183 384 122 348 116 307 C 111 277 139 252 170 247 Z'},
  {name:'돛단배',emoji:'⛵',level:'도전',path:'M 92 285 L 236 285 L 236 98 L 376 260 L 259 260 L 259 285 L 409 285 L 359 367 Q 250 406 139 367 Z'}
@@ -345,7 +345,7 @@ window.GameTrace={stop:function(){if(mode==='running'){
 chooseShape(0);
 })();
 </script>
-<script src="/arcade.js?v=11"></script>
+<script src="/arcade.js?v=12"></script>
 <script>
 (function(){
  const frame=document.getElementById('gardenMatchEmbed');
