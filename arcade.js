@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const $all=sel=>Array.from(document.querySelectorAll(sel));
 const scenes={trace:$('tracingScreen'),mole:$('moleScreen'),fire:$('fireScreen'),soccer:$('soccerScreen'),garden:$('gardenScreen')};
 let current='trace';
-const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','20초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','60초 동안 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 여섯 방향 중 골키퍼가 없는 곳을 선택해 5골에 도전해요!'],garden:['리안이·이준이의 <em>풍선 보물파티!</em> 🎈','리안이와 이준이의 사진과 함께 같은 색 풍선을 팡! 선물상자를 열어 보세요!']};
+const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','20초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','60초 동안 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 6→5→5→4→4곳에서 골키퍼를 피해 슛해요!'],garden:['리안이·이준이의 <em>풍선 보물파티!</em> 🎈','리안이와 이준이의 사진과 함께 같은 색 풍선을 팡! 선물상자를 열어 보세요!']};
 let sound=null;
 function beep(freq=500,ms=90,type='sine',volume=.07){
  if($('soundBtn').textContent.includes('꺼짐'))return;
@@ -94,13 +94,11 @@ function resetHole(i){
 function stopMole(){mo.running=false;window.GamePlayLock?.unlock('mole');clearMoleTimers();mo.active.clear();mo.lastWave=[];holes.forEach((_,i)=>resetHole(i));$('moleHammer').classList.remove('swing');$('moleStart').disabled=false;}
 function moleValues(){$('moleScore').textContent=mo.score+'점';$('moleCombo').textContent=String(mo.combo);}
 function waveSize(elapsed){
- if(elapsed<5)return 1;
- if(elapsed<14)return 2;
- if(elapsed<23)return 3;
- if(elapsed<33)return 4;
- if(elapsed<43)return 5;
- if(elapsed<52)return 6;
- return 7;
+ if(elapsed<8)return 1;
+ if(elapsed<20)return 2;
+ if(elapsed<35)return 3;
+ if(elapsed<48)return 4;
+ return 5;
 }
 function spawnWave(now){
  const elapsed=Math.max(0,(60000-(mo.deadline-now))/1000);
@@ -113,9 +111,9 @@ function spawnWave(now){
  for(let j=0;j<n;j++){
   const candidates=fresh.length?fresh:repeat;
   const index=Math.floor(Math.random()*candidates.length),i=candidates.splice(index,1)[0];
-  const p=elapsed<10?.22:elapsed<23?.29:elapsed<43?.36:.43;
+  const p=elapsed<20?.15:elapsed<40?.20:.25;
   const kind=j<Math.min(2,Math.ceil(n/3))?'mole':Math.random()<p?'cat':'mole';
-  const until=now+Math.max(820,1550-elapsed*13);
+  const until=now+Math.max(1200,1850-elapsed*8);
   mo.active.set(i,{kind,until});chosen.push(i);
   const h=holes[i];h.dataset.kind=kind;h.classList.remove('whacked','teasing','sinking');
   h.querySelector('.mole-hit-star').textContent=kind==='cat'?'😝 메롱!':'✨💛✨';
@@ -289,16 +287,15 @@ function startFire(){
 function newFire(now){
  const candidates=windows.map((_,i)=>i).filter(i=>!fi.burned.has(i)&&!fi.flames.has(i)&&!fi.residents.has(i));
  if(!candidates.length)return false;
- const i=candidates[Math.floor(Math.random()*candidates.length)];fi.flames.set(i,now+3000);windowState(i);beep(790,85,'square',.027);return true;
+ const i=candidates[Math.floor(Math.random()*candidates.length)];fi.flames.set(i,now+4500);windowState(i);beep(790,85,'square',.027);return true;
 }
 function burn(i){if(!fi.flames.has(i))return;fi.flames.delete(i);fi.burned.add(i);fi.streak=0;fi.missed++;windowState(i);fireValues();beep(145,175,'sawtooth',.065);}
-// Each home has its own three-second fire deadline; difficulty increases in waves.
+// Each window gives kids 4.5 seconds; difficulty increases gradually.
 function fireDifficulty(elapsed){
- if(elapsed<12)return {level:1,max:1,burst:1,gap:1750,label:'🌱 1단계 · 한 집씩 차근차근'};
- if(elapsed<25)return {level:2,max:2,burst:2,gap:1500,label:'🔥 2단계 · 두 집에 불이 날 수 있어요'};
- if(elapsed<38)return {level:3,max:3,burst:2,gap:1250,label:'🔥🔥 3단계 · 동시에 세 집까지'};
- if(elapsed<50)return {level:4,max:4,burst:3,gap:1050,label:'🚨 4단계 · 네 집까지!'};
- return {level:5,max:5,burst:3,gap:850,label:'🚨🚨 5단계 · 다섯 집까지!'};
+ if(elapsed<15)return {level:1,max:1,burst:1,gap:2250,label:'🌱 1단계 · 한 집씩 연습해요'};
+ if(elapsed<35)return {level:2,max:2,burst:1,gap:1950,label:'🔥 2단계 · 두 집까지 천천히'};
+ if(elapsed<50)return {level:3,max:2,burst:2,gap:1800,label:'🔥 3단계 · 두 집 동시 출동'};
+ return {level:4,max:3,burst:2,gap:1650,label:'🚨 4단계 · 세 집까지 도전'};
 }
 function updateFireDifficulty(d){
  const el=$('fireDifficulty');if(el){el.textContent=d.label;el.dataset.level=String(d.level);}
@@ -332,7 +329,7 @@ function spawnResident(now){
  const candidates=windows.map((_,i)=>i).filter(i=>!fi.burned.has(i)&&!fi.flames.has(i)&&!fi.residents.has(i));
  if(!candidates.length){fi.rescueAt=now+1700;return;}
  const i=candidates[Math.floor(Math.random()*candidates.length)];
- fi.residents.set(i,now+7700);windowState(i);
+ fi.residents.set(i,now+10500);windowState(i);
  fi.rescueAt=now+5900+Math.random()*2700;
  $('fireTip').textContent='🧒 도움 요청! 🚒 소방차를 누르고 사람이 있는 창문을 터치하세요!';
  beep(730,110,'triangle',.07);beep(960,140,'sine',.07);
@@ -467,7 +464,8 @@ function soccerPlanShots(){
  so.stageZones=Array.from({length:5},(_,round)=>{
   const ids=[0,1,2,3,4,5];
   for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]];}
-  return ids.slice(0,6-round).sort((a,b)=>a-b);
+  const openCounts=[6,5,5,4,4];
+  return ids.slice(0,openCounts[round]).sort((a,b)=>a-b);
  });
  so.plans=so.stageZones.map(open=>open[Math.floor(Math.random()*open.length)]);
 }
@@ -504,7 +502,7 @@ function stopSoccer(){
 }
 function startSoccer(){
  stopSoccer();window.GamePlayLock?.lock('soccer','soccerTime',65);so.round=0;so.goals=0;so.spentMs=0;so.results=[];so.saved=false;
- // Each shot has 6, 5, 4, 3, then 2 open directions.
+ // Each shot has 6, 5, 5, 4, then 4 open directions.
  soccerPlanShots();
  $('soccerResult').hidden=true;$('soccerSave').disabled=false;$('soccerSaveMsg').textContent='';
  $('soccerStart').disabled=true;$('soccerStart').textContent='⚽ 5번의 슈팅 진행 중';
