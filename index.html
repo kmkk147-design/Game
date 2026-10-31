@@ -20,7 +20,7 @@
 <body>
 <div class="wrap">
 <header><a href="/" class="brand" aria-label="Game 홈"><span class="brandmark">🖍️</span><span class="brandtext">GAME<small>PLAY & SMILE</small></span></a><button id="soundBtn" type="button" class="sound" aria-label="소리 켜기 또는 끄기">🔊 소리 켜짐</button></header>
-<div class="hero"><div class="eyebrow">🌈 쉬운 모양부터 어려운 모양까지 · 20개</div><h1 id="heroTitle">선 따라 <em>쓱쓱!</em> 🎨</h1><p id="heroDesc">10초 동안 손 떼지 않고 한 번에 그려요! 성공하면 폭죽 선물!</p></div>
+<div class="hero"><div class="eyebrow">🌈 쉬운 그림부터 조금 더 도전적인 그림까지 · 24개</div><h1 id="heroTitle">선 따라 <em>쓱쓱!</em> 🎨</h1><p id="heroDesc">10초 동안 손 떼지 않고 한 번에 그려요! 성공하면 폭죽 선물!</p></div>
 <nav class="game-tabs" role="tablist" aria-label="게임 선택">
  <button type="button" class="game-tab active" id="tab-trace" role="tab" aria-selected="true" aria-controls="tracingScreen" data-game="trace"><span class="tab-emoji">🖍️</span><span>색칠공부</span></button>
  <button type="button" class="game-tab" id="tab-mole" role="tab" aria-selected="false" aria-controls="moleScreen" data-game="mole"><span class="tab-emoji">🐹</span><span>두더지 게임</span></button>
@@ -72,23 +72,27 @@ const shapes=[
  {name:'동그라미',level:'쉬움',emoji:'🟠',path:'M 250 83 C 335 83 409 152 409 238 C 409 325 337 393 250 393 C 162 393 91 325 91 238 C 91 152 165 83 250 83 Z'},
  {name:'세모',level:'쉬움',emoji:'🔺',path:'M 250 82 L 423 381 L 77 381 Z'},
  {name:'네모',level:'쉬움',emoji:'🟦',path:'M 103 90 L 397 90 L 397 384 L 103 384 Z'},
- {name:'집',level:'쉬움',emoji:'🏠',path:'M 93 238 L 250 87 L 407 238 L 369 238 L 369 384 L 131 384 L 131 238 Z'},
+ {name:'집',level:'쉬움',emoji:'🏠',path:'M 93 238 L 184 153 L 184 114 L 220 114 L 220 119 L 250 87 L 407 238 L 369 238 L 369 384 L 131 384 L 131 238 Z'},
  {name:'하트',level:'쉬움',emoji:'💗',path:'M 250 382 C 211 349 88 257 88 175 C 88 101 182 76 250 157 C 318 76 412 101 412 175 C 412 257 289 349 250 382 Z'},
  {name:'별',level:'쉬움',emoji:'⭐',path:'M 250 65 L 304 174 L 425 191 L 337 276 L 357 397 L 250 340 L 143 397 L 163 276 L 75 191 L 196 174 Z'},
  {name:'구름',level:'쉬움',emoji:'☁️',path:'M 133 356 C 78 356 68 286 115 258 C 101 194 157 152 210 177 C 239 113 333 121 358 192 C 427 175 462 239 432 302 C 416 339 389 356 348 356 Z'},
- {name:'아이스크림',emoji:'🍦',level:'쉬움',path:'M 129 216 A 121 121 0 0 1 371 216 L 250 408 Z'},
+ {name:'아이스크림',emoji:'🍦',level:'쉬움',path:'M 126 229 C 111 207 124 182 155 179 C 158 150 180 133 210 138 C 219 99 266 96 284 136 C 318 124 354 153 353 183 C 388 183 399 210 375 232 L 250 407 Z'},
  {name:'다이아',emoji:'💎',level:'보통',path:'M 250 78 L 418 225 L 250 388 L 82 225 Z'},
  {name:'달',emoji:'🌙',level:'보통',path:'M 343 83 C 255 94 208 162 216 238 C 225 331 298 369 377 352 C 330 397 257 405 194 358 C 117 301 120 183 189 114 C 236 67 294 62 343 83 Z'},
- {name:'물고기',emoji:'🐟',level:'보통',path:'M 111 236 L 64 150 L 64 320 L 111 236 C 160 145 293 126 402 240 C 294 353 163 325 111 236 Z'},
+ {name:'물고기',emoji:'🐟',level:'보통',path:'M 110 238 L 64 153 L 64 322 L 110 238 C 149 178 206 163 241 162 L 263 117 L 287 172 C 335 184 368 204 402 239 C 366 281 326 302 278 317 L 249 364 L 223 322 C 163 320 126 293 110 238 Z'},
  {name:'꽃',emoji:'🌸',level:'보통',path:'M 250 144 C 198 66 155 132 185 181 C 109 154 103 243 168 250 C 100 307 157 380 217 336 C 239 406 325 376 318 316 C 402 344 429 264 360 229 C 405 160 338 112 292 160 C 282 94 226 90 250 144 Z'},
  {name:'사과',emoji:'🍎',level:'보통',path:'M 254 137 C 235 91 276 69 295 75 C 290 113 259 125 254 137 C 195 86 98 148 107 244 C 113 341 173 405 248 375 C 327 408 391 343 393 249 C 396 158 325 108 254 137 Z'},
  {name:'나무',emoji:'🌲',level:'보통',path:'M 250 65 L 181 169 L 207 169 L 131 274 L 198 274 L 150 345 L 220 345 L 220 407 L 280 407 L 280 345 L 350 345 L 302 274 L 369 274 L 293 169 L 319 169 Z'},
- {name:'고양이',emoji:'🐱',level:'도전',path:'M 141 246 L 128 99 L 214 160 Q 250 148 284 160 L 372 99 L 359 246 C 422 385 83 397 141 246 Z'},
+ {name:'우산',emoji:'☂️',level:'보통',path:'M 72 218 C 95 100 402 101 427 218 Q 385 253 343 218 Q 299 255 263 218 L 263 359 Q 264 401 219 391 L 219 367 Q 240 386 241 359 L 241 218 Q 194 252 151 218 Q 110 254 72 218 Z'},
+ {name:'선물상자',emoji:'🎁',level:'보통',path:'M 114 160 L 215 160 Q 182 140 180 111 Q 177 82 204 82 Q 230 82 250 146 Q 270 82 296 82 Q 322 82 320 111 Q 317 140 285 160 L 389 160 L 389 380 L 112 380 Z'},
+ {name:'고양이',emoji:'🐱',level:'도전',path:'M 131 246 L 122 101 L 209 158 Q 250 146 290 158 L 378 101 L 368 246 Q 401 262 382 292 L 396 318 Q 380 357 331 373 Q 249 405 170 373 Q 116 359 103 318 L 120 291 Q 101 261 131 246 Z'},
  {name:'나비',emoji:'🦋',level:'도전',path:'M 250 215 C 130 55 66 143 125 236 C 57 301 130 402 250 278 C 370 402 442 301 375 236 C 434 143 370 55 250 215 Z'},
  {name:'자동차',emoji:'🚗',level:'도전',path:'M 80 244 L 124 244 L 171 155 L 329 155 L 379 244 L 417 244 L 417 337 L 353 337 L 322 377 L 277 337 L 218 337 L 187 377 L 142 337 L 80 337 Z'},
  {name:'로켓',emoji:'🚀',level:'도전',path:'M 250 53 C 305 112 332 164 323 245 L 386 316 L 367 368 L 304 322 L 278 391 L 250 367 L 222 391 L 196 322 L 133 368 L 114 316 L 177 245 C 168 164 195 112 250 53 Z'},
  {name:'왕관',emoji:'👑',level:'도전',path:'M 104 160 L 165 237 L 218 130 L 250 233 L 296 120 L 349 236 L 414 157 L 381 354 L 121 354 Z'},
- {name:'공룡',emoji:'🦕',level:'도전',path:'M 96 300 L 156 265 L 148 198 L 202 210 L 210 135 L 257 159 L 306 109 L 315 178 L 370 183 L 387 244 L 435 248 L 415 299 L 356 320 L 336 383 L 291 383 L 276 330 L 213 341 L 184 384 L 142 384 L 143 340 Z'}
+ {name:'공룡',emoji:'🦕',level:'도전',path:'M 96 300 L 156 265 L 148 198 L 202 210 L 210 135 L 257 159 L 306 109 L 315 178 L 370 183 L 387 244 L 435 248 L 415 299 L 356 320 L 336 383 L 291 383 L 276 330 L 213 341 L 184 384 L 142 384 L 143 340 Z'},
+ {name:'토끼',emoji:'🐰',level:'도전',path:'M 170 247 C 148 228 137 166 159 131 C 178 97 204 107 216 174 C 222 112 252 77 277 95 C 301 115 279 173 267 196 C 349 201 391 264 363 327 C 341 370 289 385 246 385 C 183 384 122 348 116 307 C 111 277 139 252 170 247 Z'},
+ {name:'돛단배',emoji:'⛵',level:'도전',path:'M 92 285 L 236 285 L 236 98 L 376 260 L 259 260 L 259 285 L 409 285 L 359 367 Q 250 406 139 367 Z'}
 ];
 let selected=0,mode='ready',deadline=0,lastSecond=10,interval=0,strokes=[],activeStroke=null,activePointer=null,targetSamples=[],targetGrid=new Map(),covered=null,coveredCount=0,totalDrawn=0,onLineDrawn=0,targetLength=1,score=0,minorOff=0,midOff=0,majorOff=0,scoreBreakdown={missing:100,minor:0,medium:0,major:0,repeated:0},audioCtx=null,soundOn=true;
 const svg=$('drawSvg'),ink=$('ink'),guide=$('guideDash'),base=$('guideBase');
