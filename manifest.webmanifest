@@ -1,0 +1,19 @@
+{
+  "name": "리안이와 이준이의 GAME",
+  "short_name": "리안·이준 GAME",
+  "description": "리안이와 이준이의 즐거운 미니게임 5종",
+  "lang": "ko",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fff8ee",
+  "theme_color": "#fff8ee",
+  "icons": [
+    {
+      "src": "/icons/game-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
