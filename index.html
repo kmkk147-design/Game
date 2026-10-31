@@ -46,6 +46,7 @@
 <section id="fireScreen" class="arcade-screen fire-screen" role="tabpanel" aria-labelledby="tab-fire" hidden>
  <div class="arcade-intro"><div><span class="arcade-tag fire-tag">🚨 FIRE STATION · 60 SEC</span><h2>🚒 출동! 꼬마 소방관</h2><p>불난 창문을 3초 안에 눌러 불을 꺼 주세요!</p></div><span class="arcade-bubble" aria-hidden="true">🧑‍🚒</span></div>
  <div class="arcade-stats fire-stats"><div><small>⏳ 남은 시간</small><strong id="fireTime">60초</strong></div><div><small>💧 불 끈 횟수</small><strong id="fireHits">0</strong></div><div><small>🏆 점수</small><strong id="fireScore">0점</strong></div><div><small>🏠 탄 집</small><strong id="fireBurns">0</strong></div></div>
+ <div class="fire-difficulty" id="fireDifficulty" role="status" aria-live="polite">🌱 1단계 · 한 곳씩 불이 나요</div>
  <div class="fire-scene" id="fireScene">
   <div class="fire-sky"><span>☀️</span><span>☁️</span><span>☁️</span></div>
   <div class="fire-apartment"><div class="fire-roof"><span>🏢 햇살 아파트</span><span class="roof-light">🚨</span></div><div class="fire-windows" id="fireWindows" aria-label="아파트 창문 25개"></div><div class="fire-lobby">🚪 <span>햇살 아파트 · 안전 제일!</span> 🌼</div></div>
@@ -141,31 +142,30 @@ function scoreSegment(a,b){
  const steps=Math.max(1,Math.ceil(len/4));let weighted=0;
  for(let i=0;i<steps;i++){
   const t=(i+.5)/steps,d=nearestGuideDistance(a.x+dx*t,a.y+dy*t);
-  // Child-sized guidance: within 10 SVG units is perfect, 35 units is fully off target.
-  weighted+=d<=10?1:d>=36?0:(36-d)/26;
+  // Calibrated for a child's fingertip: 7 SVG units full credit, 32 zero.
+  weighted+=d<=7?1:d>=32?0:(32-d)/25;
  }
  onLineDrawn+=len*weighted/steps;
- // Cover each part of the guideline only once. Touching it once never counts as a complete picture.
- const radius=48;
+ // Count each target section once, using limited distance tolerance.
+ const radius=30;
  const x0=Math.floor((Math.min(a.x,b.x)-radius)/32),x1=Math.floor((Math.max(a.x,b.x)+radius)/32);
  const y0=Math.floor((Math.min(a.y,b.y)-radius)/32),y1=Math.floor((Math.max(a.y,b.y)+radius)/32);
  for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
   const items=targetGrid.get(x+','+y);if(!items)continue;
   for(const idx of items){
    const d=Math.sqrt(distanceToSegmentSq(targetSamples[idx],a,b));
-   const value=d<=12?1:d>=radius?0:(radius-d)/(radius-12);
+   const value=d<=7?1:d>=radius?0:(radius-d)/(radius-7);
    if(value>covered[idx]){coveredCount+=value-covered[idx];covered[idx]=value;}
   }
  }
 }
 function calculateScore(){
  if(!covered||!targetSamples.length||totalDrawn<1){updateScore(0);return 0;}
- const coverage=coveredCount/targetSamples.length;
- const precision=Math.min(1,onLineDrawn/totalDrawn);
- // A forgiving yet meaningful score: missing sections and stray pen strokes both count.
- // An extra-long scribble remains penalized even if it crosses the outline repeatedly.
- const extraLengthPenalty=Math.min(1,Math.pow(targetLength*1.28/totalDrawn,1.35));
- const value=Math.max(0,Math.min(100,Math.round(100*coverage*(.56+.44*precision)*extraLengthPenalty)));
+ const coverage=Math.max(0,Math.min(1,coveredCount/targetSamples.length));
+ const precision=Math.max(0,Math.min(1,onLineDrawn/totalDrawn));
+ // Partly completed / offset outlines cannot score high. Extra scribbling penalized.
+ const inkPenalty=Math.min(1,Math.pow(targetLength*1.12/totalDrawn,1.6));
+ const value=Math.max(0,Math.min(100,Math.round(100*coverage*Math.pow(precision,.55)*inkPenalty)));
  updateScore(value);return value;
 }
 function appendPoint(p){
@@ -173,7 +173,7 @@ function appendPoint(p){
  const last=activeStroke.last,dist=Math.hypot(p.x-last.x,p.y-last.y);
  if(dist<2)return false;
  // Ignore abnormal jumps from OS gestures/coalesced pointer events rather than drawing a long stray line.
- if(dist>135){activeStroke.d+=' M '+pathCoord(p);activeStroke.last=p;return true;}
+ if(dist>135){totalDrawn+=dist;activeStroke.d+=' M '+pathCoord(p);activeStroke.last=p;return true;}
  activeStroke.d+=' L '+pathCoord(p);
  scoreSegment(last,p);activeStroke.last=p;return true;
 }
