@@ -93,16 +93,24 @@ function resetHole(i){
 }
 function stopMole(){mo.running=false;clearMoleTimers();mo.active.clear();mo.lastWave=[];holes.forEach((_,i)=>resetHole(i));$('moleHammer').classList.remove('swing');$('moleStart').disabled=false;}
 function moleValues(){$('moleScore').textContent=mo.score+'점';$('moleCombo').textContent=String(mo.combo);}
-function waveSize(elapsed){if(elapsed<14)return 1;if(elapsed<34)return 2;return 3;}
+function waveSize(elapsed){
+ if(elapsed<5)return 1;
+ if(elapsed<14)return 2;
+ if(elapsed<23)return 3;
+ if(elapsed<33)return 4;
+ if(elapsed<43)return 5;
+ if(elapsed<52)return 6;
+ return 7;
+}
 function spawnWave(now){
  const elapsed=Math.max(0,(60000-(mo.deadline-now))/1000);
  const candidates=holes.map((_,i)=>i).filter(i=>!mo.active.has(i)&&!mo.lastWave.includes(i));
  const n=Math.min(waveSize(elapsed),candidates.length),chosen=[];
  for(let j=0;j<n;j++){
   const index=Math.floor(Math.random()*candidates.length),i=candidates.splice(index,1)[0];
-  const p=elapsed<16?.22:elapsed<40?.32:.39;
-  const kind=j===0&&n>1?'mole':Math.random()<p?'cat':'mole';
-  const until=now+Math.max(1050,1600-elapsed*12);
+  const p=elapsed<10?.22:elapsed<23?.29:elapsed<43?.36:.43;
+  const kind=j<Math.min(2,Math.ceil(n/3))?'mole':Math.random()<p?'cat':'mole';
+  const until=now+Math.max(820,1550-elapsed*13);
   mo.active.set(i,{kind,until});chosen.push(i);
   const h=holes[i];h.dataset.kind=kind;h.classList.remove('whacked','teasing','sinking');
   h.querySelector('.mole-hit-star').textContent=kind==='cat'?'😝 메롱!':'✨💛✨';
@@ -131,7 +139,7 @@ function tickMole(){
   h.setAttribute('aria-label',(i+1)+'번 빈 구멍');
   moTimer(()=>h.classList.remove('sinking'),300);
  }
- if(!mo.active.size&&now>=mo.nextAt){spawnWave(now);mo.nextAt=now+440;}
+ if(!mo.active.size&&now>=mo.nextAt){spawnWave(now);mo.nextAt=now+(now>mo.deadline-15000?180:320);}
 }
 function swingHammer(evt){
  const arena=$('moleArena'),pos=arena.getBoundingClientRect(),h=$('moleHammer');
@@ -164,7 +172,7 @@ function hitMole(i,evt){
   beep(380,95,'triangle',.095);moTimer(()=>beep(620,100,'sine',.065),70);
   moTimer(()=>h.classList.remove('whacked'),420);
  }
- if(!mo.active.size)mo.nextAt=Math.max(mo.nextAt,now+420);
+ if(!mo.active.size)mo.nextAt=Math.max(mo.nextAt,now+(now>mo.deadline-15000?150:270));
 }
 function finishMole(){
  if(!mo.running)return;stopMole();$('moleTime').textContent='0초';$('moleTip').textContent='60초 도전 완료!';
