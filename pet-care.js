@@ -122,32 +122,63 @@ function petEyes(p,mood,uid){
  (watery?'<path d="M64 88 L91 95 M128 95 L155 88" stroke="#916777" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M91 128 Q97 144 88 147" fill="#a8d7ff" opacity=".85"/><path d="M152 128 Q159 144 150 147" fill="#a8d7ff" opacity=".85"/>':'');
 }
 function petSvg(p,scope,adult=false,mood='normal'){
- const uid='deluxe-'+scope+'-'+p.id,fur='url(#'+uid+'fur)',sh=p.shade;
+ const uid='plush-'+scope+'-'+p.id;
  const dark=['panda','penguin'].includes(p.style);
- const bodyColor=dark?p.shade:p.tone;
- const arms=p.style==='penguin'?'<path d="M68 178 Q37 155 34 198 Q39 217 59 213 L82 197Z M151 177 Q181 155 187 198 Q183 216 161 211 L138 198Z" fill="#58739b" stroke="#3e5680" stroke-width="3"/>':
- '<ellipse cx="60" cy="193" rx="17" ry="29" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="2.8" transform="rotate(-30 60 193)"/><ellipse cx="159" cy="193" rx="17" ry="29" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="2.8" transform="rotate(30 159 193)"/>';
- return '<svg class="deluxe-pet-svg" viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+p.type+' '+MOOD_LABELS[mood]+'">'+
- '<defs><radialGradient id="'+uid+'fur" cx=".31" cy=".16" r=".93"><stop stop-color="'+p.inner+'"/><stop offset=".55" stop-color="'+p.tone+'"/><stop offset="1" stop-color="'+p.shade+'"/></radialGradient>'+
- '<linearGradient id="'+uid+'eye" x1=".1" y1=".05" x2=".9" y2="1"><stop stop-color="#695072"/><stop offset=".45" stop-color="#38314c"/><stop offset="1" stop-color="#211b3a"/></linearGradient>'+
- '<radialGradient id="'+uid+'blush"><stop stop-color="#f58fa8" stop-opacity=".69"/><stop offset="1" stop-color="#ffafc4" stop-opacity="0"/></radialGradient>'+
- '<linearGradient id="'+uid+'body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="'+p.inner+'"/><stop offset="1" stop-color="'+p.tone+'"/></linearGradient></defs>'+
- '<ellipse cx="110" cy="242" rx="58" ry="9" fill="#75636f" opacity=".15"/>'+petTail(p)+
- '<ellipse cx="81" cy="226" rx="20" ry="12" fill="'+bodyColor+'" stroke="'+sh+'" stroke-width="2.5"/><ellipse cx="140" cy="226" rx="20" ry="12" fill="'+bodyColor+'" stroke="'+sh+'" stroke-width="2.5"/>'+
- '<ellipse cx="110" cy="185" rx="54" ry="51" fill="url(#'+uid+'body)" stroke="'+sh+'" stroke-width="3"/>'+
- '<ellipse cx="110" cy="189" rx="37" ry="35" fill="'+(dark?'#fffcf8':p.inner)+'" opacity=".85"/>'+arms+
- petEars(p,fur)+
- '<ellipse cx="110" cy="112" rx="85" ry="80" fill="'+fur+'" stroke="'+sh+'" stroke-width="3.5"/>'+
- '<path d="M53 76 Q76 48 103 47" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="6" stroke-linecap="round"/>'+
+ const color=dark?'#f9f8f7':p.tone;
+ const shade=p.shade,inner=p.inner;
+ const eyesClosed=['sleep','sleepy'].includes(mood);
+ const eyesHappy=['happy','excited','bath','eating'].includes(mood);
+ const sad=['hungry','sad','messy'].includes(mood);
+ const face=eyesClosed?'<g fill="none" stroke="#503a43" stroke-width="5.2" stroke-linecap="round"><path d="M57 119Q76 132 94 117 M126 117Q144 132 163 119"/></g>':eyesHappy?'<g fill="none" stroke="#503b48" stroke-width="5.3" stroke-linecap="round"><path d="M57 119Q76 92 94 118 M126 118Q145 92 163 119"/></g>':
+ '<g class="eye-open"><ellipse cx="76" cy="116" rx="24" ry="29" fill="#fffefa"/><ellipse cx="144" cy="116" rx="24" ry="29" fill="#fffefa"/>'+
+ '<ellipse cx="77" cy="'+(sad?121:116)+'" rx="20.5" ry="25.5" fill="url(#'+uid+'iris)"/><ellipse cx="143" cy="'+(sad?121:116)+'" rx="20.5" ry="25.5" fill="url(#'+uid+'iris)"/>'+
+ '<ellipse cx="68" cy="105" rx="7.2" ry="9.1" fill="#fff"/><ellipse cx="136" cy="105" rx="7.2" ry="9.1" fill="#fff"/><circle cx="85" cy="127" r="4.5" fill="#fff"/><circle cx="151" cy="127" r="4.5" fill="#fff"/><circle cx="88" cy="101" r="2.3" fill="#fffbe8"/><circle cx="155" cy="101" r="2.3" fill="#fffbe8"/></g>'+
+ '<g class="eye-close" fill="none" stroke="#503a43" stroke-width="5"><path d="M56 118Q76 130 96 118 M124 118Q144 130 164 118"/></g>';
+ const mouth=eyesClosed?'<ellipse cx="110" cy="162" rx="6.5" ry="8" fill="#985b62"/>':sad?'<path d="M98 163Q110 151 122 163" fill="none" stroke="#9a6565" stroke-width="3.5" stroke-linecap="round"/>':(p.style==='chick'||p.style==='penguin')?
+ '<path d="M99 155Q110 150 121 155L110 171Z" fill="url(#'+uid+'beak)"/><path d="M102 156Q110 159 118 156" fill="none" stroke="#ffe8a0" stroke-width="2"/>':
+ '<ellipse cx="110" cy="158" rx="9" ry="6" fill="#714b45"/><path d="M101 166Q110 181 120 166" fill="#823d45"/><path d="M105 174Q110 170 116 174" fill="none" stroke="#fa8995" stroke-width="5" stroke-linecap="round"/>';
+ const tail=petTail(p);
+ const hood=(dark?'#9edcca':'#a2e8cc');
+ return '<svg class="deluxe-pet-svg premium-pet-svg" viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+p.type+' '+MOOD_LABELS[mood]+'">'+
+ '<defs>'+
+ '<radialGradient id="'+uid+'fur" cx=".35" cy=".14" r=".91"><stop stop-color="'+inner+'"/><stop offset=".38" stop-color="'+color+'"/><stop offset=".78" stop-color="'+p.tone+'"/><stop offset="1" stop-color="'+shade+'"/></radialGradient>'+
+ '<radialGradient id="'+uid+'iris" cx=".38" cy=".32" r=".83"><stop stop-color="#a97752"/><stop offset=".36" stop-color="#633e35"/><stop offset=".83" stop-color="#2c2236"/><stop offset="1" stop-color="#1d1829"/></radialGradient>'+
+ '<radialGradient id="'+uid+'blush"><stop stop-color="#f28c9c" stop-opacity=".72"/><stop offset="1" stop-color="#f58ea5" stop-opacity="0"/></radialGradient>'+
+ '<radialGradient id="'+uid+'hood" cx=".32" cy=".1" r=".99"><stop stop-color="#c4f9df"/><stop offset=".55" stop-color="'+hood+'"/><stop offset="1" stop-color="#62b59b"/></radialGradient>'+
+ '<radialGradient id="'+uid+'bib" cx=".32" cy=".1" r="1"><stop stop-color="#ffe099"/><stop offset=".37" stop-color="#ffbc55"/><stop offset=".75" stop-color="#f79836"/><stop offset="1" stop-color="#c8772f"/></radialGradient>'+
+ '<radialGradient id="'+uid+'muzzle" cx=".38" cy=".18" r=".86"><stop stop-color="#fffefa"/><stop offset=".7" stop-color="#fff1df"/><stop offset="1" stop-color="#e8cdb8"/></radialGradient>'+
+ '<linearGradient id="'+uid+'beak" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#ffe69c"/><stop offset="1" stop-color="#f49b48"/></linearGradient>'+
+ '<filter id="'+uid+'shadow" x="-25%" y="-25%" width="150%" height="160%"><feGaussianBlur stdDeviation="2.3"/></filter>'+
+ '<filter id="'+uid+'furNoise" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".12" numOctaves="2" seed="8" result="noise"/><feColorMatrix in="noise" type="saturate" values="0" result="gray"/><feComponentTransfer in="gray"><feFuncA type="linear" slope=".08"/></feComponentTransfer></filter>'+
+ '</defs>'+
+ '<ellipse cx="110" cy="242" rx="53" ry="7.5" fill="#6d5a55" opacity=".14"/>'+tail+
+ '<g><ellipse cx="80" cy="228" rx="22" ry="13" fill="'+shade+'" opacity=".92"/><ellipse cx="141" cy="228" rx="22" ry="13" fill="'+shade+'" opacity=".92"/>'+
+ '<ellipse cx="110" cy="190" rx="54" ry="50" fill="url(#'+uid+'hood)"/><ellipse cx="110" cy="164" rx="45" ry="25" fill="#77c8a7"/>'+
+ '<path d="M62 179Q36 167 37 197Q40 216 62 218Q76 212 77 201" fill="url(#'+uid+'hood)" stroke="#78bfa7" stroke-width="1.2"/>'+
+ '<path d="M158 179Q184 167 183 197Q180 216 158 218Q144 212 143 201" fill="url(#'+uid+'hood)" stroke="#78bfa7" stroke-width="1.2"/>'+
+ '<ellipse cx="52" cy="207" rx="13.6" ry="14.6" fill="'+shade+'"/><ellipse cx="168" cy="207" rx="13.6" ry="14.6" fill="'+shade+'"/>'+
+ '<ellipse cx="52" cy="205" rx="6.5" ry="6" fill="#f7adab"/><ellipse cx="168" cy="205" rx="6.5" ry="6" fill="#f7adab"/>'+
+ '<path d="M74 183L146 183L149 224Q110 241 71 224Z" fill="url(#'+uid+'bib)" stroke="#f0a34d" stroke-width="2"/>'+
+ '<path d="M78 170L86 208 M142 170L134 208" stroke="#ffbd63" stroke-width="18" stroke-linecap="round"/>'+
+ '<path d="M78 170L86 208 M142 170L134 208" stroke="#ffe09a" stroke-opacity=".38" stroke-width="4" stroke-linecap="round"/>'+
+ '<circle cx="86" cy="201" r="8" fill="#ffe28e" stroke="#edaa41" stroke-width="2"/><circle cx="134" cy="201" r="8" fill="#ffe28e" stroke="#edaa41" stroke-width="2"/>'+
+ '<path d="M110 201L116 213L130 215L120 225L123 238L110 231L97 238L100 225L90 215L104 213Z" fill="#ffe47d" stroke="#edb750" stroke-width="2" transform="translate(0 -5) scale(1 .94)"/>'+
+ '</g>'+
+ '<g filter="url(#'+uid+'shadow)" opacity=".32"><ellipse cx="110" cy="114" rx="87" ry="83" fill="'+shade+'"/></g>'+
+ petEars(p,'url(#'+uid+'fur)')+
+ '<ellipse cx="110" cy="112" rx="87" ry="83" fill="url(#'+uid+'fur)"/>'+
+ '<ellipse cx="110" cy="112" rx="86" ry="82" fill="#fff" filter="url(#'+uid+'furNoise)" opacity=".8" pointer-events="none"/>'+
+ '<path d="M42 92Q49 49 99 43" fill="none" stroke="#fff" stroke-opacity=".47" stroke-width="8" stroke-linecap="round"/>'+
  petMarkings(p)+
- '<ellipse cx="57" cy="142" rx="25" ry="18" fill="url(#'+uid+'blush)"/><ellipse cx="163" cy="142" rx="25" ry="18" fill="url(#'+uid+'blush)"/>'+
- petEyes(p,mood,uid)+
- '<ellipse cx="51" cy="148" rx="5" ry="2" fill="#fff" opacity=".57"/><ellipse cx="169" cy="148" rx="5" ry="2" fill="#fff" opacity=".57"/>'+
- petMouth(p,mood)+
- (p.style==='kitten'?'<path d="M68 146 L43 137 M68 155 L44 160 M152 146 L178 137 M152 155 L177 160" stroke="#ac7d93" stroke-width="2.5" stroke-linecap="round" opacity=".82"/>':'')+
- (p.style==='unicorn'?'<path d="M48 107 L52 97 L58 106 L68 110 L58 115 L54 125 L50 115 L40 110Z" fill="#fff3b2" opacity=".95"/>':'')+
- (mood==='bath'?'<circle cx="29" cy="103" r="11" fill="#fff" fill-opacity=".7" stroke="#cce9ff"/><circle cx="190" cy="155" r="8" fill="#fff" fill-opacity=".75" stroke="#cce9ff"/>':'')+
- (adult?'<path d="M52 78 L59 67 L65 79 M152 74 L160 62 L164 77" stroke="#fff" stroke-width="3" fill="none" opacity=".62"/>':'')+'</svg>';
+ '<ellipse cx="68" cy="146" rx="30" ry="21" fill="url(#'+uid+'blush)"/><ellipse cx="153" cy="146" rx="30" ry="21" fill="url(#'+uid+'blush)"/>'+
+ '<ellipse cx="110" cy="151" rx="31" ry="22" fill="url(#'+uid+'muzzle)" opacity=".90"/>'+
+ face+
+ '<ellipse cx="56" cy="146" rx="5" ry="2.2" fill="#fff" opacity=".65"/><ellipse cx="166" cy="146" rx="5" ry="2.2" fill="#fff" opacity=".65"/>'+
+ mouth+
+ (p.style==='kitten'?'<path d="M68 155L46 149M68 162L48 166M152 155L174 149M152 162L172 166" fill="none" stroke="#ac8590" stroke-width="2.3" stroke-linecap="round"/>':'')+
+ (adult?'<circle cx="185" cy="64" r="5" fill="#fff2b7"/><path d="M185 55V49M185 73V79M176 64H170M194 64H200" stroke="#ffe9a9" stroke-width="3" stroke-linecap="round"/>':'')+
+ (mood==='bath'?'<circle cx="37" cy="84" r="8" stroke="#d8f5ff" stroke-width="2" fill="#fff" fill-opacity=".73"/><circle cx="186" cy="135" r="13" stroke="#d8f5ff" stroke-width="2" fill="#fff" fill-opacity=".65"/>':'')+
+ '</svg>';
 }
 function gainXp(p,n){p.xp+=n;let levels=0;while(p.xp>=100&&p.level<99){p.xp-=100;p.level++;p.coins+=15;levels++;}if(levels){note('✨ '+PETS.find(x=>x.id===id).name+' 레벨 '+p.level+'! 성장했어요! 🏆');sparkles('✨',9);playTone(930)}}
 function formatPercent(x){return Math.round(clamp(x))+'%'}
