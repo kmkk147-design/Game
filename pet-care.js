@@ -47,83 +47,107 @@ function recover(p){
 function note(message){$('petMessage').textContent=message;$('petThought').textContent=message.length>19?message.slice(0,19)+'…':message}
 function playTone(freq=620,duration=.12){if(!sound)return;try{audio??=new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume().catch(()=>{});const t=audio.currentTime,o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(freq*1.12,t+duration);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.065,t+.018);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+duration+.02)}catch(_){}}
 function colorGrad(p,uid){return'<defs><radialGradient id="'+uid+'fur" cx=".3" cy=".15" r=".95"><stop stop-color="'+p.inner+'"/><stop offset=".52" stop-color="'+p.tone+'"/><stop offset="1" stop-color="'+p.shade+'"/></radialGradient><linearGradient id="'+uid+'shine" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffffff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>'}
-function ears(p){const f='fill="url(#GRADfur)" stroke="'+p.shade+'" stroke-width="2.5"';
+
+/* LIL' FRIENDS DELUXE: original vector characters drawn from individual shapes.
+   Large emotive heads, tiny plush bodies, specular multi-layer eyes and six moods. */
+function petMood(p){
+ if(p.energy<24)return 'sleepy';
+ if(p.food<25)return 'hungry';
+ if(p.clean<24||p.poops>=3)return 'messy';
+ if(p.happy<25)return 'sad';
+ return 'normal';
+}
+const MOOD_LABELS={normal:'기분 좋아요 ♡',happy:'행복해요! ♥',excited:'신나요! ✨',eating:'냠냠 맛있어요',sleepy:'졸려요 Zzz',hungry:'배가 고파요 ㅠㅠ',sad:'같이 놀아줘요',messy:'씻고 싶어요!',bath:'반짝반짝 깨끗!',sleep:'꿈나라 여행 중'};
+function petEars(p,fur){
+ const sh=p.shade,inner=p.inner;
  switch(p.style){
- case'chick':return'<path d="M89 58 Q79 37 96 32 Q92 22 108 30 Q117 20 119 37" fill="'+p.tone+'" stroke="'+p.shade+'" stroke-width="3"/>';
- case'puppy':return'<path d="M64 77 Q26 45 23 109 Q27 139 61 119Z M146 77 Q182 43 185 111 Q177 142 150 117Z" fill="'+p.shade+'" stroke="#a77964" stroke-width="3"/>';
- case'kitten':return'<path d="M49 83 L45 26 Q46 17 55 23 L91 56 M121 56 L155 23 Q163 17 165 33 L160 87" '+f+'/><path d="M52 35 L62 75 L81 58Z M147 35 L134 75 L124 58Z" fill="#f2a5bb"/>';
- case'bunny':return'<ellipse cx="73" cy="34" rx="19" ry="53" fill="'+p.tone+'" stroke="'+p.shade+'" stroke-width="3" transform="rotate(-15 73 34)"/><ellipse cx="138" cy="34" rx="19" ry="53" fill="'+p.tone+'" stroke="'+p.shade+'" stroke-width="3" transform="rotate(15 138 34)"/><ellipse cx="73" cy="34" rx="9" ry="39" fill="#eeb5d5" transform="rotate(-15 73 34)"/><ellipse cx="138" cy="34" rx="9" ry="39" fill="#eeb5d5" transform="rotate(15 138 34)"/>';
- case'fox':return'<path d="M40 83 L31 16 L91 59 M120 60 L183 16 L170 87" '+f+'/><path d="M43 73 L42 37 L78 63Z M132 63 L171 37 L160 75Z" fill="#ffded3"/>';
- case'panda':return'<circle cx="58" cy="68" r="27" fill="#3a3b51"/><circle cx="153" cy="68" r="27" fill="#3a3b51"/>';
- case'dino':return'<path d="M40 91 L24 73 L37 58 L24 44 L54 45 L64 27 L87 46 L103 22 L116 45 L139 36 L147 63 L172 60 L166 95" fill="#63b9a0" stroke="#4d967e" stroke-width="3"/>';
- case'penguin':return'<ellipse cx="61" cy="69" rx="19" ry="25" fill="#5f769e"/><ellipse cx="150" cy="69" rx="19" ry="25" fill="#5f769e"/>';
- case'hamster':return'<circle cx="54" cy="66" r="26" '+f+'/><circle cx="158" cy="66" r="26" '+f+'/><circle cx="54" cy="66" r="16" fill="#eaa9a3"/><circle cx="158" cy="66" r="16" fill="#eaa9a3"/>';
- case'unicorn':return'<path d="M98 56 L108 5 L120 55Z" fill="#ffd478" stroke="#d19b51" stroke-width="3"/><path d="M58 73 L49 29 L83 56 M128 57 L163 30 L154 77" '+f+'/><path d="M57 45 L69 69 L78 57Z M147 46 L136 69 L128 57Z" fill="#f5a7ce"/><path d="M85 43 Q53 42 56 78 Q78 62 94 64 Q112 53 133 67" fill="#ffb2c6" stroke="#d89cce" stroke-width="2"/>';
- default:return'';
+ case 'chick':return '<path d="M93 44 Q76 22 93 17 Q105 13 111 29 Q120 12 135 22 Q146 32 123 48" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="3" stroke-linejoin="round"/><path d="M104 31 Q111 18 122 28" stroke="#fff7bb" fill="none" stroke-width="5" stroke-linecap="round"/>';
+ case 'puppy':return '<path d="M55 72 Q17 37 14 87 Q12 128 48 136 Q64 109 68 78Z M166 71 Q208 40 209 92 Q210 129 172 135 Q157 103 157 79Z" fill="'+sh+'" stroke="#92644e" stroke-width="3"/><path d="M31 73 Q25 95 38 109 M190 72 Q198 96 186 110" stroke="#ffe3c9" stroke-width="8" opacity=".8" fill="none" stroke-linecap="round"/>';
+ case 'kitten':return '<path d="M45 80 L32 16 Q31 8 44 14 L96 49 M128 48 L177 14 Q191 9 188 25 L177 85" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="4" stroke-linejoin="round"/><path d="M47 67 L43 32 L79 54Z M170 66 L178 32 L141 53Z" fill="#ef9bb6"/><path d="M48 58 L51 45 M172 57 L169 45" stroke="#ffeef6" stroke-width="3" fill="none"/>';
+ case 'bunny':return '<path d="M66 82 Q33 14 58 2 Q87 -10 91 75Z M128 76 Q128 -7 157 2 Q184 20 150 87Z" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="3.5"/><path d="M72 69 Q48 11 62 18 Q77 20 82 73Z M137 71 Q142 15 155 19 Q166 26 147 74Z" fill="#f5a9ce"/>';
+ case 'fox':return '<path d="M39 86 L24 9 Q25 0 38 10 L90 56 M127 55 L181 9 Q194 0 195 13 L180 89" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="3.5"/><path d="M43 68 L38 24 L77 56Z M177 68 L182 24 L143 56Z" fill="#ffe4c8"/>';
+ case 'panda':return '<circle cx="49" cy="69" r="30" fill="#434052" stroke="#fff" stroke-width="3"/><circle cx="171" cy="69" r="30" fill="#434052" stroke="#fff" stroke-width="3"/><circle cx="43" cy="59" r="9" fill="#726e7e" opacity=".5"/>';
+ case 'dino':return '<path d="M35 107 L16 81 L33 71 L18 53 L46 49 L51 25 L80 41 L96 13 L115 38 L138 25 L150 50 L179 45 L178 81" fill="#69c8a8" stroke="#4eae90" stroke-width="3.5" stroke-linejoin="round"/><path d="M29 74 L40 78 L43 58 M95 38 L99 26 L110 41" stroke="#c9ffb9" fill="none" stroke-width="4" stroke-linecap="round"/>';
+ case 'penguin':return '<ellipse cx="52" cy="72" rx="22" ry="30" fill="#5a719d" transform="rotate(-24 52 72)"/><ellipse cx="168" cy="72" rx="22" ry="30" fill="#5a719d" transform="rotate(24 168 72)"/>';
+ case 'hamster':return '<circle cx="51" cy="69" r="33" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="3"/><circle cx="168" cy="69" r="33" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="3"/><circle cx="51" cy="69" r="22" fill="#e79aa9"/><circle cx="168" cy="69" r="22" fill="#e79aa9"/>';
+ case 'unicorn':return '<path d="M99 58 L108 2 Q110 -2 115 4 L126 55Z" fill="#ffe18a" stroke="#d99e59" stroke-width="3"/><path d="M103 29 L121 38 M106 18 L119 25" stroke="#fff6ca" stroke-width="3"/><path d="M47 77 L37 25 L91 54 M130 55 L182 25 L174 81" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="3.5"/><path d="M49 67 L48 39 L79 55Z M171 67 L173 39 L141 55Z" fill="#f4a5ca"/><path d="M61 75 Q45 40 79 35 Q89 15 105 34 Q132 18 151 43 Q175 43 163 68 Q143 54 127 73 Q103 56 87 82Z" fill="#f2a7d3" stroke="#da8fb8" stroke-width="2.5"/><path d="M64 62 Q82 32 99 49 M112 45 Q133 35 146 55" stroke="#b6b8ee" fill="none" stroke-width="8" stroke-linecap="round"/>';
+ default:return '';
  }}
-function faceExtras(p){
+function petTail(p){
  switch(p.style){
- case'chick':return'<path d="M97 131 L113 131 L105 148Z" fill="#ff9a4d" stroke="#e58c48" stroke-width="2"/><path d="M98 135 L112 135" stroke="#ffdca3" stroke-width="2"/>';
- case'puppy':return'<ellipse cx="106" cy="144" rx="34" ry="23" fill="#fff0dc"/><ellipse cx="106" cy="134" rx="12" ry="8" fill="#594443"/><path d="M106 142 L106 152 M96 154 Q106 163 116 154" stroke="#825c58" stroke-width="3" fill="none" stroke-linecap="round"/>';
- case'kitten':return'<path d="M99 141 Q105 147 111 141 L105 138Z" fill="#d5809d"/><path d="M105 145 Q96 158 89 150 M105 145 Q113 158 121 150" fill="none" stroke="#85677b" stroke-width="2.3"/><path d="M73 139 L41 131 M74 146 L44 150 M135 139 L169 131 M135 146 L169 150" stroke="#aa8b9a" stroke-width="2"/>';
- case'bunny':return'<ellipse cx="105" cy="143" rx="9" ry="6" fill="#e9a3bf"/><path d="M105 147 Q96 160 88 152 M105 147 Q114 160 122 152" stroke="#8e6b85" stroke-width="2.4" fill="none"/>';
- case'fox':return'<path d="M57 141 Q104 186 154 141 L127 132 Q105 158 82 132Z" fill="#fff3e8"/><ellipse cx="105" cy="142" rx="10" ry="7" fill="#51424a"/><path d="M99 154 Q105 161 112 154" stroke="#80595b" stroke-width="2" fill="none"/>';
- case'panda':return'<ellipse cx="77" cy="114" rx="20" ry="25" fill="#373a4f" transform="rotate(-15 77 114)"/><ellipse cx="135" cy="114" rx="20" ry="25" fill="#373a4f" transform="rotate(15 135 114)"/><ellipse cx="105" cy="144" rx="13" ry="9" fill="#eee"/><ellipse cx="105" cy="141" rx="8" ry="6" fill="#464555"/>';
- case'dino':return'<ellipse cx="99" cy="143" rx="3" ry="4" fill="#73a58e"/><ellipse cx="115" cy="143" rx="3" ry="4" fill="#73a58e"/><path d="M91 153 Q105 164 122 152" stroke="#648e80" stroke-width="3" fill="none"/>';
- case'penguin':return'<path d="M58 90 Q68 67 105 94 Q139 67 152 90 L156 149 Q107 200 55 150Z" fill="#fffefa" opacity=".98"/><path d="M96 139 L116 139 L106 153Z" fill="#f9ac59"/>';
- case'hamster':return'<ellipse cx="70" cy="147" rx="26" ry="22" fill="#ffefda"/><ellipse cx="143" cy="147" rx="26" ry="22" fill="#ffefda"/><ellipse cx="106" cy="139" rx="8" ry="5" fill="#c78e8d"/>';
- case'unicorn':return'<ellipse cx="105" cy="141" rx="24" ry="19" fill="#fff7fd"/><ellipse cx="98" cy="138" rx="3" ry="3.4" fill="#cb9cb9"/><ellipse cx="115" cy="138" rx="3" ry="3.4" fill="#cb9cb9"/>';
- default:return'';
+ case 'puppy':return '<path d="M150 179 Q199 131 202 164 Q204 187 182 187" fill="none" stroke="'+p.shade+'" stroke-width="18" stroke-linecap="round"/>';
+ case 'kitten':return '<path d="M148 185 Q203 174 188 131" fill="none" stroke="'+p.tone+'" stroke-width="19" stroke-linecap="round"/><path d="M186 130 Q180 117 174 137" fill="none" stroke="'+p.shade+'" stroke-width="5"/>';
+ case 'fox':return '<path d="M144 178 Q190 140 201 119 Q211 176 180 199 L158 208Z" fill="'+p.tone+'" stroke="'+p.shade+'" stroke-width="3"/><path d="M201 121 Q195 140 183 151 Q197 157 199 164 Q211 145 201 121" fill="#fff6ea"/>';
+ case 'bunny':return '<circle cx="166" cy="201" r="19" fill="#fff8fb" stroke="'+p.shade+'" stroke-width="3"/>';
+ case 'dino':return '<path d="M151 191 Q198 193 200 217 Q185 235 159 212Z" fill="'+p.tone+'" stroke="'+p.shade+'" stroke-width="3"/><path d="M188 207 L201 195 L202 219Z" fill="#4eb99a"/>';
+ case 'unicorn':return '<path d="M159 188 Q194 168 182 197 Q207 211 182 229" stroke="#e2b3f5" stroke-width="20" stroke-linecap="round" fill="none"/><path d="M163 183 Q192 173 182 198" stroke="#96d9d6" stroke-width="7" fill="none"/>';
+ case 'hamster':return '<path d="M152 191 Q180 205 162 220" stroke="'+p.shade+'" stroke-width="11" stroke-linecap="round" fill="none"/>';
+ default:return '';
  }}
-function petSvg(p,scope,adult=false){
- const uid='p'+scope+p.id,fur='url(#'+uid+'fur)',inner=p.inner;
- let extra=ears(p).replaceAll('GRAD',uid);
- const spots=p.style==='panda'?'<ellipse cx="79" cy="114" rx="25" ry="27" fill="#3d3e53"/><ellipse cx="132" cy="114" rx="25" ry="27" fill="#3d3e53"/>':'';
- const wings=p.style==='penguin'?'<ellipse cx="42" cy="166" rx="19" ry="40" transform="rotate(-26 42 166)" fill="#6379a6"/><ellipse cx="169" cy="166" rx="19" ry="40" transform="rotate(26 169 166)" fill="#6379a6"/>':
- '<ellipse cx="50" cy="172" rx="18" ry="33" transform="rotate(-27 50 172)" fill="'+p.shade+'" opacity=".88"/><ellipse cx="161" cy="172" rx="18" ry="33" transform="rotate(27 161 172)" fill="'+p.shade+'" opacity=".88"/>';
- const belly=p.style==='penguin'||p.style==='panda'?'#fffefa':p.inner;
- // Distinct tails, texture and expressive species details make each animal
- // recognizable even when the icon is shown very small on a phone.
- const tails={
-  puppy:'<path d="M157 177 Q206 122 190 109 Q179 100 170 120" fill="none" stroke="'+p.shade+'" stroke-width="20" stroke-linecap="round"/>',
-  kitten:'<path d="M162 185 Q211 170 190 130" fill="none" stroke="'+p.tone+'" stroke-width="21" stroke-linecap="round"/>',
-  bunny:'<circle cx="169" cy="207" r="18" fill="#fffafa" stroke="'+p.shade+'" stroke-width="2"/>',
-  fox:'<path d="M148 185 Q200 150 192 116 Q169 117 150 163Z" fill="'+p.tone+'" stroke="'+p.shade+'" stroke-width="3"/><path d="M190 123 Q175 123 173 141 L186 137Z" fill="#fff5ea"/>',
-  dino:'<path d="M148 182 Q206 174 196 211 Q185 231 171 215Z" fill="'+p.tone+'" stroke="'+p.shade+'" stroke-width="3"/><path d="M180 198 L197 191 L193 212Z" fill="#7cc6ab"/>',
-  unicorn:'<path d="M157 173 Q191 162 180 189 Q211 191 189 213" stroke="#e9b8f5" stroke-width="18" fill="none" stroke-linecap="round"/>',
-  hamster:'<path d="M151 192 Q180 199 165 224" stroke="'+p.shade+'" stroke-width="12" fill="none" stroke-linecap="round"/>'
- };
- const tail=tails[p.style]||'';
- const markings={
-  chick:'<path d="M87 54 Q100 49 110 57" fill="none" stroke="#ffefab" stroke-width="8" stroke-linecap="round"/>',
-  puppy:'<ellipse cx="141" cy="84" rx="15" ry="20" fill="'+p.shade+'" opacity=".64" transform="rotate(-25 141 84)"/>',
-  kitten:'<path d="M98 48 L105 60 L112 48 M86 51 L89 60 M124 51 L121 60" stroke="#c891a7" stroke-width="3" fill="none" stroke-linecap="round"/>',
-  fox:'<path d="M91 61 Q105 70 119 61" stroke="#fff0dc" stroke-width="6" fill="none"/>',
-  dino:'<circle cx="60" cy="164" r="7" fill="#87cead" opacity=".5"/><circle cx="151" cy="173" r="9" fill="#87cead" opacity=".5"/>',
-  hamster:'<path d="M65 77 Q82 64 97 75" fill="none" stroke="#ffeed5" stroke-width="5"/>',
-  penguin:'<path d="M59 100 Q105 57 155 100" fill="none" stroke="#d2e4f1" stroke-width="5" opacity=".9"/>'
- };
- const marking=markings[p.style]||'';
- const face=p.style==='panda'?'#ffffff':'#303149';
- return '<svg viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+p.type+' 일러스트">'+colorGrad(p,uid)+
- '<ellipse cx="105" cy="234" rx="68" ry="10" fill="#7a676e" opacity=".17"/>'+tail+
- '<path d="M74 193 Q63 223 82 231 Q98 237 102 218 M136 193 Q148 223 128 231 Q112 237 108 218" fill="'+p.shade+'" stroke="'+p.shade+'" stroke-width="4"/>'+
- '<ellipse cx="105" cy="178" rx="67" ry="64" fill="'+fur+'" stroke="'+p.shade+'" stroke-width="2.5"/>'+wings+
- '<ellipse cx="105" cy="185" rx="42" ry="46" fill="'+belly+'" opacity=".78"/>'+
- extra+
- '<ellipse cx="105" cy="116" rx="73" ry="75" fill="'+fur+'" stroke="'+p.shade+'" stroke-width="2.5"/>'+
- '<path d="M55 72 Q83 39 115 51" fill="none" stroke="#fff" stroke-width="5" opacity=".35" stroke-linecap="round"/>'+
- marking+
- '<ellipse cx="76" cy="93" rx="34" ry="24" fill="#fff" opacity=".13" transform="rotate(-27 76 93)"/>'+spots+
- '<g class="eye-open"><ellipse cx="79" cy="114" rx="9" ry="13" fill="'+face+'"/><ellipse cx="132" cy="114" rx="9" ry="13" fill="'+face+'"/>'+
- '<ellipse cx="76.5" cy="109" rx="3.5" ry="4.5" fill="#fff"/><ellipse cx="129.5" cy="109" rx="3.5" ry="4.5" fill="#fff"/>'+
- '<ellipse cx="83" cy="119" rx="2" ry="2" fill="#fff" opacity=".6"/><ellipse cx="136" cy="119" rx="2" ry="2" fill="#fff" opacity=".6"/></g>'+
- '<g class="eye-close" fill="none" stroke="#665465" stroke-width="3.8" stroke-linecap="round"><path d="M67 113 Q79 122 91 113 M120 113 Q132 122 144 113"/></g>'+
- '<ellipse cx="61" cy="140" rx="15" ry="9" fill="#ee94a7" opacity=".58"/><ellipse cx="150" cy="140" rx="15" ry="9" fill="#ee94a7" opacity=".58"/>'+
- faceExtras(p)+
- (p.style==='chick'||p.style==='penguin'||p.style==='panda'||p.style==='unicorn'?'':'<path d="M98 155 Q105 162 113 154" fill="none" stroke="#91667c" stroke-width="2.5" stroke-linecap="round"/>')+
- '<g opacity=".75"><circle cx="55" cy="105" r="3" fill="#fff"/><circle cx="161" cy="98" r="3.5" fill="#fff"/></g>'+
- (adult?'<path d="M56 74 L62 59 L71 69 M145 71 L153 57 L158 76" fill="none" stroke="#fff" stroke-width="3" opacity=".6"/>':'')+'</svg>';
+function petMarkings(p){
+ switch(p.style){
+ case 'puppy':return '<path d="M143 57 Q170 70 159 109 Q148 123 135 108 Q126 85 143 57Z" fill="'+p.shade+'" opacity=".42"/><path d="M55 91 Q64 77 78 76" stroke="#fff1df" fill="none" stroke-width="7" stroke-linecap="round"/>';
+ case 'kitten':return '<path d="M105 38 L111 51 L117 38 M92 40 L95 47 M126 40 L123 47" stroke="#bf8198" fill="none" stroke-width="3.5" stroke-linecap="round"/>';
+ case 'fox':return '<path d="M42 134 Q66 142 79 161 L111 149 L143 161 Q157 142 179 131 Q172 173 142 178 L79 178 Q49 167 42 134" fill="#fff3e5" opacity=".94"/>';
+ case 'panda':return '<ellipse cx="77" cy="110" rx="25" ry="31" fill="#555365" transform="rotate(-18 77 110)"/><ellipse cx="144" cy="110" rx="25" ry="31" fill="#555365" transform="rotate(18 144 110)"/>';
+ case 'dino':return '<circle cx="47" cy="141" r="8" fill="#78c8a8" opacity=".55"/><circle cx="165" cy="143" r="10" fill="#73c7a6" opacity=".5"/><circle cx="64" cy="164" r="6" fill="#64bca0" opacity=".5"/>';
+ case 'penguin':return '<path d="M54 77 Q74 58 104 76 Q131 55 164 81 L172 149 Q160 179 111 189 Q57 178 46 145Z" fill="#fffbf2" stroke="#eae5df" stroke-width="2"/>';
+ case 'hamster':return '<ellipse cx="65" cy="153" rx="30" ry="25" fill="#fff0d6"/><ellipse cx="156" cy="153" rx="30" ry="25" fill="#fff0d6"/><path d="M88 48 Q111 37 133 48" stroke="#fff0d3" fill="none" stroke-width="7" stroke-linecap="round"/>';
+ case 'unicorn':return '<circle cx="53" cy="92" r="6" fill="#ffdeed"/><path d="M153 76 L156 86 L165 88 L156 91 L152 100 L148 90 L140 87 L150 84Z" fill="#fff2ad"/>';
+ case 'chick':return '<path d="M93 43 Q106 35 121 43" stroke="#fff7b5" fill="none" stroke-width="8" stroke-linecap="round"/>';
+ default:return '';
+ }}
+function petMouth(p,mood){
+ const center=110;
+ if(mood==='hungry'||mood==='sad'||mood==='messy')return '<path d="M98 159 Q110 147 122 159" fill="none" stroke="#845466" stroke-width="3.3" stroke-linecap="round"/>';
+ if(mood==='sleepy'||mood==='sleep')return '<ellipse cx="110" cy="154" rx="6" ry="9" fill="#ae7286"/><ellipse cx="110" cy="151" rx="3.6" ry="3" fill="#edacb8"/>';
+ if(mood==='eating')return '<ellipse cx="110" cy="154" rx="12" ry="9" fill="#794e61"/><path d="M102 155 Q110 164 117 155" fill="#f29aaa"/>';
+ if(mood==='happy'||mood==='excited'||mood==='bath')return '<path d="M94 151 Q110 177 127 151 Q112 160 94 151" fill="#954f66"/><path d="M100 161 Q110 165 120 161" stroke="#ed90a1" stroke-width="4" fill="none" stroke-linecap="round"/>';
+ if(p.style==='chick'||p.style==='penguin')return '<path d="M100 149 Q110 143 120 149 L110 163Z" fill="#f4a05a" stroke="#dc8d49" stroke-width="2"/><path d="M101 149 Q110 151 119 149" fill="none" stroke="#ffe1a3" stroke-width="2"/>';
+ if(p.style==='puppy')return '<ellipse cx="110" cy="148" rx="10" ry="7" fill="#604757"/><path d="M110 154 Q103 161 98 154 M110 154 Q117 161 123 154" stroke="#85596a" fill="none" stroke-width="2.5" stroke-linecap="round"/>';
+ if(p.style==='kitten'||p.style==='bunny'||p.style==='hamster')return '<path d="M104 148 Q110 153 116 148 L110 144Z" fill="#ce879d"/><path d="M110 152 Q102 161 96 155 M110 152 Q118 161 124 155" stroke="#855e71" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
+ if(p.style==='panda'||p.style==='fox')return '<ellipse cx="110" cy="149" rx="10" ry="7" fill="#584b5a"/><path d="M100 160 Q110 168 122 159" fill="none" stroke="#846678" stroke-width="2.6" stroke-linecap="round"/>';
+ return '<path d="M98 153 Q110 163 123 153" fill="none" stroke="#826473" stroke-width="3.3" stroke-linecap="round"/>';
+}
+function petEyes(p,mood,uid){
+ const dark='#3d314e',white='#fff';
+ if(['happy','excited','bath','eating'].includes(mood))return '<g class="eye-custom" fill="none" stroke="'+dark+'" stroke-width="5.5" stroke-linecap="round"><path d="M65 113 Q80 91 96 113 M125 113 Q140 91 156 113"/></g><g fill="#fff"><circle cx="61" cy="99" r="3"/><circle cx="161" cy="99" r="3"/></g>';
+ if(mood==='sleepy'||mood==='sleep')return '<g class="eye-custom" fill="none" stroke="'+dark+'" stroke-width="5.5" stroke-linecap="round"><path d="M65 115 Q80 125 96 115 M125 115 Q140 125 156 115"/></g>';
+ const watery=(mood==='hungry'||mood==='sad'),eyes='<g><ellipse cx="80" cy="114" rx="18" ry="24" fill="#fff9fb" opacity=".97"/><ellipse cx="140" cy="114" rx="18" ry="24" fill="#fff9fb" opacity=".97"/>'+
+ '<ellipse cx="80" cy="'+(watery?119:114)+'" rx="14.1" ry="20.3" fill="url(#'+uid+'eye)"/><ellipse cx="140" cy="'+(watery?119:114)+'" rx="14.1" ry="20.3" fill="url(#'+uid+'eye)"/>'+
+ '<ellipse cx="74" cy="105" rx="6.3" ry="8.1" fill="'+white+'"/><ellipse cx="134" cy="105" rx="6.3" ry="8.1" fill="'+white+'"/>'+
+ '<circle cx="86" cy="123" r="4.2" fill="'+white+'" opacity=".9"/><circle cx="146" cy="123" r="4.2" fill="'+white+'" opacity=".9"/>'+
+ '<circle cx="87" cy="105" r="2.3" fill="#d4c1ff" opacity=".8"/><circle cx="147" cy="105" r="2.3" fill="#d4c1ff" opacity=".8"/></g>';
+ return '<g class="eye-open">'+eyes+'</g><g class="eye-close" fill="none" stroke="'+dark+'" stroke-width="4.8" stroke-linecap="round"><path d="M66 114 Q80 125 95 114 M125 114 Q140 125 155 114"/></g>'+
+ (watery?'<path d="M64 88 L91 95 M128 95 L155 88" stroke="#916777" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M91 128 Q97 144 88 147" fill="#a8d7ff" opacity=".85"/><path d="M152 128 Q159 144 150 147" fill="#a8d7ff" opacity=".85"/>':'');
+}
+function petSvg(p,scope,adult=false,mood='normal'){
+ const uid='deluxe-'+scope+'-'+p.id,fur='url(#'+uid+'fur)',sh=p.shade;
+ const dark=['panda','penguin'].includes(p.style);
+ const bodyColor=dark?p.shade:p.tone;
+ const arms=p.style==='penguin'?'<path d="M68 178 Q37 155 34 198 Q39 217 59 213 L82 197Z M151 177 Q181 155 187 198 Q183 216 161 211 L138 198Z" fill="#58739b" stroke="#3e5680" stroke-width="3"/>':
+ '<ellipse cx="60" cy="193" rx="17" ry="29" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="2.8" transform="rotate(-30 60 193)"/><ellipse cx="159" cy="193" rx="17" ry="29" fill="'+p.tone+'" stroke="'+sh+'" stroke-width="2.8" transform="rotate(30 159 193)"/>';
+ return '<svg class="deluxe-pet-svg" viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+p.type+' '+MOOD_LABELS[mood]+'">'+
+ '<defs><radialGradient id="'+uid+'fur" cx=".31" cy=".16" r=".93"><stop stop-color="'+p.inner+'"/><stop offset=".55" stop-color="'+p.tone+'"/><stop offset="1" stop-color="'+p.shade+'"/></radialGradient>'+
+ '<linearGradient id="'+uid+'eye" x1=".1" y1=".05" x2=".9" y2="1"><stop stop-color="#695072"/><stop offset=".45" stop-color="#38314c"/><stop offset="1" stop-color="#211b3a"/></linearGradient>'+
+ '<radialGradient id="'+uid+'blush"><stop stop-color="#f58fa8" stop-opacity=".69"/><stop offset="1" stop-color="#ffafc4" stop-opacity="0"/></radialGradient>'+
+ '<linearGradient id="'+uid+'body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="'+p.inner+'"/><stop offset="1" stop-color="'+p.tone+'"/></linearGradient></defs>'+
+ '<ellipse cx="110" cy="242" rx="58" ry="9" fill="#75636f" opacity=".15"/>'+petTail(p)+
+ '<ellipse cx="81" cy="226" rx="20" ry="12" fill="'+bodyColor+'" stroke="'+sh+'" stroke-width="2.5"/><ellipse cx="140" cy="226" rx="20" ry="12" fill="'+bodyColor+'" stroke="'+sh+'" stroke-width="2.5"/>'+
+ '<ellipse cx="110" cy="185" rx="54" ry="51" fill="url(#'+uid+'body)" stroke="'+sh+'" stroke-width="3"/>'+
+ '<ellipse cx="110" cy="189" rx="37" ry="35" fill="'+(dark?'#fffcf8':p.inner)+'" opacity=".85"/>'+arms+
+ petEars(p,fur)+
+ '<ellipse cx="110" cy="112" rx="85" ry="80" fill="'+fur+'" stroke="'+sh+'" stroke-width="3.5"/>'+
+ '<path d="M53 76 Q76 48 103 47" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="6" stroke-linecap="round"/>'+
+ petMarkings(p)+
+ '<ellipse cx="57" cy="142" rx="25" ry="18" fill="url(#'+uid+'blush)"/><ellipse cx="163" cy="142" rx="25" ry="18" fill="url(#'+uid+'blush)"/>'+
+ petEyes(p,mood,uid)+
+ '<ellipse cx="51" cy="148" rx="5" ry="2" fill="#fff" opacity=".57"/><ellipse cx="169" cy="148" rx="5" ry="2" fill="#fff" opacity=".57"/>'+
+ petMouth(p,mood)+
+ (p.style==='kitten'?'<path d="M68 146 L43 137 M68 155 L44 160 M152 146 L178 137 M152 155 L177 160" stroke="#ac7d93" stroke-width="2.5" stroke-linecap="round" opacity=".82"/>':'')+
+ (p.style==='unicorn'?'<path d="M48 107 L52 97 L58 106 L68 110 L58 115 L54 125 L50 115 L40 110Z" fill="#fff3b2" opacity=".95"/>':'')+
+ (mood==='bath'?'<circle cx="29" cy="103" r="11" fill="#fff" fill-opacity=".7" stroke="#cce9ff"/><circle cx="190" cy="155" r="8" fill="#fff" fill-opacity=".75" stroke="#cce9ff"/>':'')+
+ (adult?'<path d="M52 78 L59 67 L65 79 M152 74 L160 62 L164 77" stroke="#fff" stroke-width="3" fill="none" opacity=".62"/>':'')+'</svg>';
 }
 function gainXp(p,n){p.xp+=n;let levels=0;while(p.xp>=100&&p.level<99){p.xp-=100;p.level++;p.coins+=15;levels++;}if(levels){note('✨ '+PETS.find(x=>x.id===id).name+' 레벨 '+p.level+'! 성장했어요! 🏆');sparkles('✨',9);playTone(930)}}
 function formatPercent(x){return Math.round(clamp(x))+'%'}
