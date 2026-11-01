@@ -581,7 +581,7 @@ body{background:radial-gradient(ellipse 900px 450px at 50% -140px,#ffecf0 1%,tra
 .pet-shop{margin-top:12px!important}
 
 @media(max-width:440px){
- .pet-main-grid{grid-template-columns:minmax(132px,42%) minmax(0,58%)!important;gap:6px!important}
+ .pet-main-grid{grid-template-columns:minmax(132px,.42fr) minmax(0,.58fr)!important;gap:6px!important}
  .pet-main-grid .care-first{padding:7px 4px!important;border-radius:16px!important}
  .pet-main-grid .care-first .actions-head{margin:0 0 5px!important;padding:0 2px!important}
  .pet-main-grid .care-first .actions-head>span{font-size:8px!important;letter-spacing:1px!important}
@@ -605,7 +605,7 @@ body{background:radial-gradient(ellipse 900px 450px at 50% -140px,#ffecf0 1%,tra
  .mini-top .mini-choice{height:57px!important;min-height:57px!important;max-height:57px!important}
 }
 @media(max-width:350px){
- .pet-main-grid{grid-template-columns:minmax(115px,40%) minmax(0,60%)!important;gap:4px!important}
+ .pet-main-grid{grid-template-columns:minmax(115px,.40fr) minmax(0,.60fr)!important;gap:4px!important}
  .pet-main-grid .care-first .pet-actions{gap:3px!important}
  .pet-main-grid .care-first .care-button small{display:none!important}
  .pet-main-grid .care-first .care-button{height:72px!important;min-height:72px!important;max-height:72px!important}
