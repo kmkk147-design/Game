@@ -262,3 +262,21 @@ body{background:radial-gradient(ellipse 900px 450px at 50% -140px,#ffecf0 1%,tra
  .room-sparkle,.title-heart{animation:none!important}
  .pick:hover .preview,.pick[aria-pressed=true] .preview{transform:none!important}
 }
+
+
+/* Friend-shaped mini-game targets and character victory card. */
+.mini-thing{width:69px;height:70px;font-size:0;display:grid;place-items:center;padding:5px;z-index:2;border-radius:50%;filter:drop-shadow(0 4px 3px #80a6ae56);will-change:transform}
+.mini-thing svg{display:block;width:59px;height:62px;overflow:visible;pointer-events:none;transition:filter .18s}
+.mini-thing:active svg{filter:brightness(1.1)}
+.mini-thing.star-pop{width:68px;height:70px}
+.mini-result{gap:5px;overflow:hidden;background:radial-gradient(ellipse at 48% 40%,#fff7c6,#fffafb 60%,#fceafd)}
+.mini-result:before,.mini-result:after{content:'✦';position:absolute;color:#f3ba95;font-size:28px;top:24%;left:12%;animation:deluxeTwinkle 3s ease infinite;pointer-events:none}
+.mini-result:after{content:'♡';top:43%;left:auto;right:12%;color:#ed9fb5;font-size:35px;animation-delay:.8s}
+.mini-result-pet{height:128px;width:145px;flex-shrink:0;display:grid;place-items:center;filter:drop-shadow(0 6px 3px #bf96ae4a)}
+.mini-result-pet svg{width:128px;height:140px;animation:petIdle 2.2s ease-in-out infinite}
+.mini-result-icon{font-size:34px;line-height:1}
+.mini-result h3{font-size:clamp(16px,4vw,20px);max-width:96%;line-height:1.4;z-index:1}
+.mini-result p{background:#ffffffd9;border:1px solid #f4dfeb;box-shadow:0 4px 10px #d8b9c440;border-radius:18px;padding:12px;max-width:96%;line-height:1.6;font-size:12px;color:#a37491;z-index:1}
+.mini-result button{font-size:12px;z-index:1;min-height:35px;border-radius:12px}
+.mini-result button:last-child{margin-bottom:2px}
+@media(max-width:420px){.mini-thing{width:62px;height:65px}.mini-thing svg{width:56px;height:59px}.mini-result-pet{height:105px;width:120px}.mini-result-pet svg{width:112px;height:124px}.mini-result p{font-size:11px;padding:8px}}
