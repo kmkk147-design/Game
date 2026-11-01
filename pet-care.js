@@ -282,8 +282,10 @@ function stopMini(showResult=true){
  if(!mini.active)return;mini.active=false;clearInterval(miniTick);clearInterval(miniSpawn);miniTick=null;miniSpawn=null;notifyParent('endMini');
  if(showResult){
   const p=getPet(),coins=Math.min(70,5+mini.score*3);p.coins+=coins;p.happy=clamp(p.happy+12);p.energy=clamp(p.energy-5);gainXp(p,Math.min(35,10+mini.score*2));save();
-  $('miniResult').hidden=false;$('miniResultIcon').textContent=mini.score>=8?'🏆':'💖';$('miniResultTitle').textContent=mini.score>=8?'와! 대단해요!':'참 잘했어요!';
-  $('miniResultBody').textContent='⭐ '+mini.score+'점 · 🪙 '+coins+'코인 획득! 내 펫과 함께 성장했어요!';
+  $('miniResult').hidden=false;$('miniResultIcon').textContent=mini.score>=8?'🏆':'💖';
+  $('miniResultPet').innerHTML=petSvg(PETS.find(x=>x.id===id),'miniwinner',p.level>=3,'happy');
+  $('miniResultTitle').textContent=mini.score>=8?'와! 우리 친구가 정말 신났어요!':'우리 친구랑 즐거웠어요!';
+  $('miniResultBody').textContent=PETS.find(x=>x.id===id).name+'의 한마디: 같이 놀아서 너무 좋아! ♡  ⭐ '+mini.score+'점 · 🪙 '+coins+'코인 선물!';
   playTone(960);renderMetersOnly();
  }else{$('petMinigame').hidden=true;$('miniResult').hidden=true;render();note('다음에 또 같이 놀자! ♡')}
 }
@@ -296,9 +298,30 @@ function beginMini(type){
  miniTick=setInterval(()=>{const left=Math.max(0,Math.ceil((mini.deadline-performance.now())/1000));$('miniTime').textContent=left+'초';if(left<=0)stopMini()},90);
  miniSpawn=setInterval(spawnMini,type==='fruit'?670:780);spawnMini();
 }
+
+function miniMascotSvg(type,variant){
+ const palettes=[
+  {body:'#ff8694',stroke:'#dd6075',leaf:'#8dca97'},
+  {body:'#ffb76a',stroke:'#e78d4d',leaf:'#86c9a0'},
+  {body:'#a99bdc',stroke:'#8678bf',leaf:'#88c99a'},
+  {body:'#ffafc1',stroke:'#e885a1',leaf:'#8bcfad'}
+ ];
+ const c=palettes[variant%palettes.length],star=type==='star';
+ const body=star?'<path d="M50 9 Q53 8 56 15 L65 34 L88 35 Q97 36 90 44 L73 60 L79 84 Q80 94 70 89 L50 77 L29 89 Q19 93 22 83 L27 60 L10 44 Q3 36 13 35 L35 34 L45 15 Q47 10 50 9Z" fill="#ffd978" stroke="#efa85e" stroke-width="3.4" stroke-linejoin="round"/>':
+ variant%4===1?'<circle cx="50" cy="51" r="37" fill="'+c.body+'" stroke="'+c.stroke+'" stroke-width="3.5"/>':
+ variant%4===2?'<path d="M50 21 Q75 16 83 42 Q93 68 70 86 Q50 92 31 85 Q9 71 16 44 Q22 22 50 21Z" fill="'+c.body+'" stroke="'+c.stroke+'" stroke-width="3.5"/>':
+ '<path d="M50 23 Q70 12 80 35 Q96 52 76 80 Q60 94 50 86 Q40 93 25 80 Q7 53 20 35 Q30 15 50 23Z" fill="'+c.body+'" stroke="'+c.stroke+'" stroke-width="3.5"/>';
+ const leaves=star?'':'<path d="M49 24 Q43 6 32 11 Q35 22 49 24 Q55 6 72 13 Q65 27 49 24" fill="'+c.leaf+'" stroke="#6bb184" stroke-width="2"/><path d="M49 23 Q53 16 55 7" stroke="#659b71" stroke-width="2.5" fill="none"/>';
+ return '<svg viewBox="0 0 100 106" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+(star?'웃는 별':'웃는 과일')+'"><ellipse cx="50" cy="98" rx="29" ry="5" fill="#777" opacity=".14"/>'+body+leaves+
+ '<path d="M26 40 Q33 28 43 28" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="5" stroke-linecap="round"/>'+
+ '<ellipse cx="39" cy="52" rx="6.7" ry="8.6" fill="#43354b"/><ellipse cx="62" cy="52" rx="6.7" ry="8.6" fill="#43354b"/>'+
+ '<ellipse cx="37" cy="49" rx="2.8" ry="3.5" fill="#fff"/><ellipse cx="60" cy="49" rx="2.8" ry="3.5" fill="#fff"/>'+
+ '<ellipse cx="29" cy="64" rx="8" ry="4.7" fill="#f483a3" opacity=".7"/><ellipse cx="72" cy="64" rx="8" ry="4.7" fill="#f483a3" opacity=".7"/>'+
+ '<path d="M44 65 Q50 74 57 65" fill="none" stroke="#894e70" stroke-width="3" stroke-linecap="round"/></svg>';
+}
 function spawnMini(){
  if(!mini.active)return;const field=$('miniField'),type=mini.type,b=document.createElement('button');b.className='mini-thing';b.type='button';
- b.textContent=type==='fruit'?['🍎','🍓','🍇','🍊','🍌'][rand(0,4)]:['⭐','🌟','💫'][rand(0,2)];
+ b.innerHTML=miniMascotSvg(type,rand(0,3));b.setAttribute('aria-label',type==='fruit'?'귀여운 과일 잡기':'웃는 별 잡기');
  b.style.left=rand(3,83)+'%';
  const duration=type==='fruit'?rand(2500,3400):rand(1300,1900);
  b.style.setProperty('--fall',(duration/1000)+'s');
