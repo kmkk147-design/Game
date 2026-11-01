@@ -489,3 +489,134 @@ body{background:radial-gradient(ellipse 900px 450px at 50% -140px,#ffecf0 1%,tra
  .mini-top{padding:9px}
  .mini-top .mini-choice{height:67px!important;min-height:67px!important;max-height:67px!important}
 }
+
+
+/* Ten individually drawn 3D companions: sprite atlas is purely visual; pet IDs and progress remain unchanged. */
+.pet-sprite{display:block;position:relative;max-width:100%;background-image:url('/assets/pet-mascots-9.avif?v=20261101a');background-size:300% 300%;background-repeat:no-repeat;image-rendering:auto;pointer-events:none}
+.pet-sprite-chick{background-position:0% 0%}
+.pet-sprite-puppy{background-position:50% 0%}
+.pet-sprite-kitten{background-position:100% 0%}
+.pet-sprite-bunny{background-position:0% 50%}
+.pet-sprite-panda{background-position:50% 50%}
+.pet-sprite-dino{background-position:100% 50%}
+.pet-sprite-penguin{background-position:0% 100%}
+.pet-sprite-hamster{background-position:50% 100%}
+.pet-sprite-unicorn{background-position:100% 100%}
+.pick .preview .pet-sprite{width:100%;height:100%;filter:drop-shadow(0 2px 2px #977f7f22)}
+.creature .pet-sprite{width:100%;height:100%;display:block}
+.mini-result-pet .pet-sprite{width:min(150px,100%);height:150px;margin:auto}
+
+/* Most important view: selected pet and ALL six care actions together; games immediately underneath. */
+.pet-app{padding:8px 8px 20px!important}
+.top{padding:0 40px 2px!important;margin:0!important;min-height:0!important}
+.top-emblem>span.tiny-overline{font-size:8px!important;letter-spacing:1.5px!important;margin:0!important}
+.top h1{font-size:clamp(22px,5vw,31px)!important;line-height:1.12!important;letter-spacing:-1.6px!important;margin:3px 0!important}
+.top p{font-size:10px!important;line-height:1.3!important;margin:2px 0 5px!important}
+.top .top-emblem .logo-leaf{display:none!important}
+.sound-toggle{width:36px!important;height:36px!important;top:3px!important;right:1px!important;font-size:17px!important;border-radius:13px!important}
+.pet-primary-summary{margin:6px 0 7px!important}
+.pet-primary-summary .pet-sheet{border-radius:18px!important;padding:8px 11px!important;border-width:1.5px!important;box-shadow:0 3px 8px #eccbd233!important;min-height:0!important}
+.pet-primary-summary .pet-info{align-items:center!important;min-width:0}
+.pet-primary-summary .pet-info>div:first-child{display:flex!important;flex-direction:row!important;align-items:center!important;gap:5px!important;flex-wrap:wrap!important;min-width:0}
+.pet-primary-summary .pet-info-sub{display:none!important}
+.pet-primary-summary .pet-info h2{font-size:19px!important;line-height:1.1!important;margin:0!important;letter-spacing:-.8px!important}
+.pet-primary-summary .stage-badge{font-size:9px!important;padding:3px 5px!important}
+.pet-primary-summary .mood-badge{font-size:9px!important;min-height:19px!important;margin:0!important;padding:3px 5px!important}
+.pet-primary-summary .wallet{padding:4px 8px!important;margin:0 0 0 4px!important;min-width:0}
+.pet-primary-summary .wallet strong{font-size:17px!important;line-height:1.2!important}
+.pet-primary-summary .wallet small{display:none!important}
+.pet-primary-summary .wallet>span{font-size:17px!important}
+.pet-primary-summary .save-indicator{display:none!important}
+.pet-primary-summary .condition-title{display:none!important}
+.pet-primary-summary .pet-status{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px 8px!important;margin:6px 0 3px!important}
+.pet-primary-summary .status-title{font-size:9px!important;margin:0 0 3px!important;gap:1px!important;line-height:1.2!important}
+.pet-primary-summary .status-title output{font-size:9px!important}
+.pet-primary-summary .status-track{height:5px!important}
+.pet-primary-summary .xp-row{margin:3px 0 0!important;gap:6px!important;min-height:0!important}
+.pet-primary-summary .xp-row span{font-size:9px!important}
+.pet-primary-summary .xp-rail{height:5px!important}
+
+.pet-main-grid{display:grid!important;grid-template-columns:minmax(155px,.43fr) minmax(0,.57fr)!important;gap:9px!important;align-items:stretch!important;margin:7px 0 0!important;max-width:100%}
+.pet-main-grid .care-first{min-width:0!important;margin:0!important;padding:10px 7px!important;border-radius:19px!important;align-self:stretch!important}
+.pet-main-grid .care-first .actions-head{padding:0 3px!important;margin:0 0 8px!important}
+.pet-main-grid .actions-head>span{font-size:9px!important}
+.pet-main-grid .actions-head h2{font-size:17px!important;margin:2px 0!important}
+.pet-main-grid .actions-head p{display:none!important}
+.pet-main-grid .care-first .pet-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(3,90px)!important;grid-auto-rows:90px!important;gap:6px!important}
+.pet-main-grid .care-first .care-button{display:flex!important;min-width:0!important;height:90px!important;min-height:90px!important;max-height:90px!important;gap:3px!important;padding:4px 2px!important;border-radius:14px!important}
+.pet-main-grid .care-first .care-icon{width:37px!important;height:35px!important;min-height:35px!important;font-size:25px!important;margin:0!important}
+.pet-main-grid .care-first .care-button strong{font-size:11px!important;line-height:1.1!important;white-space:normal!important;word-break:keep-all!important}
+.pet-main-grid .care-first .care-button small{font-size:8px!important;line-height:1.16!important;white-space:normal!important;word-break:keep-all!important}
+.pet-main-grid .pet-experience{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:5px!important;margin:0!important;min-width:0!important}
+.pet-main-grid .pet-message{order:0!important;display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:27px!important;max-height:33px!important;margin:0!important;padding:4px 6px!important;font-size:10px!important;border-radius:12px!important;line-height:1.3!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.pet-main-grid .room-wrap{order:1!important;display:block!important;grid-column:auto!important;grid-row:auto!important;min-width:0!important;width:100%!important;margin:0!important;padding:5px 5px 0!important;border-radius:19px!important;box-shadow:0 3px 0 #f2dde6!important}
+.pet-main-grid .room-controls{gap:3px!important;padding:0 0 5px!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.pet-main-grid .room-tab{display:flex!important;flex-direction:column!important;gap:0!important;min-width:0!important;min-height:36px!important;height:36px!important;border-radius:9px!important;padding:2px 0!important;font-size:10px!important;line-height:1.05!important;box-shadow:none!important}
+.pet-main-grid .room-tab>span{font-size:14px!important;line-height:1.1!important}
+.pet-main-grid .room{height:270px!important;min-height:270px!important;border-radius:13px!important}
+.pet-main-grid .room-hint{display:none!important}
+.pet-main-grid .creature:has(.pet-3d-img){width:min(100%,215px)!important;height:220px!important;bottom:10px!important}
+.pet-main-grid .creature .pet-sprite{filter:drop-shadow(0 4px 5px #92748037)}
+.pet-main-grid .thought{font-size:9px!important;max-width:85%!important;top:5px!important;padding:4px 7px!important}
+.pet-main-grid .room[data-place=bedroom] .creature.lying{width:125px!important;height:139px!important;bottom:47px!important}
+.pet-main-grid .room[data-place=bathroom] .creature.toileting{transform:translateX(-50%) scale(.66)!important}
+.pet-main-grid .room[data-place=bathroom] .creature.bathing{transform:translateX(-50%) scale(.66)!important}
+.pet-main-grid .pet-bed{transform:scale(.75)!important;transform-origin:bottom right!important}
+.pet-main-grid .food-bowl{transform:scale(.78)!important;transform-origin:bottom left!important}
+.pet-main-grid .room[data-place=bedroom] .pet-bed{transform:none!important}
+.pet-main-grid .room[data-place=bedroom] .bed-blanket{transform:scale(.85)!important;transform-origin:bottom right!important}
+
+.mini-top{margin:7px 0!important;padding:8px!important;border-radius:17px!important}
+.mini-top .section-heading{margin:0 3px 6px!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
+.mini-top .section-heading>div>span{display:none!important}
+.mini-top .section-heading h2{font-size:14px!important;line-height:1.15!important;margin:0!important;letter-spacing:-.5px!important}
+.mini-top .section-symbol{display:none!important}
+.mini-top .mini-options{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+.mini-top .mini-choice{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;text-align:center!important;gap:1px!important;min-width:0!important;height:67px!important;min-height:67px!important;max-height:67px!important;padding:5px 1px!important;border-radius:12px!important}
+.mini-top .mini-choice .mini-symbol{width:29px!important;height:29px!important;min-width:29px!important;font-size:19px!important;border-radius:9px!important}
+.mini-top .mini-choice strong{font-size:10px!important;line-height:1.15!important}
+.mini-top .mini-choice p{display:none!important}
+.daily-fun{margin:8px 0!important}
+.pet-select-lower{margin:11px 0!important}
+.pet-shop{margin-top:12px!important}
+
+@media(max-width:440px){
+ .pet-main-grid{grid-template-columns:minmax(132px,42%) minmax(0,58%)!important;gap:6px!important}
+ .pet-main-grid .care-first{padding:7px 4px!important;border-radius:16px!important}
+ .pet-main-grid .care-first .actions-head{margin:0 0 5px!important;padding:0 2px!important}
+ .pet-main-grid .care-first .actions-head>span{font-size:8px!important;letter-spacing:1px!important}
+ .pet-main-grid .care-first .actions-head h2{font-size:14px!important}
+ .pet-main-grid .care-first .pet-actions{gap:4px!important;grid-template-rows:repeat(3,76px)!important;grid-auto-rows:76px!important}
+ .pet-main-grid .care-first .care-button{height:76px!important;min-height:76px!important;max-height:76px!important;border-radius:11px!important}
+ .pet-main-grid .care-first .care-icon{width:31px!important;height:29px!important;min-height:29px!important;font-size:21px!important;border-radius:10px!important}
+ .pet-main-grid .care-first .care-button strong{font-size:10px!important;letter-spacing:-.5px!important}
+ .pet-main-grid .care-first .care-button small{font-size:8px!important;letter-spacing:-.45px!important}
+ .pet-main-grid .room{height:234px!important;min-height:234px!important}
+ .pet-main-grid .creature:has(.pet-3d-img){width:min(100%,174px)!important;height:177px!important;bottom:6px!important}
+ .pet-main-grid .room-controls{gap:2px!important}
+ .pet-main-grid .room-tab{font-size:9px!important;min-height:31px!important;height:31px!important}
+ .pet-main-grid .room-tab>span{font-size:12px!important}
+ .pet-main-grid .room[data-place=bedroom] .creature.lying{height:124px!important;width:111px!important;bottom:42px!important}
+ .pet-primary-summary .pet-info h2{font-size:17px!important}
+ .pet-primary-summary .mood-badge{display:none!important}
+ .pet-primary-summary .pet-status{gap:3px 5px!important}
+ .pet-primary-summary .status-title{font-size:8px!important}
+ .pet-primary-summary .status-title output{font-size:8px!important}
+ .mini-top .mini-choice{height:57px!important;min-height:57px!important;max-height:57px!important}
+}
+@media(max-width:350px){
+ .pet-main-grid{grid-template-columns:minmax(115px,40%) minmax(0,60%)!important;gap:4px!important}
+ .pet-main-grid .care-first .pet-actions{gap:3px!important}
+ .pet-main-grid .care-first .care-button small{display:none!important}
+ .pet-main-grid .care-first .care-button{height:72px!important;min-height:72px!important;max-height:72px!important}
+ .pet-main-grid .room{height:227px!important;min-height:227px!important}
+ .pet-main-grid .room-tab{font-size:8px!important}
+}
+@media(min-width:741px){
+ .pet-main-grid{grid-template-columns:minmax(245px,.36fr) minmax(0,.64fr)!important;gap:13px!important}
+ .pet-main-grid .care-first .pet-actions{grid-template-rows:repeat(3,96px)!important}
+ .pet-main-grid .care-first .care-button{height:96px!important;min-height:96px!important;max-height:96px!important}
+ .pet-main-grid .room{height:298px!important;min-height:298px!important}
+ .pet-main-grid .creature:has(.pet-3d-img){width:230px!important;height:248px!important}
+ .pet-main-grid .room-tab{flex-direction:row!important;font-size:12px!important}
+}
