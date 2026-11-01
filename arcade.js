@@ -2,9 +2,9 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const $all=sel=>Array.from(document.querySelectorAll(sel));
-const scenes={trace:$('tracingScreen'),mole:$('moleScreen'),fire:$('fireScreen'),soccer:$('soccerScreen'),garden:$('gardenScreen')};
+const scenes={trace:$('tracingScreen'),mole:$('moleScreen'),fire:$('fireScreen'),soccer:$('soccerScreen'),garden:$('gardenScreen'),pet:$('petScreen')};
 let current='trace';
-const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','20초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','60초 동안 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 6→5→5→4→4곳에서 골키퍼를 피해 슛해요!'],garden:['리안이·이준이의 <em>풍선 보물파티!</em> 🎈','리안이와 이준이의 사진과 함께 같은 색 풍선을 팡! 선물상자를 열어 보세요!']};
+const labels={trace:['선 따라 <em>쓱쓱!</em> 🎨','20초 동안 한 번에 선을 따라 그려요. 손을 떼면 채점!'],mole:['두더지 <em>팡팡!</em> 🐹','60초 동안 뿅망치로 두더지를 많이 잡아요!'],fire:['출동! <em>꼬마 소방관</em> 🚒','불은 터치해 끄고, 구조할 땐 소방차를 누른 다음 사람 있는 창문을 터치해요!'],soccer:['승부차기 <em>슛!</em> ⚽','각 슈팅은 10초! 6→5→5→4→4곳에서 골키퍼를 피해 슛해요!'],garden:['리안이·이준이의 <em>풍선 보물파티!</em> 🎈','리안이와 이준이의 사진과 함께 같은 색 풍선을 팡! 선물상자를 열어 보세요!'],pet:['포근포근 <em>펫하우스!</em> 🐾','10가지 귀여운 친구를 골라 먹이고 씻기고 키워요! 미니게임도 즐겨요!']};
 let sound=null;
 function beep(freq=500,ms=90,type='sine',volume=.07){
  if($('soundBtn').textContent.includes('꺼짐'))return;
@@ -20,6 +20,7 @@ function setGame(id){
  else if(current==='fire')stopFire();
  else if(current==='soccer')stopSoccer();
  else if(current==='garden')stopGarden();
+ else if(current==='pet'){window.GamePlayLock?.unlock('pet');try{$('petHouseEmbed').contentWindow?.postMessage({petHouse:'stop'},location.origin)}catch(_){}}
  current=id;
  Object.keys(scenes).forEach(key=>{scenes[key].hidden=key!==id;});
  $all('.game-tab').forEach(btn=>{const selected=btn.dataset.game===id;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',String(selected));btn.tabIndex=selected?0:-1;});
