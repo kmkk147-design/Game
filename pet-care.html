@@ -1,17 +1,18 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#fff3e8">
-<title>리안·이준 GAME — 포근포근 펫하우스</title><link rel="stylesheet" href="/pet-care.css?v=1"></head>
+<title>리안·이준 GAME — 포근포근 펫하우스</title><meta name="theme-color" content="#fff7f2"><link rel="stylesheet" href="/pet-care.css?v=2"></head>
 <body>
 <div class="pet-app">
 <header class="top">
-  <div class="top-emblem"><span>✦ THE LITTLE WORLD ✦</span><h1>포근포근 <em>펫하우스</em> <span class="title-heart">♡</span></h1><p>좋아하는 친구를 골라 함께 놀고, 먹이고, 키워요!</p></div>
+  <div class="top-emblem"><span class="logo-leaf" aria-hidden="true">✿</span><span class="tiny-overline">LITTLE FRIENDS · MY PET STORY</span><h1>포근포근 <em>펫하우스</em><span class="title-heart">♥</span></h1><p>작은 친구들과 함께하는 반짝반짝 하루 <span aria-hidden="true">✦</span></p></div>
   <button id="petSound" class="sound-toggle" type="button" aria-label="소리 켜기 또는 끄기">🔊</button>
 </header>
-<div class="picker-head"><div><span class="eyebrow">CHOOSE YOUR FRIEND</span><h2>나의 작은 친구들 <small>10마리</small></h2></div><span class="picker-hint">옆으로 밀어서 골라요 <span aria-hidden="true">→</span></span></div>
+<div class="picker-head"><div><span class="eyebrow">CHOOSE A LITTLE FRIEND</span><h2>오늘은 누구랑 놀까? <small>10마리</small></h2></div><span class="picker-hint">옆으로 밀어보세요 <span aria-hidden="true">→</span></span></div>
 <div class="pet-picker" id="petPicker" aria-label="키울 캐릭터 10종 선택"></div>
+<div class="pet-experience">
 <section class="pet-sheet">
   <div class="pet-info"><div><span class="pet-info-sub">MY LITTLE BEST FRIEND</span><h2 id="petName">삐약이</h2><span id="petStage" class="stage-badge">BABY · LV. 1</span></div><div class="wallet"><span>🪙</span><strong id="petCoins">0</strong><small>코인</small></div></div>
-  <div class="pet-status" role="group" aria-label="내 펫의 상태">
+  <div class="condition-title"><span>♡ 오늘의 컨디션</span><span class="condition-hint">LOVE & CARE</span></div><div class="pet-status" role="group" aria-label="내 펫의 상태">
     <div class="status-item"><div class="status-title"><span>🍓 배부름</span><output id="statFood">80%</output></div><div class="status-track"><div id="barFood" class="status-fill orange"></div></div></div>
     <div class="status-item"><div class="status-title"><span>💖 행복</span><output id="statHappy">85%</output></div><div class="status-track"><div id="barHappy" class="status-fill pink"></div></div></div>
     <div class="status-item"><div class="status-title"><span>🫧 청결</span><output id="statClean">90%</output></div><div class="status-track"><div id="barClean" class="status-fill mint"></div></div></div>
@@ -21,15 +22,22 @@
 </section>
 <div id="petMessage" class="pet-message" role="status" aria-live="polite">오늘도 함께 놀자! ♡</div>
 <section class="room-wrap" aria-label="움직이는 펫을 돌보는 방">
- <div class="room" id="petRoom">
-  <div class="room-pattern" aria-hidden="true"></div><div class="window-sun" aria-hidden="true"><div class="sun-disc"></div><div class="cloud-one"></div><div class="cloud-two"></div></div>
-  <div class="room-shelf" aria-hidden="true">🪴 <span>✧</span> 📚</div><div class="room-rug" aria-hidden="true"></div><div class="room-floor" aria-hidden="true"></div>
+ <div class="room" id="petRoom" data-theme="peach">
+  <div class="room-pattern" aria-hidden="true"></div>
+  <div class="room-cloud room-cloud-a" aria-hidden="true"></div><div class="room-cloud room-cloud-b" aria-hidden="true"></div>
+  <div class="window-sun" aria-hidden="true"><div class="sun-disc"></div><div class="cloud-one"></div><div class="cloud-two"></div></div>
+  <div class="room-lamp" aria-hidden="true"><span class="room-lamp-bulb"></span></div>
+  <div class="room-art" aria-hidden="true"><span class="art-sun">☀</span><span class="art-hills"></span></div>
+  <div class="room-shelf" aria-hidden="true"><span class="shelf-pot">🪴</span><span class="shelf-book">▥</span><span class="shelf-star">✧</span></div>
+  <div class="room-floor" aria-hidden="true"></div><div class="room-rug" aria-hidden="true"></div>
+  <div class="room-plant" aria-hidden="true"><span class="plant-leaves">❀</span><span class="plant-pot"></span></div>
+  <div class="room-mobile" aria-hidden="true"><span>✦</span><span>♡</span><span>✧</span></div>
   <div id="petThought" class="thought">💖 함께 놀아요!</div>
   <div id="petCreature" class="creature" role="button" tabindex="0" aria-label="펫을 쓰다듬기"></div>
   <div class="food-bowl" id="petBowl" aria-hidden="true"><div id="petFoodVisual">🍓</div><div class="bowl-cup"></div></div>
   <div id="petPoops" class="poop-layer" aria-label="청소할 똥"></div>
   <div id="petFx" class="fx-layer" aria-hidden="true"></div>
-  <div id="petBed" class="pet-bed" aria-hidden="true">🛏️</div>
+  <div id="petBed" class="pet-bed" aria-hidden="true"><span class="bed-mattress"></span><span class="bed-pillow"></span><span class="bed-heart">♥</span></div>
   <div id="petMinigame" class="mini-overlay" hidden>
     <div class="mini-bar"><strong id="miniTitle">🍓 과일 받기</strong><span id="miniTime">20초</span><strong>⭐ <span id="miniScore">0</span></strong><button id="miniStop" type="button">끝내기 ✕</button></div>
     <div id="miniField" class="mini-field" aria-label="떨어지는 아이템을 터치하세요"></div>
@@ -37,9 +45,10 @@
     <div id="miniResult" class="mini-result" hidden><div class="mini-result-icon" id="miniResultIcon">🏆</div><h3 id="miniResultTitle">참 잘했어요!</h3><p id="miniResultBody">코인을 받았어요!</p><button id="miniAgain" type="button">다시 하기</button><button id="miniClose" type="button">펫에게 돌아가기</button></div>
   </div>
  </div>
- <div class="room-hint">✨ 펫을 톡톡 누르면 좋아해요. 방 안에서 자유롭게 움직여요!</div>
+ <div class="room-hint"><span class="room-hint-dot">●</span> 친구를 터치하면 기뻐해요! 방 안에서 움직이는 모습도 지켜봐요 <span aria-hidden="true">♡</span></div>
 </section>
-<div class="actions-head"><span>CARE TIME</span><h2>우리 친구 돌보기</h2></div>
+</div>
+<div class="actions-head"><span>DAILY CARE</span><h2>함께하는 돌봄 시간 <span class="section-heart">♥</span></h2><p>좋아하는 음식을 주고 예쁘게 돌봐 주세요!</p></div>
 <div class="pet-actions">
  <button type="button" class="care-button care-feed" data-action="feed"><span class="care-icon">🍓</span><strong>밥 주기</strong><small>냠냠 먹기</small></button>
  <button type="button" class="care-button care-poop" data-action="clean"><span class="care-icon">🧹</span><strong>똥 치우기</strong><small>반짝 청소</small></button>
@@ -48,12 +57,12 @@
  <button type="button" class="care-button care-cuddle" data-action="pet"><span class="care-icon">💗</span><strong>쓰다듬기</strong><small>사랑 듬뿍</small></button>
  <button type="button" class="care-button care-play" data-action="play"><span class="care-icon">🧸</span><strong>놀아주기</strong><small>폴짝폴짝</small></button>
 </div>
-<div class="section-heading"><div><span>PLAY & EARN COINS</span><h2>우리 펫과 미니게임</h2></div><span class="section-symbol">✦</span></div>
+<div class="section-heading"><div><span>HAPPY PLAY TIME</span><h2>함께 놀면 코인이 쏙! <span class="section-heart">✦</span></h2></div><span class="section-symbol">✷</span></div>
 <div class="mini-options">
  <button class="mini-choice fruit" type="button" data-game="fruit"><div class="mini-symbol">🍓</div><div><strong>과일 톡톡</strong><p>떨어지는 과일을 터치해서 코인 받기</p></div><span class="mini-arrow">↗</span></button>
  <button class="mini-choice star" type="button" data-game="star"><div class="mini-symbol">⭐</div><div><strong>별빛 잡기</strong><p>반짝이는 별을 찾아 터치하기</p></div><span class="mini-arrow">↗</span></button>
 </div>
-<section class="pet-shop"><div class="shop-title"><div><span>DECORATE YOUR FRIEND</span><h2>펫 꾸미기</h2></div><span>🪙 코인으로 선물해요</span></div><div id="petShop" class="shop-grid"></div></section>
+<section class="pet-shop"><div class="shop-title"><div><span>LITTLE GIFT SHOP</span><h2>나만의 펫 꾸미기 <span class="section-heart">♡</span></h2></div><span>🪙 코인으로 선물해요</span></div><div id="petShop" class="shop-grid"></div></section>
 <p class="bottom-note">💖 10마리 모두 따로 키울 수 있어요. 성장·코인·상태는 이 기기에 저장돼요.<br>오랜만에 찾아와도 친구는 사라지지 않아요!</p>
 </div>
-<script src="/pet-care.js?v=1"></script></body></html>
+<script src="/pet-care.js?v=2"></script></body></html>
