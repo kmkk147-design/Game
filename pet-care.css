@@ -305,3 +305,112 @@ body{background:radial-gradient(ellipse 900px 450px at 50% -140px,#ffecf0 1%,tra
 .creature.jump .pet-3d-img{animation:petJump .65s ease-out both}
 .mini-result-pet .pet-3d-img{width:100%;height:100%;max-width:170px;max-height:180px;margin:auto;object-fit:contain;animation:petIdle 2.3s ease-in-out infinite}
 @media(prefers-reduced-motion:reduce){.creature .pet-3d-img,.mini-result-pet .pet-3d-img{animation:none!important}}
+
+/* PET HOUSE V4: care-first mobile flow and spatially meaningful rooms */
+.care-first{margin:13px 0 17px;padding:12px;border-radius:25px;border:2px solid #f6dbe4;background:linear-gradient(155deg,#fffdfb 0%,#fff0f5 100%);box-shadow:0 7px 0 #f5e3e9,0 12px 22px #c8a1a117}
+.care-first .actions-head{margin:0 0 10px;text-align:left;padding:0 6px}
+.care-first .actions-head>span{font-size:9px;color:#bd8098;letter-spacing:1.7px}
+.care-first .actions-head h2{font-size:19px;margin:3px 0;color:#694e67}
+.care-first .actions-head p{font-size:11px;color:#ae8a9b;margin:1px 0 0}
+.care-first .pet-actions{gap:8px}
+.care-first .care-button{min-height:83px;gap:1px;border-radius:16px;padding:6px 3px;box-shadow:0 3px 0 #efdee8;border-width:1.5px}
+.care-first .care-icon{font-size:26px;width:auto;height:auto;margin:0;line-height:1.1}
+.care-first .care-button strong{font-size:13px;line-height:1.3}
+.care-first .care-button small{font-size:10px;line-height:1.3}
+.pet-select-lower{margin:22px 0 7px;padding:9px 10px 7px;border:1.5px solid #f2e5e8;border-radius:23px;background:#fffafc}
+.pet-select-lower .picker-head{margin:2px 3px 9px}
+.pet-select-lower .picker-head h2{font-size:21px}
+.pet-select-lower .pet-picker{margin-top:0}
+.save-indicator{color:#68a28a;font-size:11px;font-weight:900;margin:7px 0 3px}
+.save-indicator.save-error{color:#cb5175}
+.wallet{flex-wrap:nowrap}.wallet small{white-space:nowrap}
+.room-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:3px 3px 10px}
+.room-tab{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:38px;border-radius:14px;background:#fff9f8;border:1.5px solid #f3e0e6;font-size:13px;font-weight:950;color:#9b7891;transition:background .2s,transform .2s;box-shadow:0 2px 0 #ebdfe4}
+.room-tab>span{font-size:19px}
+.room-tab[aria-pressed=true]{background:linear-gradient(135deg,#ffe3ee,#fff2da);border-color:#efadc9;color:#ad5d85;box-shadow:0 2px 0 #e9bcd0}
+.room-tab:active{transform:scale(.97)}
+.room{transition:background .5s ease}
+.room[data-place=bedroom]{background:linear-gradient(180deg,#b3a5dc 0%,#dcd4f5 65%,#c0a1cf 65.3%,#e4c9db 100%);--room-highlight:#e5defa;--room-shadow:#ad9cc9;--room-stroke:#c4aada}
+.room[data-place=bathroom]{background:linear-gradient(180deg,#c7f3ee 0%,#eafcf9 65%,#b9e4da 65.3%,#e8f7ef 100%);--room-highlight:#edfffd;--room-shadow:#a3d5d0;--room-stroke:#b6e8dd}
+.room[data-place=bedroom] .room-pattern{background-image:radial-gradient(#fff8ff 1.6px,transparent 2px);background-size:26px 26px}
+.room[data-place=bathroom] .room-pattern{opacity:.65;background-image:linear-gradient(90deg,#ffffff90 2px,transparent 2px),linear-gradient(#ffffff90 2px,transparent 2px);background-size:37px 37px}
+.room[data-place=bedroom] .room-floor{background:repeating-linear-gradient(90deg,transparent 0 57px,#d3a9c458 58px 60px);box-shadow:inset 0 8px 16px #86738e44}
+.room[data-place=bathroom] .room-floor{background:repeating-linear-gradient(90deg,transparent 0 45px,#a9dace91 46px 47px),repeating-linear-gradient(0deg,transparent 0 40px,#a9dace91 41px 42px);box-shadow:inset 0 8px 14px #8dbab342}
+.room[data-place=bedroom] .window-sun{background:linear-gradient(170deg,#4a5588,#9b8ec7);border-color:#fff5fb;box-shadow:0 8px 0 #9a8ab9}
+.room[data-place=bedroom] .sun-disc{background:#fff8d7;box-shadow:0 0 0 9px #fff8dc32}
+.room[data-place=bedroom] .cloud-one,.room[data-place=bedroom] .cloud-two{background:#d3c8ef}
+.room[data-place=bedroom] .room-art,.room[data-place=bedroom] .room-shelf,.room[data-place=bedroom] .room-plant,.room[data-place=bedroom] .room-lamp,.room[data-place=bedroom] .room-rug,
+.room[data-place=bathroom] .room-art,.room[data-place=bathroom] .room-shelf,.room[data-place=bathroom] .room-plant,.room[data-place=bathroom] .room-lamp,.room[data-place=bathroom] .room-rug,.room[data-place=bathroom] .window-sun,.room[data-place=bathroom] .room-mobile{display:none}
+.bedroom-scene,.bathroom-scene{display:none;position:absolute;inset:0;z-index:2;pointer-events:none}
+.room[data-place=bedroom] .bedroom-scene{display:block}
+.room[data-place=bathroom] .bathroom-scene{display:block}
+.bedroom-star{position:absolute;top:41px;right:27%;font-size:31px;color:#fff4c4;text-shadow:0 0 14px #fff9d8;animation:deluxeTwinkle 3s infinite}
+.bedroom-moon{position:absolute;top:37px;right:12%;font-size:62px;line-height:1;color:#ffefc8;text-shadow:0 0 23px #fff6d0b8}
+.bedroom-label{position:absolute;top:111px;right:8%;font-size:10px;letter-spacing:2px;color:#fffdf5;font-weight:1000;text-shadow:0 1px 5px #736aa3}
+.bedside-table{position:absolute;z-index:2;bottom:54px;left:5%;width:73px;height:71px;border-radius:18px 18px 8px 8px;background:linear-gradient(135deg,#f5caba,#d5a3ba);border:5px solid #fff4ee;box-shadow:0 7px 0 #b48c9b}
+.bedside-table:after{content:'♡';position:absolute;left:26px;bottom:11px;font-size:24px;color:#fff4ee}
+.bedside-lamp{position:absolute;top:-43px;left:13px;font-size:32px;filter:drop-shadow(0 2px 5px #fff6bf)}
+.room .pet-bed{transition:all .45s ease}
+.room[data-place=living] .pet-bed{opacity:.58}
+.room[data-place=bedroom] .pet-bed{z-index:4;left:auto;right:5%;bottom:42px;width:58%;max-width:230px;height:101px;transform:none!important;opacity:1;filter:drop-shadow(0 12px 7px #8d638347)}
+.room[data-place=bedroom] .bed-mattress{inset:13px 0 0;border-width:6px;border-color:#fff7fd;border-radius:37px 37px 20px 20px;background:linear-gradient(155deg,#f4bfd8,#cc95c9);box-shadow:inset 0 -16px #b57cb2,0 3px 0 #846d9f}
+.room[data-place=bedroom] .bed-pillow{left:7%;width:34%;height:49px;top:15px;border-radius:17px;border:4px solid #fff;background:linear-gradient(145deg,#fffefa,#ffe2f0);box-shadow:0 3px 0 #dd9ebb}
+.room[data-place=bedroom] .bed-heart{left:67%;bottom:13px;font-size:23px}
+.bed-blanket{display:none;position:absolute;z-index:7;right:6%;bottom:65px;width:30%;max-width:118px;height:59px;border-radius:11px 35px 20px 22px;border:5px solid #fff5f8;background:linear-gradient(140deg,#f9d4e7,#ddacd6);box-shadow:0 6px 0 #b581ad;transform:rotate(-5deg);pointer-events:none}
+.bed-blanket span{position:absolute;left:48%;top:12px;color:white;font-size:25px;font-weight:1000}
+.room[data-place=bedroom].bedtime .bed-blanket{display:block;animation:blanketBreath 2.4s ease-in-out infinite}
+@keyframes blanketBreath{50%{transform:rotate(-5deg) translateY(-3px)}}
+.room[data-place=bedroom] .creature.lying{left:64%!important;bottom:72px!important;width:148px!important;height:171px!important;z-index:5;transform:translateX(-50%) rotate(-73deg) scale(.78);transform-origin:50% 75%;filter:drop-shadow(0 3px 2px #76587f4f)}
+.room[data-place=bedroom] .creature.lying .pet-3d-img,.room[data-place=bedroom] .creature.lying svg{animation:petSleep 2.6s ease-in-out infinite}
+.room[data-place=bedroom] .creature.lying .accessory{display:none}
+.bath-mirror{position:absolute;left:9%;top:26px;height:112px;width:107px;border-radius:43px 43px 12px 12px;border:8px solid #fff;background:linear-gradient(140deg,#c7f5f9,#f5fffa 55%,#b4e7ed);box-shadow:0 5px 0 #9acfc6,0 8px 12px #9cc0bb45}
+.bath-mirror:before{content:'';position:absolute;left:13px;top:10px;width:19px;height:68px;border-left:5px solid #fff8;border-radius:20px;transform:rotate(25deg)}
+.bath-mirror span{position:absolute;right:12px;top:10px;font-size:23px;color:white}
+.bath-sink{position:absolute;top:143px;left:11%;width:104px;height:33px;border-radius:40% 40% 65% 65%;background:linear-gradient(#fff,#ddf5f5);border:5px solid #b1ddd5;box-shadow:0 9px 0 #98c5c0}
+.bath-sink .tap{position:absolute;top:-26px;left:44px;width:18px;height:26px;border:6px solid #86bdc3;border-radius:12px 12px 0 0;border-bottom:0}
+.bath-toilet{position:absolute;z-index:4;right:5%;bottom:42px;width:109px;height:123px}
+.toilet-lid{position:absolute;right:0;top:0;width:55px;height:66px;border:6px solid #fff;background:linear-gradient(160deg,#e4ffff,#b2dfe3);border-radius:13px 13px 21px 21px;box-shadow:0 4px 0 #89bdc5}
+.toilet-seat{position:absolute;right:11px;top:48px;width:79px;height:41px;border:6px solid #fff;background:linear-gradient(#e6fcff,#c1e7eb);border-radius:52% 52% 38% 38%;box-shadow:0 4px 0 #8ebcc4}
+.toilet-base{position:absolute;right:17px;bottom:0;width:55px;height:50px;border-radius:0 0 17px 17px;background:linear-gradient(90deg,#f9ffff,#cceaf0);box-shadow:0 6px 0 #87c0be}
+.toilet-flush{position:absolute;right:18px;top:8px;font-size:19px;color:#fff}
+.bath-tub{position:absolute;z-index:7;left:3%;bottom:33px;width:42%;max-width:181px;height:63px;border:6px solid #fff9ff;border-radius:16px 16px 47px 47px;background:linear-gradient(155deg,#e7c8f9,#b0b1ec);box-shadow:inset 0 -15px #8ca0d7,0 7px 0 #8fb6bf}
+.bath-tub:before{content:'';position:absolute;left:-8px;top:-17px;width:calc(100% + 16px);height:18px;border-radius:60%;border:4px solid #fff;background:#c4f3ff}
+.bath-bubble{position:absolute;font-size:31px;color:#fff;opacity:.92;text-shadow:0 0 4px #9bcbd3;animation:bubbleFloat 2.1s ease-in-out infinite}
+.bubble1{left:15%;top:-50px}.bubble2{left:50%;top:-66px;animation-delay:.5s}.bubble3{right:8%;top:-38px;animation-delay:1s}
+@keyframes bubbleFloat{50%{transform:translateY(-9px);opacity:.62}}
+.bath-mat{position:absolute;right:2%;bottom:16px;width:33%;height:20px;background:#b6f0db;border:4px solid #e7fff2;border-radius:50%}
+.room[data-place=bathroom] .creature.toileting{left:77%!important;bottom:70px!important;transform:translateX(-50%) scale(.64);z-index:5}
+.room[data-place=bathroom] .creature.bathing{left:27%!important;bottom:58px!important;transform:translateX(-50%) scale(.72);z-index:5}
+.room[data-place=bathroom].flushing .toilet-seat{animation:toiletFlush .5s ease-in-out 3}
+@keyframes toiletFlush{50%{background:#b6e8ff}}
+.room[data-place=bathroom] .poop-layer{display:block}
+.room:not([data-place=bathroom]) .poop-layer{display:none}
+.room[data-place=bathroom] .poop{bottom:30px!important}
+.room[data-place=bedroom] .food-bowl,.room[data-place=bathroom] .food-bowl{display:none}
+.room[data-place=bathroom] .pet-bed{display:none}
+.room[data-place=bedroom] .room-hint{color:#9984a4}
+@media(max-width:740px){
+ .care-first{margin:9px 0 14px;padding:10px}
+ .care-first .actions-head h2{font-size:18px}
+ .care-first .pet-actions{gap:6px}
+ .care-first .care-button{min-height:78px;padding:6px 1px}
+ .care-first .care-icon{font-size:25px}
+ .care-first .care-button strong{font-size:12px}
+ .care-first .care-button small{font-size:9px}
+ .pet-select-lower{padding:8px 5px}
+ .room-controls{padding-bottom:9px}
+ .room-tab{min-height:39px;font-size:12px}
+ .room[data-place=bedroom] .pet-bed{right:3%;bottom:38px;width:60%;height:94px}
+ .room[data-place=bedroom] .creature.lying{bottom:64px!important}
+}
+@media(max-width:380px){
+ .care-first .care-button{min-height:75px}
+ .care-first .care-button small{font-size:9px}
+ .room[data-place=bedroom] .creature.lying{width:120px!important;height:150px!important;bottom:59px!important}
+ .room[data-place=bedroom] .pet-bed{bottom:31px}
+ .room[data-place=bathroom] .creature.toileting{transform:translateX(-50%) scale(.58)}
+ .room[data-place=bathroom] .creature.bathing{transform:translateX(-50%) scale(.61)}
+ .bath-mirror{transform:scale(.80);transform-origin:top left}
+ .bath-sink{transform:scale(.8);transform-origin:top left}
+}
+@media(prefers-reduced-motion:reduce){.bath-bubble,.bedroom-star,.room.bedtime .bed-blanket{animation:none!important}}
