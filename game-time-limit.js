@@ -25,7 +25,7 @@ function read(){
 let state=read(),locked=false,mode=null,last=performance.now(),lastPersist=0;
 const format=ms=>{const total=Math.ceil(Math.max(0,ms)/1000);return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0')};
 function persist(){state.updatedAt=Date.now();try{localStorage.setItem(STORE,JSON.stringify(state));}catch(_){$('timeWarning').textContent='⚠️ 브라우저 저장이 차단되어 종료 후 기록이 남지 않을 수 있어요';}}
-function advanceDay(){if(state.date===day())return;state={...fresh(),limitMinutes:state.limitMinutes,allowanceMs:state.limitMinutes*60000};persist();locked=false;mode=null;$('gameTimeGate').hidden=true;update();}
+function advanceDay(){if(state.date===day())return;state={...fresh(),limitMinutes:state.limitMinutes,allowanceMs:state.limitMinutes*60000};persist();locked=false;mode=null;$('gameTimeGate').hidden=true;document.querySelector('.wrap')?.removeAttribute('inert');update();}
 function remaining(){return Math.max(0,state.allowanceMs-state.usedMs)}
 function update(){
  const left=remaining();
@@ -40,7 +40,7 @@ function stopGames(){
 }
 function showGate(nextMode){
  mode=nextMode;
- const overlay=$('gameTimeGate');overlay.hidden=false;
+ const overlay=$('gameTimeGate');overlay.hidden=false;document.querySelector('.wrap')?.setAttribute('inert','');
  $('timeGateTitle').textContent=nextMode==='locked'?'오늘 게임 시간 끝! 🌙':'보호자 설정 🔒';
  $('timeGateDescription').textContent=nextMode==='locked'
   ?'약속한 '+state.limitMinutes+'분을 모두 사용했어요. 다음 날 자동으로 다시 플레이할 수 있어요.'
@@ -61,6 +61,7 @@ function unlock(extra){
  if(extra){state.allowanceMs=Math.min(24*3600000,state.allowanceMs+state.limitMinutes*60000);persist()}
  locked=remaining()<=0;
  $('gameTimeGate').hidden=!locked;
+ if(!locked)document.querySelector('.wrap')?.removeAttribute('inert');
  mode=locked?'locked':null;update();
  if(locked)showGate('locked');
 }
@@ -78,7 +79,7 @@ function tick(){
 $('timeParentOpen').addEventListener('click',()=>showGate(locked?'locked':'settings'));
 $('timeGateDismiss').addEventListener('click',()=>{
  if(locked)return;
- mode=null;$('gameTimeGate').hidden=true;$('timePin').value='';last=performance.now();
+ mode=null;$('gameTimeGate').hidden=true;document.querySelector('.wrap')?.removeAttribute('inert');$('timePin').value='';last=performance.now();
 });
 $('timePinForm').addEventListener('submit',e=>{
  e.preventDefault();
@@ -99,7 +100,7 @@ $('timeSettingsForm').addEventListener('submit',e=>{
  state.limitMinutes=minutes;
  // Preserve already used minutes. Editing the limit must not erase elapsed play time.
  state.allowanceMs=minutes*60000;
- persist();mode=null;$('gameTimeGate').hidden=true;last=performance.now();
+ persist();mode=null;$('gameTimeGate').hidden=true;document.querySelector('.wrap')?.removeAttribute('inert');last=performance.now();
  if(remaining()<=0)lock();else update();
 });
 document.addEventListener('visibilitychange',()=>{last=performance.now();persist();advanceDay()});
