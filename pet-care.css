@@ -414,3 +414,78 @@ body{background:radial-gradient(ellipse 900px 450px at 50% -140px,#ffecf0 1%,tra
  .bath-sink{transform:scale(.8);transform-origin:top left}
 }
 @media(prefers-reduced-motion:reduce){.bath-bubble,.bedroom-star,.room.bedtime .bed-blanket{animation:none!important}}
+
+
+/* V5 compact iPhone layout: remove tall blank spaces in the care tiles. */
+.pet-app{display:block!important}
+.care-first{display:block!important;height:auto!important;min-height:0!important;max-height:none!important;margin:10px 0 11px!important;padding:11px!important}
+.care-first .actions-head{margin:0 0 10px!important}
+.care-first .actions-head h2{font-size:18px!important;margin:2px 0!important}
+.care-first .actions-head p{margin:2px 0!important;font-size:11px}
+.care-first .pet-actions{
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ grid-template-rows:repeat(2,92px)!important;grid-auto-rows:92px!important;
+ align-items:stretch!important;align-content:start!important;gap:7px!important;
+ height:auto!important;max-height:none!important;min-height:0!important;flex:none!important;
+}
+.care-first .care-button{
+ display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;
+ height:92px!important;min-height:0!important;max-height:92px!important;overflow:hidden;
+ padding:7px 3px!important;gap:3px!important;align-self:stretch!important;
+ border-radius:16px!important;box-shadow:0 3px 0 #eddce5!important;
+}
+.care-first .care-button:before{height:26px!important;top:-8px!important}
+.care-first .care-icon{
+ width:37px!important;height:36px!important;min-height:36px!important;display:grid!important;place-items:center!important;
+ font-size:24px!important;margin:0!important;line-height:1!important;border-radius:12px!important;
+}
+.care-first .care-button strong{font-size:12px!important;line-height:1.15!important;margin:0!important;white-space:nowrap}
+.care-first .care-button small{font-size:9px!important;line-height:1.15!important;letter-spacing:-.3px!important;max-width:98%;white-space:normal;text-align:center}
+.mini-top{background:linear-gradient(155deg,#fffdf9,#fff7f0);border:1.5px solid #f3e0e5;border-radius:22px;padding:11px;margin:12px 0}
+.mini-top .section-heading{margin:0 2px 9px!important;padding:0}
+.mini-top .section-heading h2{font-size:18px!important;line-height:1.25!important;margin:3px 0!important}
+.mini-top .section-symbol{font-size:22px}
+.mini-top .mini-options{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+.mini-top .mini-choice{
+ display:flex;align-items:center;min-width:0;width:100%;height:71px!important;min-height:71px!important;max-height:71px!important;
+ padding:7px!important;border-radius:16px!important;gap:7px!important;
+ box-shadow:0 3px 0 #ebdfe6!important;
+}
+.mini-top .mini-symbol{width:39px!important;height:40px!important;min-width:39px!important;flex:none;display:grid;place-items:center;font-size:25px!important;border-radius:12px!important}
+.mini-top .mini-choice strong{font-size:12px!important;white-space:nowrap}
+.mini-top .mini-choice p{font-size:9px!important;line-height:1.25;margin:2px 0 0!important}
+.mini-top .mini-choice .mini-arrow{display:none!important}
+.mini-choice.bubble{background:linear-gradient(135deg,#e7f9ff,#fcf8ff);border-color:#d1eef8}
+.mini-choice.heart{background:linear-gradient(135deg,#ffeaf3,#fffafd);border-color:#f8d9eb}
+.daily-fun{display:grid;grid-template-columns:1fr;gap:7px;margin:10px 0 13px}
+.daily-attendance,.pet-request{display:flex;align-items:center;gap:9px;background:#fffdfc;border:1.5px solid #f1e0e8;border-radius:17px;padding:9px 10px;min-height:62px;box-shadow:0 3px 0 #f7e8ec}
+.daily-attendance{background:linear-gradient(110deg,#fffaf0,#fff6df)}
+.pet-request{background:linear-gradient(110deg,#fff9fc,#f8f2ff)}
+.daily-emoji{font-size:26px;line-height:1;flex:none}
+.daily-content{display:flex;flex:1;flex-direction:column;min-width:0;gap:3px}
+.daily-content strong{color:#79566e;font-size:13px}
+.daily-content span{color:#a4899d;font-size:10px;line-height:1.3;overflow-wrap:anywhere}
+.reward-button{flex:none;border:1px solid #eabbd0;border-radius:12px;background:linear-gradient(150deg,#f8d8ea,#f8e8f0);color:#a35680;min-width:68px;min-height:38px;padding:7px 9px;font-size:11px;font-weight:1000}
+.reward-button:disabled{opacity:.6;background:#f1edea}
+.request-button{background:linear-gradient(150deg,#eee1ff,#f9ecff)}
+.pet-experience{margin-top:10px!important}
+.pet-select-lower{margin-top:13px!important}
+.collection-note{font-size:11px;color:#a28b9e;text-align:center;margin:12px 0 2px}
+.shop-item.locked{opacity:.6}
+.room-decorations{position:absolute;inset:0;z-index:3;pointer-events:none}
+.room-decorations>span{display:none;position:absolute;filter:drop-shadow(0 4px 4px #c39ab955)}
+.room[data-place=living][data-decor=sticker] .decor-sticker{display:block;top:30px;right:11%;font-size:45px}
+.room[data-place=living][data-decor=cushion] .decor-cushion{display:block;bottom:45px;left:13%;font-size:50px}
+.room[data-place=living][data-decor=lamp] .decor-lamp{display:block;top:68px;right:15%;font-size:42px;text-shadow:0 0 18px #fff5af}
+.level-up-flash{position:absolute;top:29%;left:50%;transform:translateX(-50%);z-index:40;white-space:nowrap;border-radius:25px;border:2px solid #ffe1a3;background:#fff6d7eb;box-shadow:0 8px 28px #b07e6373;font-size:16px;font-weight:1000;color:#ab6f34;padding:13px;animation:rise 1.8s both}
+.mini-thing.mini-bubble,.mini-thing.mini-heart{font-size:40px!important;filter:drop-shadow(0 4px 6px #79a6cf88)}
+.mini-thing.mini-bubble{border-radius:50%;background:radial-gradient(circle at 30% 25%,#ffffffa6,#caeeff6e 58%,#e5e4ff);box-shadow:inset -3px -5px 8px #b6d8ef70}
+.mini-thing.mini-heart{border-radius:50%;background:#fff7ffb5}
+@media(max-width:390px){
+ .care-first{padding:8px!important}
+ .care-first .pet-actions{gap:5px!important;grid-template-rows:repeat(2,85px)!important}
+ .care-first .care-button{height:85px!important;max-height:85px!important}
+ .care-first .care-button small{font-size:8px!important}
+ .mini-top{padding:9px}
+ .mini-top .mini-choice{height:67px!important;min-height:67px!important;max-height:67px!important}
+}
