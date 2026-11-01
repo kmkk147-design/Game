@@ -13,9 +13,9 @@ const PETS=[
 {id:'hamster',name:'콩이',type:'햄스터',tone:'#f2cf9a',shade:'#c69562',inner:'#ffebcc',style:'hamster',food:'🌰'},
 {id:'unicorn',name:'별이',type:'유니콘',tone:'#e6cbfa',shade:'#b5a1e6',inner:'#ffedfc',style:'unicorn',food:'🍓'}
 ];
-const STORE='game-pet-house-v1',SHOP=[{id:'bow',icon:'🎀',name:'러블리 리본',price:35},{id:'hat',icon:'🎩',name:'멋진 모자',price:55},{id:'crown',icon:'👑',name:'반짝 왕관',price:90}];
+const STORE='game-pet-house-v1',SHOP=[{id:'bow',icon:'🎀',name:'러블리 리본',price:35},{id:'hat',icon:'🎩',name:'멋진 모자',price:55},{id:'crown',icon:'👑',name:'반짝 왕관',price:90},{id:'starlight',icon:'🌟',name:'반짝 별모자',price:45,levelRequired:3},{id:'daily-bow',icon:'🌈',name:'7일 출석 선물',price:0,special:true},{id:'cushion',icon:'🧸',name:'포근한 쿠션',price:30,room:true},{id:'lamp',icon:'🌟',name:'별빛 조명',price:45,room:true},{id:'sticker',icon:'🌈',name:'무지개 벽장식',price:40,room:true}];
 const now=()=>Date.now(),rand=(a,b)=>Math.round(a+Math.random()*(b-a));
-let cache={pets:{},active:'fox',walletCoins:25},id='fox',busy=false,activeRoom='living',storageAvailable=true,actionTimer=null,poopTimer=null,roamTimer=null,miniTick=null,miniSpawn=null,mini={active:false,type:'fruit',score:0,deadline:0},audio=null,sound=true;
+let cache={pets:{},active:'fox',walletCoins:25,roomOwned:[],roomDecor:null,attendance:null,request:null,requestLastRewardAt:0},id='fox',busy=false,activeRoom='living',storageAvailable=true,actionTimer=null,poopTimer=null,roamTimer=null,miniTick=null,miniSpawn=null,mini={active:false,type:'fruit',score:0,deadline:0},audio=null,sound=true;
 function getPet(){return cache.pets[id]}
 function makePet(){return{food:78,happy:86,clean:90,energy:82,xp:0,level:1,coins:0,poops:0,feedCount:0,decor:null,owned:[],lastAt:now()}}
 function save(){
@@ -34,7 +34,7 @@ function read(){
   try{data=JSON.parse(localStorage.getItem(STORE+'-backup')||'null')}catch(_){}
  }
  if(data&&typeof data==='object'&&data.pets&&typeof data.pets==='object'){
-  cache={pets:data.pets,active:typeof data.active==='string'?data.active:'fox',walletCoins:data.walletCoins};
+  cache={...data,pets:data.pets,active:typeof data.active==='string'?data.active:'fox',walletCoins:data.walletCoins};
  }
  if(!PETS.some(p=>p.id===cache.active))cache.active='fox';
  // Previous versions stored a separate coin balance per character.
@@ -48,6 +48,9 @@ function read(){
   cache.walletCoins=Math.max(0,oldBalance);
  }
  cache.walletCoins=Math.min(999999999,Math.max(0,Math.floor(cache.walletCoins)));
+ if(!Array.isArray(cache.roomOwned))cache.roomOwned=[];
+ if(typeof cache.requestLastRewardAt!=='number')cache.requestLastRewardAt=0;
+ if(cache.request&&(!PETS.some(p=>p.id===cache.request.petId)||!['feed','clean','bath','sleep','pet','play'].includes(cache.request.action)))cache.request=null;
  // Keep established players' selected pet; default the new design for untouched starters only.
  try{
   if(!localStorage.getItem('game-pet-3d-mascot-onboarded-v1')){
@@ -75,6 +78,77 @@ function recover(p){
   p.poops=Math.min(3,p.poops+Math.floor(minutes/70));
  }
  p.lastAt=now();return p;
+}
+const REQUESTS=[
+ {action:'feed',icon:'🍓',text:'맛있는 간식이 먹고 싶어!',reward:9},
+ {action:'clean',icon:'🚽',text:'화장실에 데려다줘!',reward:8},
+ {action:'bath',icon:'🫧',text:'따뜻하게 목욕하고 싶어!',reward:10},
+ {action:'sleep',icon:'🌙',text:'침실에서 낮잠 잘래!',reward:8},
+ {action:'pet',icon:'💗',text:'쓰담쓰담 해주면 행복해!',reward:8},
+ {action:'play',icon:'🧸',text:'나랑 신나게 놀아줘!',reward:10}
+];
+function seoulDate(){
+ const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+ const p=k=>parts.find(x=>x.type===k).value;
+ return p('year')+'-'+p('month')+'-'+p('day');
+}
+function dayDifference(a,b){
+ const parse=s=>Date.parse(s+'T00:00:00Z');
+ return Number.isFinite(parse(a))&&Number.isFinite(parse(b))?Math.round((parse(b)-parse(a))/86400000):999;
+}
+function attendanceView(){
+ const el=$('attendanceInfo'),btn=$('claimAttendance');if(!el||!btn)return;
+ const rec=cache.attendance||{},today=seoulDate(),claimed=rec.date===today;
+ const streak=Math.max(0,Math.min(7,Number(rec.streak)||0));
+ const next=claimed?streak:dayDifference(rec.date||'',today)===1?Math.min(7,streak+1):1;
+ const prize=[10,15,20,25,30,35,50][Math.max(0,next-1)];
+ el.textContent=claimed?streak+'일 출석 완료 · 내일 또 만나요!':next+'일차 선물 🪙 '+prize+'코인'+(next===7?' + 🌈 특별 리본':'');
+ btn.textContent=claimed?'받음 ✓':'선물 받기';btn.disabled=claimed;
+}
+function claimAttendance(){
+ const today=seoulDate(),rec=cache.attendance||{};if(rec.date===today)return;
+ const streak=dayDifference(rec.date||'',today)===1?Math.min(7,Math.max(0,rec.streak||0)+1):1;
+ const prize=[10,15,20,25,30,35,50][streak-1];
+ cache.attendance={date:today,streak};cache.walletCoins=Math.min(999999999,cache.walletCoins+prize);
+ if(streak===7){const p=getPet();if(!p.owned.includes('daily-bow'))p.owned.push('daily-bow');}
+ attendanceView();render();save();playTone(920);sparkles(streak===7?'🌈':'🪙',9);
+ note('🎁 출석 '+streak+'일차! '+prize+'코인 획득'+(streak===7?' · 특별 리본 선물!':'')+' ♡');
+}
+function requestView(){
+ const el=$('requestInfo'),btn=$('requestHelp');if(!el||!btn)return;
+ const req=cache.request,remaining=Math.ceil((120000-(now()-cache.requestLastRewardAt))/1000);
+ if(req){
+  const friend=PETS.find(p=>p.id===req.petId),cfg=REQUESTS.find(r=>r.action===req.action);
+  el.textContent=(friend?.name||'친구')+': '+cfg.icon+' '+cfg.text+' · 성공 +'+cfg.reward+'코인';
+  btn.textContent=req.petId===id?'도와주기':'친구 선택';btn.disabled=false;
+ }else if(remaining>0){
+  el.textContent='새 부탁이 곧 도착해요 · 약 '+Math.ceil(remaining/60)+'분';
+  btn.textContent='조금 뒤에';btn.disabled=true;
+ }else{
+  el.textContent='부탁을 들어주면 보너스 코인!';
+  btn.textContent='들어보기';btn.disabled=false;
+ }
+}
+function startRequest(force=false){
+ if(cache.request){requestView();if(force&&cache.request.petId!==id)selectPet(cache.request.petId);else if(force){const cfg=REQUESTS.find(x=>x.action===cache.request.action);note('💌 '+cfg.text)}return;}
+ if(now()-cache.requestLastRewardAt<120000){requestView();return;}
+ const cfg=REQUESTS[rand(0,REQUESTS.length-1)];
+ cache.request={petId:id,action:cfg.action,createdAt:now()};requestView();save();
+ if(force)note('💌 '+PETS.find(x=>x.id===id).name+': '+cfg.text);
+}
+function completeRequest(action){
+ const req=cache.request;if(!req||req.petId!==id||req.action!==action)return;
+ const cfg=REQUESTS.find(r=>r.action===action);
+ cache.request=null;cache.requestLastRewardAt=now();
+ cache.walletCoins=Math.min(999999999,cache.walletCoins+cfg.reward);
+ gainXp(getPet(),7);requestView();renderMetersOnly();save();
+ sparkles('🪙',7);note('💌 부탁 성공! '+cfg.reward+'코인과 경험치를 받았어요!');
+}
+function renderRoomDecor(){const room=$('petRoom');if(room)room.dataset.decor=cache.roomDecor||'none';}
+function showLevelUp(level){
+ const room=$('petRoom');if(!room)return;
+ const el=document.createElement('div');el.className='level-up-flash';el.textContent='✨ LEVEL '+level+'! +15🪙'+(level===3?' · 별모자 해금!':'');
+ room.append(el);setTimeout(()=>el.remove(),2200);
 }
 function note(message){$('petMessage').textContent=message;$('petThought').textContent=message.length>19?message.slice(0,19)+'…':message}
 function playTone(freq=620,duration=.12){if(!sound)return;try{audio??=new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume().catch(()=>{});const t=audio.currentTime,o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(freq*1.12,t+duration);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.065,t+.018);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+duration+.02)}catch(_){}}
@@ -259,18 +333,28 @@ function renderPoops(){
  for(let i=0;i<getPet().poops;i++){const b=document.createElement('button');b.className='poop';b.type='button';b.textContent='💩';b.style.left=(14+i*18)+'%';b.style.bottom=(14+i%2*10)+'px';b.setAttribute('aria-label','똥 치우기');b.addEventListener('click',()=>care('clean'));host.append(b)}
 }
 function renderShop(){
- const host=$('petShop');host.replaceChildren();const p=getPet();
- for(const item of SHOP){const own=p.owned.includes(item.id),worn=p.decor===item.id;
-  const b=document.createElement('button');b.type='button';b.className='shop-item'+(own?' owned':'');
-  b.innerHTML='<span>'+item.icon+'</span><strong>'+item.name+'</strong><small>'+(worn?'✅ 착용 중':own?'착용하기':'🪙 '+item.price)+'</small>';
-  b.addEventListener('click',()=>buy(item.id));host.append(b);
+ const host=$('petShop');host.replaceChildren();const p=getPet();let collected=0;
+ for(const item of SHOP){
+  const own=item.room?cache.roomOwned.includes(item.id):p.owned.includes(item.id);
+  const selected=item.room?cache.roomDecor===item.id:p.decor===item.id;
+  const locked=item.special&&!own||item.levelRequired&&p.level<item.levelRequired;
+  if(own)collected++;
+  const b=document.createElement('button');b.type='button';b.className='shop-item'+(own?' owned':'')+(locked?' locked':'');
+  b.innerHTML='<span>'+item.icon+'</span><strong>'+item.name+'</strong><small>'+(selected?'✓ 사용 중':locked?(item.special?'🎁 7일 출석':'🔒 Lv.'+item.levelRequired):own?'꾸미기':'🪙 '+item.price)+'</small>';
+  b.disabled=Boolean(locked);b.addEventListener('click',()=>buy(item.id));host.append(b);
  }
+ const progress=$('collectionProgress');if(progress)progress.textContent='🎀 '+p.name+'의 수집 '+collected+' / '+SHOP.length+' · 원하는 아이템을 선택해요';
 }
 function buy(itemId){
- if(mini.active||busy)return;const item=SHOP.find(x=>x.id===itemId),p=getPet();if(!item)return;
- if(p.decor===itemId){p.decor=null;note('옷을 잠깐 벗었어요!');}
- else if(p.owned.includes(itemId)){p.decor=itemId;note('짜잔! '+item.name+'를 착용했어요! ✨');}
- else if(cache.walletCoins>=item.price){cache.walletCoins-=item.price;p.owned.push(itemId);p.decor=itemId;note('선물 성공! '+item.name+' 🎁');playTone(890);}
+ if(mini.active||busy)return;
+ const item=SHOP.find(x=>x.id===itemId),p=getPet();if(!item)return;
+ const owned=item.room?cache.roomOwned:p.owned;
+ if(item.special&&!owned.includes(itemId))return;
+ if(item.levelRequired&&p.level<item.levelRequired){note('🔒 레벨 '+item.levelRequired+'부터 살 수 있어요!');return;}
+ if(item.room&&cache.roomDecor===itemId){cache.roomDecor=null;note('방 장식을 잠시 치웠어요');}
+ else if(!item.room&&p.decor===itemId){p.decor=null;note('장식을 잠시 벗었어요');}
+ else if(owned.includes(itemId)){if(item.room)cache.roomDecor=itemId;else p.decor=itemId;note('✨ '+item.name+'로 예쁘게 꾸몄어요!');}
+ else if(cache.walletCoins>=item.price){cache.walletCoins-=item.price;owned.push(itemId);if(item.room)cache.roomDecor=itemId;else p.decor=itemId;note('🎁 '+item.name+' 선물을 받았어요!');playTone(890);}
  else{note('🪙 코인이 모자라요! 미니게임으로 모아요.');return;}
  save();render();
 }
