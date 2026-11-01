@@ -191,3 +191,11 @@ body{background:radial-gradient(ellipse 900px 450px at 50% -140px,#ffecf0 1%,tra
  .mini-options{gap:9px}.mini-choice{padding:10px 7px}.mini-symbol{width:40px;height:45px;font-size:28px}
 }
 @media(prefers-reduced-motion:reduce){.creature:not(.sleep):not(.eat) .eye-open,.creature:not(.sleep):not(.eat) .eye-close{animation:none!important}}
+
+
+/* Polished, readable reaction layers. */
+.food-float{position:absolute;z-index:12;right:16%;bottom:65px;font-size:33px;pointer-events:none;filter:drop-shadow(0 5px 3px #ae849254);animation:foodToPet 1.35s cubic-bezier(.18,.8,.19,1) forwards}
+@keyframes foodToPet{0%{opacity:0;transform:translate(0,8px) scale(.65) rotate(-13deg)}16%{opacity:1}70%{opacity:1;transform:translate(-28px,-74px) rotate(14deg) scale(.95)}100%{opacity:0;transform:translate(-37px,-89px) rotate(6deg) scale(.35)}}
+.fx-layer .spark{font-size:clamp(22px,4vw,29px);filter:drop-shadow(0 4px 2px #a8969f54)}
+.shop-item:active,.pick:active{filter:brightness(.98)}
+@media(max-width:740px){.food-float{right:13%;bottom:54px;font-size:31px}}
