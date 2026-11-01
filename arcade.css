@@ -556,3 +556,9 @@
 .mole-leaderboard .mole-rank-name{overflow-wrap:anywhere;min-width:0}
 .mole-leaderboard .mole-rank-current{background:#fff0ce;box-shadow:inset 0 0 0 2px #f4b95c}
 @media(max-width:540px){.mole-leaderboard{padding:13px 10px}.mole-leaderboard h3{font-size:18px}.mole-leaderboard .rank-list li{grid-template-columns:33px minmax(0,1fr) 76px;gap:5px;padding:9px 8px;font-size:12px}.mole-leaderboard .rank-list .rank-pos{font-size:18px}.mole-save-record{margin:15px auto}}
+
+/* Six tidy navigation tabs, including the illustrated Tamagotchi-style pet house. */
+.game-tab[data-game=pet].active{background:linear-gradient(140deg,#fff0f4,#fff8e9);color:#b26885;border-color:#edabc1;box-shadow:0 6px 0 #f4d5df}
+.game-tabs{grid-template-columns:repeat(3,minmax(0,1fr));}
+@media(min-width:1080px){.game-tabs{grid-template-columns:repeat(6,minmax(0,1fr));}.game-tab{font-size:15px;gap:5px}.game-tab .tab-emoji{font-size:23px}}
+@media(max-width:650px){.game-tabs{grid-template-columns:repeat(2,minmax(0,1fr));}}
