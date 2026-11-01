@@ -2,11 +2,11 @@
 'use strict';
 const $=id=>document.getElementById(id),clamp=x=>Math.max(0,Math.min(100,x));
 const PETS=[
+{id:'fox',name:'보리',type:'레서판다',tone:'#f7b074',shade:'#de7a50',inner:'#fff4e8',style:'redpanda',food:'🍎'},
 {id:'chick',name:'삐약이',type:'병아리',tone:'#ffe277',shade:'#efb941',inner:'#fff0ad',style:'chick',food:'🌽'},
 {id:'puppy',name:'몽실이',type:'강아지',tone:'#e9b58e',shade:'#b47858',inner:'#ffe3c4',style:'puppy',food:'🍗'},
 {id:'kitten',name:'솜솜이',type:'아기 고양이',tone:'#f7d2d9',shade:'#dba6b5',inner:'#fff0ed',style:'kitten',food:'🐟'},
 {id:'bunny',name:'토리',type:'토끼',tone:'#efe0fa',shade:'#c7a8e6',inner:'#fff1fb',style:'bunny',food:'🥕'},
-{id:'fox',name:'보리',type:'아기 여우',tone:'#f7b074',shade:'#de7a50',inner:'#fff4e8',style:'fox',food:'🍎'},
 {id:'panda',name:'푸푸',type:'판다',tone:'#fffdf6',shade:'#b7b9c9',inner:'#f5f5ff',style:'panda',food:'🎋'},
 {id:'dino',name:'초코',type:'아기 공룡',tone:'#a8e1c3',shade:'#63bd9e',inner:'#e9ffde',style:'dino',food:'🍎'},
 {id:'penguin',name:'팽팽이',type:'펭귄',tone:'#8ca4d0',shade:'#4c638f',inner:'#fffdf5',style:'penguin',food:'🐟'},
@@ -15,7 +15,7 @@ const PETS=[
 ];
 const STORE='game-pet-house-v1',SHOP=[{id:'bow',icon:'🎀',name:'러블리 리본',price:35},{id:'hat',icon:'🎩',name:'멋진 모자',price:55},{id:'crown',icon:'👑',name:'반짝 왕관',price:90}];
 const now=()=>Date.now(),rand=(a,b)=>Math.round(a+Math.random()*(b-a));
-let cache={pets:{},active:'chick'},id='chick',busy=false,actionTimer=null,poopTimer=null,roamTimer=null,miniTick=null,miniSpawn=null,mini={active:false,type:'fruit',score:0,deadline:0},audio=null,sound=true;
+let cache={pets:{},active:'fox'},id='fox',busy=false,actionTimer=null,poopTimer=null,roamTimer=null,miniTick=null,miniSpawn=null,mini={active:false,type:'fruit',score:0,deadline:0},audio=null,sound=true;
 function getPet(){return cache.pets[id]}
 function makePet(){return{food:78,happy:86,clean:90,energy:82,xp:0,level:1,coins:25,poops:0,feedCount:0,decor:null,owned:[],lastAt:now()}}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(cache))}catch(_){}}
@@ -23,7 +23,17 @@ function read(){
  try{const data=JSON.parse(localStorage.getItem(STORE)||'null');if(data&&typeof data==='object'&&data.pets&&typeof data.pets==='object'){
  cache={pets:data.pets,active:typeof data.active==='string'?data.active:'chick'};
  }}catch(_){}
- if(!PETS.some(p=>p.id===cache.active))cache.active='chick';
+ if(!PETS.some(p=>p.id===cache.active))cache.active='fox';
+ // Offer the newly designed mascot first without destroying previously raised pets.
+ try {
+  if(!localStorage.getItem('game-pet-3d-mascot-onboarded-v1')){
+   const previous=cache.pets[cache.active];
+   if(cache.active==='chick' && (!previous || (previous.level===1 && (previous.feedCount||0)===0 && (previous.xp||0)===0))){
+    cache.active='fox';
+   }
+   localStorage.setItem('game-pet-3d-mascot-onboarded-v1','1');
+  }
+ }catch(_){}
  id=cache.active;
  if(!cache.pets[id])cache.pets[id]=makePet();
 }
@@ -122,6 +132,7 @@ function petEyes(p,mood,uid){
  (watery?'<path d="M64 88 L91 95 M128 95 L155 88" stroke="#916777" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M91 128 Q97 144 88 147" fill="#a8d7ff" opacity=".85"/><path d="M152 128 Q159 144 150 147" fill="#a8d7ff" opacity=".85"/>':'');
 }
 function petSvg(p,scope,adult=false,mood='normal'){
+ if(p.style==='redpanda')return '<img class="pet-3d-img" src="/assets/pet-red-panda.avif?v=mascot1" alt="'+p.name+' · 고품질 레서판다 캐릭터" draggable="false" decoding="async">';
  const uid='plush-'+scope+'-'+p.id;
  const dark=['panda','penguin'].includes(p.style);
  const color=dark?'#f9f8f7':p.tone;
