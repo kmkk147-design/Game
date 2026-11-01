@@ -28,8 +28,8 @@
 #gardenScreen .garden-match-embed{display:block;width:100%;height:1120px;min-height:950px;background:#fff9fc;border:0;border-radius:20px}
 @media(max-width:540px){#gardenScreen .garden-match-embed{height:1240px;border-radius:16px}}
 #petScreen{padding:0!important;overflow:visible!important}
-#petHouseEmbed{display:block;border:0;border-radius:22px;background:#fff9f6;width:100%;height:1550px;min-height:1100px}
-@media(max-width:540px){#petHouseEmbed{border-radius:16px;height:1790px}}
+#petHouseEmbed{display:block;border:0;border-radius:22px;background:#fff9f6;width:100%;height:1200px;min-height:0}
+@media(max-width:540px){#petHouseEmbed{border-radius:16px;height:1200px;min-height:0}}
 
 /* Whole-arcade parent timer, iPhone safe area and lock-screen. */
 .parent-timer{display:flex;align-items:center;justify-content:space-between;gap:8px;max-width:100%;margin:9px 0 14px;padding:8px 12px;border-radius:16px;background:#fffdf9;border:1px solid #efe1e7;box-shadow:0 3px 0 #f4e7ea}
@@ -227,7 +227,7 @@
  <ol id="soccerRankList" class="rank-list"><li class="rank-empty">첫 번째 승부차기 기록을 만들어 보세요!</li></ol></div>
 </section>
 <section id="petScreen" class="arcade-screen" role="tabpanel" aria-labelledby="tab-pet" hidden>
- <iframe id="petHouseEmbed" title="포근포근 펫하우스 — 10가지 귀여운 캐릭터 키우기" src="/pet-care.html?v=fun-compact-20261101" loading="eager" scrolling="no" referrerpolicy="same-origin"></iframe>
+ <iframe id="petHouseEmbed" title="포근포근 펫하우스 — 10가지 귀여운 캐릭터 키우기" src="/pet-care.html?v=mascots-layout-20261101" loading="eager" scrolling="no" referrerpolicy="same-origin"></iframe>
 </section>
 <section id="gardenScreen" class="arcade-screen garden-screen" role="tabpanel" aria-labelledby="tab-garden" hidden>
  <iframe id="gardenMatchEmbed" class="garden-match-embed" src="/balloon-match.html?v=easy-75s-20261031" title="김리안과 권이준의 30초 풍선 짝맞추기" loading="eager" scrolling="no"></iframe>
@@ -478,7 +478,7 @@ chooseShape(0);
  let lastHeight=0;
  function resize(){
   try{const d=frame.contentDocument;if(!d||!d.body)return;
-   const height=Math.max(980,Math.ceil(Math.max(d.body.scrollHeight,d.documentElement.scrollHeight))+14);
+   const height=Math.max(300,Math.ceil(Math.max(d.body.scrollHeight,d.documentElement.scrollHeight))+8);
    if(height!==lastHeight){frame.style.height=height+'px';lastHeight=height;}
   }catch(_){}
  }
