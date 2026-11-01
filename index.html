@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#fff8ee">
-<meta name="description" content="어린이를 위한 미니게임 6종: 색칠공부, 두더지, 소방서, 축구, 김리안과 권이준 사진이 나오는 풍선 보물파티.">
+<meta name="description" content="어린이를 위한 미니게임 6종: 그림 따라 그리기, 두더지, 소방서, 축구, 풍선놀이와 10종 캐릭터 다마고치 펫 키우기.">
 <title>Game · 키즈 플레이 아케이드</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -464,7 +464,11 @@ chooseShape(0);
  window.addEventListener('message',e=>{
   if(e.origin!==location.origin||e.source!==frame.contentWindow||!e.data?.petHouse)return;
   if(e.data.petHouse==='startMini'&&document.getElementById('petScreen')?.hidden===false){
-   window.GamePlayLock?.lock('pet','petHouseEmbed',62);
+   // Align the PLAY ROOM, not the top of this tall iframe, on small screens.
+   // Otherwise the game can start outside the phone's visible viewport.
+   let roomTop=0;
+   try{roomTop=frame.contentDocument?.getElementById('petRoom')?.getBoundingClientRect().top||0;}catch(_){}
+   window.GamePlayLock?.lock('pet','petHouseEmbed',62-roomTop);
   }
   if(e.data.petHouse==='endMini')window.GamePlayLock?.unlock('pet');
  });
