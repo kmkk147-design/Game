@@ -287,7 +287,7 @@ function petSvg(p,scope,adult=false,mood='normal'){
  (mood==='bath'?'<circle cx="37" cy="84" r="8" stroke="#d8f5ff" stroke-width="2" fill="#fff" fill-opacity=".73"/><circle cx="186" cy="135" r="13" stroke="#d8f5ff" stroke-width="2" fill="#fff" fill-opacity=".65"/>':'')+
  '</svg>';
 }
-function gainXp(p,n){p.xp+=n;let levels=0;while(p.xp>=100&&p.level<99){p.xp-=100;p.level++;cache.walletCoins+=15;levels++;}if(levels){note('✨ '+PETS.find(x=>x.id===id).name+' 레벨 '+p.level+'! 성장했어요! 🏆');sparkles('✨',9);playTone(930)}}
+function gainXp(p,n){p.xp+=n;let levels=0;while(p.xp>=100&&p.level<99){p.xp-=100;p.level++;cache.walletCoins+=15;levels++;}if(levels){note('✨ '+PETS.find(x=>x.id===id).name+' 레벨 '+p.level+'! 성장했어요! 🏆');sparkles('✨',9);playTone(930);showLevelUp(p.level)}}
 function formatPercent(x){return Math.round(clamp(x))+'%'}
 function showPetMood(mood){
  const p=getPet(),data=PETS.find(x=>x.id===id),actor=$('petCreature');
@@ -310,7 +310,7 @@ function render(){
  $('petPicker').querySelectorAll('.pick').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));
  const actor=$('petCreature');showPetMood(petMood(p));
  actor.classList.toggle('adult',p.level>=3);
- $('petFoodVisual').textContent=data.food;renderPoops();renderShop();
+ $('petFoodVisual').textContent=data.food;renderPoops();renderShop();renderRoomDecor();attendanceView();requestView();
 }
 function renderPicker(){
  const host=$('petPicker');host.replaceChildren();
@@ -326,7 +326,7 @@ function selectPet(next){
  if(!cache.pets[id])cache.pets[id]=makePet();
  else cache.pets[id]=recover(cache.pets[id]);
  const c=$('petCreature');c.className='creature';c.style.left='50%';switchRoom('living',{force:true,silent:true});
- render();note('💖 '+PETS.find(p=>p.id===id).name+'와 함께 놀자!');save();
+ render();note('💖 '+PETS.find(p=>p.id===id).name+'와 함께 놀자!');requestView();save();
 }
 function renderPoops(){
  const host=$('petPoops');host.replaceChildren();
@@ -398,7 +398,7 @@ function care(action){
   floatFood(PETS.find(x=>x.id===id).food);
   actionTimer=setTimeout(()=>{if(id!==owner)return;el.classList.remove('walk');showPetMood('eating');el.classList.add('eat');playTone(550);$('petBowl').classList.remove('shake');$('petFoodVisual').style.opacity='.18';
    p.food=clamp(p.food+23);p.happy=clamp(p.happy+6);p.energy=clamp(p.energy-2);p.feedCount++;gainXp(p,12);
-   note('냠냠! 맛있게 먹었어요! 😋');sparkles('💖',5);save();finishAction(1450);delayedPoop(owner);setTimeout(()=>$('petFoodVisual').style.opacity='1',1450);
+   note('냠냠! 맛있게 먹었어요! 😋');sparkles('💖',5);completeRequest('feed');save();finishAction(1450);delayedPoop(owner);setTimeout(()=>$('petFoodVisual').style.opacity='1',1450);
   },900);
  }else if(action==='clean'){
   switchRoom('bathroom',{force:true,silent:true});
@@ -412,7 +412,7 @@ function care(action){
    $('petRoom').classList.add('flushing');
    renderPoops();renderMetersOnly();
    note(count?'🚽 쉬~ 시원해요! 물도 내리고 깨끗하게!':'🚽 화장실 다녀왔어요. 손도 씻어요!');
-   sparkles('🫧',7);playTone(770);save();finishAction(1800);
+   sparkles('🫧',7);completeRequest('clean');playTone(770);save();finishAction(1800);
   },1000);
  }else if(action==='bath'){
   switchRoom('bathroom',{force:true,silent:true});
@@ -423,7 +423,7 @@ function care(action){
    el.classList.remove('walk');el.classList.add('bathing');
    p.clean=clamp(p.clean+34);p.happy=clamp(p.happy+6);gainXp(p,13);
    note('🫧 보글보글! 거품 목욕으로 반짝반짝!');
-   renderMetersOnly();sparkles('🫧',10);playTone(730);save();finishAction(2400);
+   renderMetersOnly();sparkles('🫧',10);completeRequest('bath');playTone(730);save();finishAction(2400);
   },900);
  }else if(action==='sleep'){
   if(p.energy>=97){note('아직 쌩쌩해요! 조금 더 놀아요.');busy=false;return;}
@@ -437,14 +437,14 @@ function care(action){
    $('petRoom').classList.add('bedtime');
    p.energy=clamp(p.energy+32);p.happy=clamp(p.happy+3);gainXp(p,12);
    note('🌙 포근한 침대에서 쿨쿨... 좋은 꿈 꾸세요! Zzz');
-   sparkles('💤',5);renderMetersOnly();playTone(490);save();finishAction(6500);
+   sparkles('💤',5);completeRequest('sleep');renderMetersOnly();playTone(490);save();finishAction(6500);
   },1100);
  }else if(action==='pet'){
-  switchRoom('living',{force:true,silent:true});p.happy=clamp(p.happy+14);gainXp(p,6);showPetMood('happy');el.classList.add('jump');note('💗 쓰담쓰담! 너무 좋아요!');sparkles('💕',8);playTone(850);finishAction(820);
+  switchRoom('living',{force:true,silent:true});p.happy=clamp(p.happy+14);gainXp(p,6);showPetMood('happy');el.classList.add('jump');note('💗 쓰담쓰담! 너무 좋아요!');sparkles('💕',8);completeRequest('pet');playTone(850);finishAction(820);
  }else if(action==='play'){
   if(p.energy<12){note('🥱 졸려요. 먼저 잠을 자게 해줘요!');busy=false;return;}
   switchRoom('living',{force:true,silent:true});p.happy=clamp(p.happy+20);p.energy=clamp(p.energy-8);p.food=clamp(p.food-3);gainXp(p,12);
-  showPetMood('excited');el.classList.add('jump');note('🧸 폴짝폴짝! 신나게 놀았어요!');sparkles('⭐',8);playTone(900);finishAction(1000);
+  showPetMood('excited');el.classList.add('jump');note('🧸 폴짝폴짝! 신나게 놀았어요!');sparkles('⭐',8);completeRequest('play');playTone(900);finishAction(1000);
  }else busy=false;
  renderMetersOnly();save();
 }
@@ -455,19 +455,20 @@ function renderMetersOnly(){
  $('xpFill').style.width=p.xp+'%';$('xpText').textContent=p.xp+' / 100 XP';
 }
 function passiveNeeds(){
- if(mini.active||busy)return;const p=getPet();let m='오늘도 함께 놀자! ♡';
+ if(mini.active||busy)return;const p=getPet();let m=['오늘도 함께 놀자! ♡','오늘은 정말 신나는 날이야! ✨','우리 집이 참 포근해 ♡','같이 있으면 행복해! 💗'][rand(0,3)];
  if(p.poops>=1)m='💩 똥이 생겼어요! 청소해 줘요!';
  else if(p.food<30)m='🍓 배가 고파요! 밥 주세요!';
  else if(p.energy<25)m='🥱 피곤해요! 재워 주세요!';
  else if(p.clean<30)m='🫧 목욕하고 싶어요!';
  else if(p.happy<30)m='💗 같이 놀고 싶어요!';
+ if(cache.request?.petId===id){const cfg=REQUESTS.find(x=>x.action===cache.request.action);if(cfg)m=cfg.icon+' '+cfg.text}
  $('petThought').textContent=m;showPetMood(petMood(p));
 }
 function updateNeeds(){
  if(mini.active)return;
  const p=getPet(),t=now(),m=Math.max(0,Math.min(2,(t-p.lastAt)/60000));p.lastAt=t;
  if(m>0){p.food=clamp(p.food-m*.6);p.happy=clamp(p.happy-m*.23);p.clean=clamp(p.clean-m*.28);p.energy=clamp(p.energy-m*.2);renderMetersOnly();save()}
- passiveNeeds();
+ passiveNeeds();requestView();
 }
 function roam(){
  if(mini.active||busy||activeRoom!=='living')return;const el=$('petCreature');if(el.classList.contains('sleep'))return;
