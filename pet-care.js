@@ -82,14 +82,38 @@ function petSvg(p,scope,adult=false){
  const wings=p.style==='penguin'?'<ellipse cx="42" cy="166" rx="19" ry="40" transform="rotate(-26 42 166)" fill="#6379a6"/><ellipse cx="169" cy="166" rx="19" ry="40" transform="rotate(26 169 166)" fill="#6379a6"/>':
  '<ellipse cx="50" cy="172" rx="18" ry="33" transform="rotate(-27 50 172)" fill="'+p.shade+'" opacity=".88"/><ellipse cx="161" cy="172" rx="18" ry="33" transform="rotate(27 161 172)" fill="'+p.shade+'" opacity=".88"/>';
  const belly=p.style==='penguin'||p.style==='panda'?'#fffefa':p.inner;
+ // Distinct tails, texture and expressive species details make each animal
+ // recognizable even when the icon is shown very small on a phone.
+ const tails={
+  puppy:'<path d="M157 177 Q206 122 190 109 Q179 100 170 120" fill="none" stroke="'+p.shade+'" stroke-width="20" stroke-linecap="round"/>',
+  kitten:'<path d="M162 185 Q211 170 190 130" fill="none" stroke="'+p.tone+'" stroke-width="21" stroke-linecap="round"/>',
+  bunny:'<circle cx="169" cy="207" r="18" fill="#fffafa" stroke="'+p.shade+'" stroke-width="2"/>',
+  fox:'<path d="M148 185 Q200 150 192 116 Q169 117 150 163Z" fill="'+p.tone+'" stroke="'+p.shade+'" stroke-width="3"/><path d="M190 123 Q175 123 173 141 L186 137Z" fill="#fff5ea"/>',
+  dino:'<path d="M148 182 Q206 174 196 211 Q185 231 171 215Z" fill="'+p.tone+'" stroke="'+p.shade+'" stroke-width="3"/><path d="M180 198 L197 191 L193 212Z" fill="#7cc6ab"/>',
+  unicorn:'<path d="M157 173 Q191 162 180 189 Q211 191 189 213" stroke="#e9b8f5" stroke-width="18" fill="none" stroke-linecap="round"/>',
+  hamster:'<path d="M151 192 Q180 199 165 224" stroke="'+p.shade+'" stroke-width="12" fill="none" stroke-linecap="round"/>'
+ };
+ const tail=tails[p.style]||'';
+ const markings={
+  chick:'<path d="M87 54 Q100 49 110 57" fill="none" stroke="#ffefab" stroke-width="8" stroke-linecap="round"/>',
+  puppy:'<ellipse cx="141" cy="84" rx="15" ry="20" fill="'+p.shade+'" opacity=".64" transform="rotate(-25 141 84)"/>',
+  kitten:'<path d="M98 48 L105 60 L112 48 M86 51 L89 60 M124 51 L121 60" stroke="#c891a7" stroke-width="3" fill="none" stroke-linecap="round"/>',
+  fox:'<path d="M91 61 Q105 70 119 61" stroke="#fff0dc" stroke-width="6" fill="none"/>',
+  dino:'<circle cx="60" cy="164" r="7" fill="#87cead" opacity=".5"/><circle cx="151" cy="173" r="9" fill="#87cead" opacity=".5"/>',
+  hamster:'<path d="M65 77 Q82 64 97 75" fill="none" stroke="#ffeed5" stroke-width="5"/>',
+  penguin:'<path d="M59 100 Q105 57 155 100" fill="none" stroke="#d2e4f1" stroke-width="5" opacity=".9"/>'
+ };
+ const marking=markings[p.style]||'';
  const face=p.style==='panda'?'#ffffff':'#303149';
  return '<svg viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+p.type+' 일러스트">'+colorGrad(p,uid)+
- '<ellipse cx="105" cy="234" rx="68" ry="10" fill="#7a676e" opacity=".17"/>'+
+ '<ellipse cx="105" cy="234" rx="68" ry="10" fill="#7a676e" opacity=".17"/>'+tail+
  '<path d="M74 193 Q63 223 82 231 Q98 237 102 218 M136 193 Q148 223 128 231 Q112 237 108 218" fill="'+p.shade+'" stroke="'+p.shade+'" stroke-width="4"/>'+
  '<ellipse cx="105" cy="178" rx="67" ry="64" fill="'+fur+'" stroke="'+p.shade+'" stroke-width="2.5"/>'+wings+
  '<ellipse cx="105" cy="185" rx="42" ry="46" fill="'+belly+'" opacity=".78"/>'+
  extra+
  '<ellipse cx="105" cy="116" rx="73" ry="75" fill="'+fur+'" stroke="'+p.shade+'" stroke-width="2.5"/>'+
+ '<path d="M55 72 Q83 39 115 51" fill="none" stroke="#fff" stroke-width="5" opacity=".35" stroke-linecap="round"/>'+
+ marking+
  '<ellipse cx="76" cy="93" rx="34" ry="24" fill="#fff" opacity=".13" transform="rotate(-27 76 93)"/>'+spots+
  '<g class="eye-open"><ellipse cx="79" cy="114" rx="9" ry="13" fill="'+face+'"/><ellipse cx="132" cy="114" rx="9" ry="13" fill="'+face+'"/>'+
  '<ellipse cx="76.5" cy="109" rx="3.5" ry="4.5" fill="#fff"/><ellipse cx="129.5" cy="109" rx="3.5" ry="4.5" fill="#fff"/>'+
@@ -105,6 +129,8 @@ function gainXp(p,n){p.xp+=n;let levels=0;while(p.xp>=100&&p.level<99){p.xp-=100
 function formatPercent(x){return Math.round(clamp(x))+'%'}
 function render(){
  const p=getPet(),data=PETS.find(x=>x.id===id);
+ const roomTheme=['panda','penguin'].includes(id)?'blue':id==='dino'?'mint':['bunny','unicorn','kitten'].includes(id)?'lavender':'peach';
+ $('petRoom').dataset.theme=roomTheme;
  $('petName').textContent=data.name;$('petStage').textContent=(p.level>=3?'GROWN-UP':'BABY')+' · LV. '+p.level;$('petLevel').textContent='LV.'+p.level;$('xpFill').style.width=p.xp+'%';$('xpText').textContent=p.xp+' / 100 XP';$('petCoins').textContent=p.coins.toLocaleString('ko-KR');
  for(const [key,field] of [['food','Food'],['happy','Happy'],['clean','Clean'],['energy','Energy']]){$('stat'+field).textContent=formatPercent(p[key]);$('bar'+field).style.width=clamp(p[key])+'%'}
  $('petPicker').querySelectorAll('.pick').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));
@@ -156,6 +182,10 @@ function moveActor(x,state,duration=1300){
  setTimeout(()=>{if(el.classList.contains('walk'))el.classList.remove('walk')},duration);
 }
 function finishAction(ms=1500){clearTimeout(actionTimer);actionTimer=setTimeout(()=>{busy=false;$('petCreature').classList.remove('walk','eat','bath','sleep','jump');$('petCreature').style.left='50%';render();save()},ms)}
+function floatFood(food){
+ const room=$('petRoom'),v=document.createElement('span');v.className='food-float';v.textContent=food;
+ room.append(v);setTimeout(()=>v.remove(),1450);
+}
 function delayedPoop(petId){
  clearTimeout(poopTimer);poopTimer=setTimeout(()=>{const p=cache.pets[petId];if(!p)return;p.poops=Math.min(3,p.poops+1);p.clean=clamp(p.clean-6);save();if(id===petId){renderPoops();note('💩 앗! 청소해 주세요!')}},19000);
 }
@@ -163,7 +193,8 @@ function care(action){
  if(mini.active||busy)return;const p=getPet(),el=$('petCreature'),owner=id;busy=true;
  if(action==='feed'){
   if(p.food>=98){note('배가 아주 든든해요! 조금 후에 먹어요 ♡');busy=false;return;}
-  note('🍓 음식 냄새가 나요! 펫이 걸어가요.');$('petBowl').classList.add('shake');moveActor(73,'walk',650);
+  note('🍓 맛있는 밥이에요! 친구가 밥그릇으로 걸어가요.');$('petBowl').classList.add('shake');moveActor(73,'walk',650);
+  floatFood(PETS.find(x=>x.id===id).food);
   actionTimer=setTimeout(()=>{if(id!==owner)return;el.classList.remove('walk');el.classList.add('eat');playTone(550);$('petBowl').classList.remove('shake');$('petFoodVisual').style.opacity='.18';
    p.food=clamp(p.food+23);p.happy=clamp(p.happy+6);p.energy=clamp(p.energy-2);p.feedCount++;gainXp(p,12);
    note('냠냠! 맛있게 먹었어요! 😋');sparkles('💖',5);save();finishAction(1450);delayedPoop(owner);setTimeout(()=>$('petFoodVisual').style.opacity='1',1450);
