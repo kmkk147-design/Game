@@ -30,6 +30,31 @@
 #petScreen{padding:0!important;overflow:visible!important}
 #petHouseEmbed{display:block;border:0;border-radius:22px;background:#fff9f6;width:100%;height:1550px;min-height:1100px}
 @media(max-width:540px){#petHouseEmbed{border-radius:16px;height:1790px}}
+
+/* Whole-arcade parent timer, iPhone safe area and lock-screen. */
+.parent-timer{display:flex;align-items:center;justify-content:space-between;gap:8px;max-width:100%;margin:9px 0 14px;padding:8px 12px;border-radius:16px;background:#fffdf9;border:1px solid #efe1e7;box-shadow:0 3px 0 #f4e7ea}
+.parent-timer .parent-timer-left{display:flex;align-items:center;gap:8px;min-width:0}
+.parent-timer strong{font-size:13px;color:#76627d}
+.parent-timer small{font-size:11px;color:#9c8093}
+.parent-timer-clock{font-size:16px;font-variant-numeric:tabular-nums;font-weight:900;color:#a45b7e;white-space:nowrap}
+.parent-timer button{min-height:34px;padding:7px 11px;border:1px solid #edc9db;background:linear-gradient(140deg,#fff2f8,#f8eaf9);border-radius:12px;font-size:12px;font-weight:900;color:#976381;white-space:nowrap}
+#gameTimeGate[hidden],#timePinForm[hidden],#timeSettings[hidden]{display:none!important}
+#gameTimeGate{position:fixed;inset:0;z-index:99999;background:#262035e8;display:flex;align-items:center;justify-content:center;padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));overscroll-behavior:contain}
+.time-gate-card{max-width:420px;width:100%;background:linear-gradient(145deg,#fffcf9,#fff1fb);border:3px solid #fff;border-radius:28px;padding:25px 19px;text-align:center;box-shadow:0 20px 65px #100e186b}
+.time-gate-icon{font-size:52px;line-height:1.3}
+.time-gate-card h2{font-size:25px;line-height:1.25;color:#644a70;margin:5px 0 8px}
+.time-gate-card p{font-size:13px;line-height:1.55;color:#987a96;margin:7px 0 17px}
+#timePinForm{display:grid;gap:12px}
+#timePin{font-size:21px;text-align:center;letter-spacing:5px;width:100%;height:53px;border:2px solid #e7bfda;border-radius:15px;background:#fff;color:#59465b}
+#timePinForm button,#timeSettingsForm button{min-height:49px;border:0;border-radius:14px;background:#ec8bba;color:#fff;font-size:15px;font-weight:900}
+#timeGateError{min-height:12px;color:#c94664;font-size:12px;font-weight:800}
+#timeGateDismiss{margin:12px auto 0;border:0;background:transparent;color:#84718a;font-weight:900;font-size:13px;padding:10px}
+#timeSettingsForm{display:grid;gap:10px;text-align:left}
+#timeSettingsForm label{font-size:13px;color:#806788;font-weight:900}
+#timeLimitSelect{height:49px;background:#fff;border:2px solid #ead3e6;border-radius:14px;padding:7px 11px;font-size:16px;font-weight:700}
+.time-gate-warning{font-size:11px!important;opacity:.85;margin-top:14px!important}
+#timeGateNotice{color:#ab7d94;font-size:12px;min-height:8px}
+@media(max-width:480px){.parent-timer{padding:8px;margin:5px 0 10px}.parent-timer strong{font-size:11px}.parent-timer small{display:none}.parent-timer-clock{font-size:15px}}
 </style>
 </head>
 <body>
@@ -80,6 +105,7 @@
 </script>
 <div class="wrap">
 <header><a href="/" class="brand" aria-label="Game 홈"><span class="brandmark">🖍️</span><span class="brandtext">GAME<small>PLAY & SMILE</small></span></a><button id="soundBtn" type="button" class="sound" aria-label="소리 켜기 또는 끄기">🔊 소리 켜짐</button></header>
+<div class="parent-timer" role="group" aria-label="오늘의 게임 시간"><div class="parent-timer-left"><span aria-hidden="true">⏳</span><div><strong>오늘 남은 게임 시간</strong><small> 전체 게임 공통 제한</small></div></div><span id="timeRemaining" class="parent-timer-clock" aria-live="off">10:00</span><button type="button" id="timeParentOpen">🔒 시간 설정</button></div>
 <div class="hero"><div class="eyebrow">🌈 리안이와 이준이의 6가지 미니게임 · 그림 24개</div><h1 id="heroTitle">선 따라 <em>쓱쓱!</em> 🎨</h1><p id="heroDesc">20초 동안 손 떼지 않고 한 번에 그려요! 성공하면 폭죽 선물!</p></div>
 <nav class="game-tabs" role="tablist" aria-label="게임 선택">
  <button type="button" class="game-tab active" id="tab-trace" role="tab" aria-selected="true" aria-controls="tracingScreen" data-game="trace"><span class="tab-emoji">🖍️</span><span>색칠공부</span></button>
@@ -201,7 +227,7 @@
  <ol id="soccerRankList" class="rank-list"><li class="rank-empty">첫 번째 승부차기 기록을 만들어 보세요!</li></ol></div>
 </section>
 <section id="petScreen" class="arcade-screen" role="tabpanel" aria-labelledby="tab-pet" hidden>
- <iframe id="petHouseEmbed" title="포근포근 펫하우스 — 10가지 귀여운 캐릭터 키우기" src="/pet-care.html?v=rooms-wallet-20261101" loading="eager" scrolling="no" referrerpolicy="same-origin"></iframe>
+ <iframe id="petHouseEmbed" title="포근포근 펫하우스 — 10가지 귀여운 캐릭터 키우기" src="/pet-care.html?v=fun-compact-20261101" loading="eager" scrolling="no" referrerpolicy="same-origin"></iframe>
 </section>
 <section id="gardenScreen" class="arcade-screen garden-screen" role="tabpanel" aria-labelledby="tab-garden" hidden>
  <iframe id="gardenMatchEmbed" class="garden-match-embed" src="/balloon-match.html?v=easy-75s-20261031" title="김리안과 권이준의 30초 풍선 짝맞추기" loading="eager" scrolling="no"></iframe>
@@ -474,5 +500,20 @@ chooseShape(0);
  });
 })();
 </script>
+
+<div id="gameTimeGate" role="dialog" aria-modal="true" aria-labelledby="timeGateTitle" hidden>
+ <div class="time-gate-card">
+  <div class="time-gate-icon" aria-hidden="true">🌙</div>
+  <h2 id="timeGateTitle">오늘 게임 시간 끝!</h2>
+  <p id="timeGateDescription">다음 날 다시 만나요!</p>
+  <form id="timePinForm"><label for="timePin">보호자 비밀번호</label><input id="timePin" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" placeholder="비밀번호 4자리" required><div id="timeGateError" role="alert"></div><button id="timeGateSubmit" type="submit">게임 시간 추가 허용</button></form>
+  <section id="timeSettings" hidden><form id="timeSettingsForm"><label for="timeLimitSelect">하루 전체 게임 시간</label><select id="timeLimitSelect"><option value="5">5분</option><option value="10" selected>10분</option><option value="15">15분</option><option value="20">20분</option><option value="30">30분</option><option value="45">45분</option><option value="60">60분</option></select><button type="submit">시간 제한 저장</button></form></section>
+  <button id="timeGateDismiss" type="button">취소 · 게임으로 돌아가기</button>
+  <p id="timeLimitDescription" class="time-gate-warning">하루 10분</p>
+  <p id="timeWarning" class="time-gate-warning">이 기기에 이용 시간이 저장되며, 다음 날 자동 초기화됩니다.</p>
+  <p id="timeGateNotice"></p>
+ </div>
+</div>
+<script src="/game-time-limit.js?v=20261101-guard1"></script>
 </body>
 </html>
