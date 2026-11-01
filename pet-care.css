@@ -824,3 +824,18 @@ body{background:radial-gradient(ellipse 900px 450px at 50% -140px,#ffecf0 1%,tra
  }
  .pet-main-grid .room-tab>span{font-size:11px!important}
 }
+
+/* Keep the bigger mascot fully visible during walking, toileting and bathing. */
+@media(max-width:740px){
+ .pet-main-grid .creature.walk:has(.pet-3d-img){
+   transform:translateX(-50%) scale(.78)!important;
+ }
+ .pet-main-grid .room[data-place=bathroom] .creature.toileting{
+   left:64%!important;
+   transform:translateX(-50%) scale(.70)!important;
+ }
+ .pet-main-grid .room[data-place=bathroom] .creature.bathing{
+   left:36%!important;
+   transform:translateX(-50%) scale(.66)!important;
+ }
+}
