@@ -235,9 +235,9 @@ function spawnMini(){
  b.style.left=rand(3,83)+'%';
  const duration=type==='fruit'?rand(2500,3400):rand(1300,1900);
  b.style.setProperty('--fall',(duration/1000)+'s');
- if(type==='star')b.style.top=rand(12,65)+'%';
+ if(type==='star'){b.classList.add('star-pop');b.style.top=rand(12,62)+'%';}
  let taken=false;
- b.addEventListener('click',e=>{e.preventDefault();if(!mini.active||taken)return;taken=true;mini.score++;$('miniScore').textContent=String(mini.score);const rect=b.getBoundingClientRect(),par=$('petMinigame').getBoundingClientRect();b.remove();
+ b.addEventListener('click',e=>{e.preventDefault();if(!mini.active||taken)return;taken=true;mini.score+=type==='star'?2:1;$('miniScore').textContent=String(mini.score);const rect=b.getBoundingClientRect(),par=$('petMinigame').getBoundingClientRect();b.remove();
   const s=document.createElement('span');s.className='spark';s.textContent='✨';s.style.left=(rect.left-par.left)+'px';s.style.top=(rect.top-par.top)+'px';$('petMinigame').append(s);setTimeout(()=>s.remove(),1300);playTone(560+mini.score*19);
  });
  field.append(b);setTimeout(()=>b.remove(),duration+100);
