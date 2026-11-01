@@ -380,7 +380,10 @@ function switchRoom(place,{force=false,silent=false}={}){
  if(!silent)note(place==='living'?'🏡 함께 놀자!':place==='bedroom'?'🛏️ 포근한 침실이에요!':'🚽 뽀득뽀득 화장실이에요!');
 }
 function moveActor(x,state,duration=1300){
- const el=$('petCreature');el.classList.remove('walk','eat','bath','sleep','jump','toileting','lying','bathing');el.classList.add('walk');el.style.left=x+'%';
+ const el=$('petCreature');el.classList.remove('walk','eat','bath','sleep','jump','toileting','lying','bathing');el.classList.add('walk');
+ // On narrow phones the larger character stays entirely inside the room while walking.
+ const target=window.innerWidth<=740?Math.max(38,Math.min(62,x)):x;
+ el.style.left=target+'%';
  setTimeout(()=>{if(el.classList.contains('walk'))el.classList.remove('walk')},duration);
 }
 function finishAction(ms=1500){clearTimeout(actionTimer);actionTimer=setTimeout(()=>{busy=false;const el=$('petCreature');el.classList.remove('walk','eat','bath','sleep','jump','toileting','lying','bathing');el.style.left='50%';$('petRoom').classList.remove('bedtime','flushing');render();save()},ms)}
