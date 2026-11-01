@@ -292,3 +292,16 @@ body{background:radial-gradient(ellipse 900px 450px at 50% -140px,#ffecf0 1%,tra
  .mini-result button{min-height:30px;padding:5px 14px;font-size:11px}
  .mini-result button:last-child{margin-bottom:0}
 }
+
+/* Premium real-rendered 3D mascot: preserve native edges and existing interactions. */
+.pet-3d-img{display:block;object-fit:contain;object-position:center;user-select:none;-webkit-user-select:none;pointer-events:none;image-rendering:auto;transform-origin:50% 84%}
+.pick .preview .pet-3d-img{width:100%;height:100%;filter:drop-shadow(0 3px 3px #8d75753b)}
+.creature:has(.pet-3d-img){width:clamp(186px,39vw,238px);height:245px;bottom:22px}
+.creature .pet-3d-img{width:100%;height:100%;animation:petIdle 2.3s ease-in-out infinite}
+.creature.walk .pet-3d-img{animation:petWalk .3s ease-in-out infinite alternate}
+.creature.eat .pet-3d-img{animation:petNibble .2s ease-in-out infinite alternate}
+.creature.bath .pet-3d-img{animation:petWash .35s infinite alternate}
+.creature.sleep .pet-3d-img{animation:petSleep 2.6s ease-in-out infinite}
+.creature.jump .pet-3d-img{animation:petJump .65s ease-out both}
+.mini-result-pet .pet-3d-img{width:100%;height:100%;max-width:170px;max-height:180px;margin:auto;object-fit:contain;animation:petIdle 2.3s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.creature .pet-3d-img,.mini-result-pet .pet-3d-img{animation:none!important}}
