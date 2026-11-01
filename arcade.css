@@ -562,3 +562,10 @@
 .game-tabs{grid-template-columns:repeat(3,minmax(0,1fr));}
 @media(min-width:1080px){.game-tabs{grid-template-columns:repeat(6,minmax(0,1fr));}.game-tab{font-size:15px;gap:5px}.game-tab .tab-emoji{font-size:23px}}
 @media(max-width:650px){.game-tabs{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
+/* Sixth mini-game: premium virtual pet house */
+.game-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.game-tab[data-game=pet].active{background:#fff1f7;color:#c56294;border-color:#f1a4c6;box-shadow:0 6px 0 #f9d6e5}
+#petScreen[hidden]{display:none!important}
+@media(min-width:1080px){.game-tabs{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(max-width:650px){.game-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.game-tab[data-game=garden]{grid-column:auto}.game-tab[data-game=pet]{grid-column:auto}}
