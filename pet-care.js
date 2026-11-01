@@ -229,6 +229,7 @@ function petEyes(p,mood,uid){
 }
 function petSvg(p,scope,adult=false,mood='normal'){
  if(p.style==='redpanda')return '<img class="pet-3d-img" src="/assets/pet-red-panda.avif?v=mascot1" alt="'+p.name+' · 고품질 레서판다 캐릭터" draggable="false" decoding="async">';
+ if(p.style!=='redpanda')return '<span class="pet-3d-img pet-sprite pet-sprite-'+p.id+'" role="img" aria-label="'+p.name+' · 3D 캐릭터"></span>';
  const uid='plush-'+scope+'-'+p.id;
  const dark=['panda','penguin'].includes(p.style);
  const color=dark?'#f9f8f7':p.tone;
