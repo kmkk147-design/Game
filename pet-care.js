@@ -491,10 +491,10 @@ function beginMini(type){
  if(mini.active||busy)return;const p=getPet();if(p.energy<10){note('💤 체력이 부족해요. 먼저 재워 주세요!');return;}
  mini={active:true,type,score:0,deadline:performance.now()+20000};
  $('petMinigame').hidden=false;$('miniResult').hidden=true;$('miniField').replaceChildren();$('miniScore').textContent='0';$('miniTime').textContent='20초';
- $('miniTitle').textContent=type==='fruit'?'🍓 과일 톡톡':'⭐ 별빛 잡기';$('miniPrompt').textContent=type==='fruit'?'🍓 떨어지는 과일을 톡톡!':'⭐ 반짝이는 별을 찾아 톡톡!';
+ const labels={fruit:['🍓 과일 톡톡','🍓 떨어지는 과일을 톡톡!'],star:['⭐ 별빛 잡기','⭐ 반짝이는 별을 찾아 톡톡!'],bubble:['🫧 방울 팡팡','🫧 비눗방울을 터뜨려 주세요!'],heart:['💗 숨은 하트','💗 숨어 있는 하트를 찾아요!']};$('miniTitle').textContent=labels[type][0];$('miniPrompt').textContent=labels[type][1];
  notifyParent('startMini');playTone(700);
  miniTick=setInterval(()=>{const left=Math.max(0,Math.ceil((mini.deadline-performance.now())/1000));$('miniTime').textContent=left+'초';if(left<=0)stopMini()},90);
- miniSpawn=setInterval(spawnMini,type==='fruit'?670:780);spawnMini();
+ miniSpawn=setInterval(spawnMini,type==='fruit'?670:type==='bubble'?600:type==='heart'?880:780);spawnMini();
 }
 
 function miniMascotSvg(type,variant){
@@ -519,13 +519,13 @@ function miniMascotSvg(type,variant){
 }
 function spawnMini(){
  if(!mini.active)return;const field=$('miniField'),type=mini.type,b=document.createElement('button');b.className='mini-thing';b.type='button';
- b.innerHTML=miniMascotSvg(type,rand(0,3));b.setAttribute('aria-label',type==='fruit'?'귀여운 과일 잡기':'웃는 별 잡기');
+ b.innerHTML=type==='bubble'?'🫧':type==='heart'?'💗':miniMascotSvg(type,rand(0,3));b.setAttribute('aria-label',({fruit:'귀여운 과일 잡기',star:'웃는 별 잡기',bubble:'비눗방울 터뜨리기',heart:'숨은 하트 찾기'})[type]);
  b.style.left=rand(3,83)+'%';
- const duration=type==='fruit'?rand(2500,3400):rand(1300,1900);
+ const duration=type==='fruit'?rand(2500,3400):type==='bubble'?rand(1600,2600):rand(1300,1900);
  b.style.setProperty('--fall',(duration/1000)+'s');
- if(type==='star'){b.classList.add('star-pop');b.style.top=rand(12,62)+'%';}
+ if(type==='star'||type==='heart'||type==='bubble'){b.classList.add('star-pop');b.style.top=rand(15,70)+'%';}b.classList.add('mini-'+type);
  let taken=false;
- b.addEventListener('click',e=>{e.preventDefault();if(!mini.active||taken)return;taken=true;mini.score+=type==='star'?2:1;$('miniScore').textContent=String(mini.score);const rect=b.getBoundingClientRect(),par=$('petMinigame').getBoundingClientRect();b.remove();
+ b.addEventListener('click',e=>{e.preventDefault();if(!mini.active||taken)return;taken=true;mini.score+=(type==='star'||type==='heart')?2:1;$('miniScore').textContent=String(mini.score);const rect=b.getBoundingClientRect(),par=$('petMinigame').getBoundingClientRect();b.remove();
   const s=document.createElement('span');s.className='spark';s.textContent='✨';s.style.left=(rect.left-par.left)+'px';s.style.top=(rect.top-par.top)+'px';$('petMinigame').append(s);setTimeout(()=>s.remove(),1300);playTone(560+mini.score*19);
  });
  field.append(b);setTimeout(()=>b.remove(),duration+100);
@@ -535,6 +535,8 @@ document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click'
 document.querySelectorAll('[data-go-room]').forEach(b=>b.addEventListener('click',()=>switchRoom(b.dataset.goRoom)));
 
 document.querySelectorAll('[data-game]').forEach(b=>b.addEventListener('click',()=>beginMini(b.dataset.game)));
+$('claimAttendance').addEventListener('click',claimAttendance);
+$('requestHelp').addEventListener('click',()=>startRequest(true));
 $('petCreature').addEventListener('click',()=>care('pet'));
 $('petCreature').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();care('pet')}});
 $('miniStop').addEventListener('click',()=>stopMini(false));
@@ -546,8 +548,8 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){getPet().
 window.addEventListener('pagehide',save);
 window.addEventListener('pageshow',()=>{if(!mini.active&&!busy){renderMetersOnly();save()}});
 read();for(const p of Object.keys(cache.pets))cache.pets[p]=recover(cache.pets[p]);
-renderPicker();render();switchRoom('living',{force:true,silent:true});note('💖 '+PETS.find(p=>p.id===id).name+'와 함께 놀자!');
+renderPicker();render();switchRoom('living',{force:true,silent:true});startRequest();note('💖 '+PETS.find(p=>p.id===id).name+'와 함께 놀자!');
 setInterval(updateNeeds,12000);roamTimer=setInterval(roam,6500);
-window.PetGameDebug={getState:()=>({id,room:activeRoom,walletCoins:cache.walletCoins,storageAvailable,pet:{...getPet(),owned:[...getPet().owned]},mini:{...mini},species:PETS.map(x=>x.id)}),feed:()=>care('feed'),care,select:selectPet,startMini:beginMini,stopMini};
+window.PetGameDebug={getState:()=>({id,room:activeRoom,walletCoins:cache.walletCoins,storageAvailable,attendance:cache.attendance,request:cache.request,roomDecor:cache.roomDecor,roomOwned:cache.roomOwned,pet:{...getPet(),owned:[...getPet().owned]},mini:{...mini},species:PETS.map(x=>x.id)}),feed:()=>care('feed'),care,select:selectPet,startMini:beginMini,stopMini,claimAttendance,requestNow:startRequest,buy};
 save();
 })();
