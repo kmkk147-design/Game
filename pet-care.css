@@ -839,3 +839,36 @@ body{background:radial-gradient(ellipse 900px 450px at 50% -140px,#ffecf0 1%,tra
    transform:translateX(-50%) scale(.66)!important;
  }
 }
+
+
+/* Room-first mascot sizing: show the wallpaper, furniture and floor around the pet. */
+@media(max-width:740px){
+ .pet-main-grid .creature:has(.pet-3d-img):not(.lying){
+   width:min(81%,225px)!important;
+   height:232px!important;
+   bottom:9px!important;
+ }
+ .pet-main-grid .creature.walk:has(.pet-3d-img){
+   transform:translateX(-50%) scale(.84)!important;
+ }
+ .pet-main-grid .room[data-place=bathroom] .creature.toileting{
+   transform:translateX(-50%) scale(.78)!important;
+ }
+ .pet-main-grid .room[data-place=bathroom] .creature.bathing{
+   transform:translateX(-50%) scale(.76)!important;
+ }
+}
+@media(max-width:390px){
+ .pet-main-grid .creature:has(.pet-3d-img):not(.lying){
+   width:min(82%,202px)!important;
+   height:220px!important;
+   bottom:10px!important;
+ }
+}
+@media(max-width:350px){
+ .pet-main-grid .creature:has(.pet-3d-img):not(.lying){
+   width:min(82%,170px)!important;
+   height:208px!important;
+   bottom:10px!important;
+ }
+}
