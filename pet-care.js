@@ -15,22 +15,44 @@ const PETS=[
 ];
 const STORE='game-pet-house-v1',SHOP=[{id:'bow',icon:'🎀',name:'러블리 리본',price:35},{id:'hat',icon:'🎩',name:'멋진 모자',price:55},{id:'crown',icon:'👑',name:'반짝 왕관',price:90}];
 const now=()=>Date.now(),rand=(a,b)=>Math.round(a+Math.random()*(b-a));
-let cache={pets:{},active:'fox'},id='fox',busy=false,actionTimer=null,poopTimer=null,roamTimer=null,miniTick=null,miniSpawn=null,mini={active:false,type:'fruit',score:0,deadline:0},audio=null,sound=true;
+let cache={pets:{},active:'fox',walletCoins:25},id='fox',busy=false,activeRoom='living',storageAvailable=true,actionTimer=null,poopTimer=null,roamTimer=null,miniTick=null,miniSpawn=null,mini={active:false,type:'fruit',score:0,deadline:0},audio=null,sound=true;
 function getPet(){return cache.pets[id]}
-function makePet(){return{food:78,happy:86,clean:90,energy:82,xp:0,level:1,coins:25,poops:0,feedCount:0,decor:null,owned:[],lastAt:now()}}
-function save(){try{localStorage.setItem(STORE,JSON.stringify(cache))}catch(_){}}
+function makePet(){return{food:78,happy:86,clean:90,energy:82,xp:0,level:1,coins:0,poops:0,feedCount:0,decor:null,owned:[],lastAt:now()}}
+function save(){
+ const payload=JSON.stringify(cache);
+ try{
+  localStorage.setItem(STORE,payload);storageAvailable=true;
+  try{localStorage.setItem(STORE+'-backup',payload)}catch(_){}
+ }catch(_){storageAvailable=false}
+ const indicator=$('petSaveState');
+ if(indicator){indicator.textContent=storageAvailable?'✓ 코인·성장 자동 저장됨':'⚠️ 이 기기의 저장 공간을 사용할 수 없어요';indicator.classList.toggle('save-error',!storageAvailable)}
+}
 function read(){
- try{const data=JSON.parse(localStorage.getItem(STORE)||'null');if(data&&typeof data==='object'&&data.pets&&typeof data.pets==='object'){
- cache={pets:data.pets,active:typeof data.active==='string'?data.active:'chick'};
- }}catch(_){}
+ let data=null;
+ try{data=JSON.parse(localStorage.getItem(STORE)||'null')}catch(_){}
+ if(!data||typeof data!=='object'||!data.pets||typeof data.pets!=='object'){
+  try{data=JSON.parse(localStorage.getItem(STORE+'-backup')||'null')}catch(_){}
+ }
+ if(data&&typeof data==='object'&&data.pets&&typeof data.pets==='object'){
+  cache={pets:data.pets,active:typeof data.active==='string'?data.active:'fox',walletCoins:data.walletCoins};
+ }
  if(!PETS.some(p=>p.id===cache.active))cache.active='fox';
- // Offer the newly designed mascot first without destroying previously raised pets.
- try {
+ // Previous versions stored a separate coin balance per character.
+ // Migrate once to a shared wallet without discarding earned coins or gifts.
+ if(!Number.isFinite(cache.walletCoins)){
+  let oldBalance=0;
+  for(const p of Object.values(cache.pets)){
+   const value=Number(p?.coins);
+   if(Number.isFinite(value)&&value>0)oldBalance+=Math.floor(value);
+  }
+  cache.walletCoins=Math.max(0,oldBalance);
+ }
+ cache.walletCoins=Math.min(999999999,Math.max(0,Math.floor(cache.walletCoins)));
+ // Keep established players' selected pet; default the new design for untouched starters only.
+ try{
   if(!localStorage.getItem('game-pet-3d-mascot-onboarded-v1')){
    const previous=cache.pets[cache.active];
-   if(cache.active==='chick' && (!previous || (previous.level===1 && (previous.feedCount||0)===0 && (previous.xp||0)===0))){
-    cache.active='fox';
-   }
+   if(cache.active==='chick'&&(!previous||(previous.level===1&&(previous.feedCount||0)===0&&(previous.xp||0)===0)))cache.active='fox';
    localStorage.setItem('game-pet-3d-mascot-onboarded-v1','1');
   }
  }catch(_){}
@@ -191,7 +213,7 @@ function petSvg(p,scope,adult=false,mood='normal'){
  (mood==='bath'?'<circle cx="37" cy="84" r="8" stroke="#d8f5ff" stroke-width="2" fill="#fff" fill-opacity=".73"/><circle cx="186" cy="135" r="13" stroke="#d8f5ff" stroke-width="2" fill="#fff" fill-opacity=".65"/>':'')+
  '</svg>';
 }
-function gainXp(p,n){p.xp+=n;let levels=0;while(p.xp>=100&&p.level<99){p.xp-=100;p.level++;p.coins+=15;levels++;}if(levels){note('✨ '+PETS.find(x=>x.id===id).name+' 레벨 '+p.level+'! 성장했어요! 🏆');sparkles('✨',9);playTone(930)}}
+function gainXp(p,n){p.xp+=n;let levels=0;while(p.xp>=100&&p.level<99){p.xp-=100;p.level++;cache.walletCoins+=15;levels++;}if(levels){note('✨ '+PETS.find(x=>x.id===id).name+' 레벨 '+p.level+'! 성장했어요! 🏆');sparkles('✨',9);playTone(930)}}
 function formatPercent(x){return Math.round(clamp(x))+'%'}
 function showPetMood(mood){
  const p=getPet(),data=PETS.find(x=>x.id===id),actor=$('petCreature');
@@ -209,7 +231,7 @@ function render(){
  const p=getPet(),data=PETS.find(x=>x.id===id);
  const roomTheme=['panda','penguin'].includes(id)?'blue':id==='dino'?'mint':['bunny','unicorn','kitten'].includes(id)?'lavender':'peach';
  $('petRoom').dataset.theme=roomTheme;
- $('petName').textContent=data.name;$('petStage').textContent=(p.level>=3?'GROWN-UP':'BABY')+' · LV. '+p.level;$('petLevel').textContent='LV.'+p.level;$('xpFill').style.width=p.xp+'%';$('xpText').textContent=p.xp+' / 100 XP';$('petCoins').textContent=p.coins.toLocaleString('ko-KR');
+ $('petName').textContent=data.name;$('petStage').textContent=(p.level>=3?'GROWN-UP':'BABY')+' · LV. '+p.level;$('petLevel').textContent='LV.'+p.level;$('xpFill').style.width=p.xp+'%';$('xpText').textContent=p.xp+' / 100 XP';$('petCoins').textContent=cache.walletCoins.toLocaleString('ko-KR');
  for(const [key,field] of [['food','Food'],['happy','Happy'],['clean','Clean'],['energy','Energy']]){$('stat'+field).textContent=formatPercent(p[key]);$('bar'+field).style.width=clamp(p[key])+'%'}
  $('petPicker').querySelectorAll('.pick').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));
  const actor=$('petCreature');showPetMood(petMood(p));
@@ -229,7 +251,7 @@ function selectPet(next){
  clearTimeout(actionTimer);clearTimeout(poopTimer);busy=false;id=next;cache.active=next;
  if(!cache.pets[id])cache.pets[id]=makePet();
  else cache.pets[id]=recover(cache.pets[id]);
- const c=$('petCreature');c.className='creature';c.style.left='50%';
+ const c=$('petCreature');c.className='creature';c.style.left='50%';switchRoom('living',{force:true,silent:true});
  render();note('💖 '+PETS.find(p=>p.id===id).name+'와 함께 놀자!');save();
 }
 function renderPoops(){
@@ -248,18 +270,35 @@ function buy(itemId){
  if(mini.active||busy)return;const item=SHOP.find(x=>x.id===itemId),p=getPet();if(!item)return;
  if(p.decor===itemId){p.decor=null;note('옷을 잠깐 벗었어요!');}
  else if(p.owned.includes(itemId)){p.decor=itemId;note('짜잔! '+item.name+'를 착용했어요! ✨');}
- else if(p.coins>=item.price){p.coins-=item.price;p.owned.push(itemId);p.decor=itemId;note('선물 성공! '+item.name+' 🎁');playTone(890);}
+ else if(cache.walletCoins>=item.price){cache.walletCoins-=item.price;p.owned.push(itemId);p.decor=itemId;note('선물 성공! '+item.name+' 🎁');playTone(890);}
  else{note('🪙 코인이 모자라요! 미니게임으로 모아요.');return;}
  save();render();
 }
 function sparkles(emoji='💕',count=6){
  const host=$('petFx');for(let i=0;i<count;i++){const s=document.createElement('span');s.className='spark';s.textContent=emoji;s.style.left=rand(25,75)+'%';s.style.top=rand(40,76)+'%';s.style.animationDelay=rand(0,300)+'ms';host.append(s);setTimeout(()=>s.remove(),1700)}
 }
+function switchRoom(place,{force=false,silent=false}={}){
+ if(!['living','bedroom','bathroom'].includes(place))return;
+ if(busy&&!force)return;
+ activeRoom=place;
+ const room=$('petRoom');room.dataset.place=place;
+ room.classList.remove('bedtime','flushing');
+ document.querySelectorAll('[data-go-room]').forEach(btn=>{
+  const selected=btn.dataset.goRoom===place;
+  btn.setAttribute('aria-pressed',String(selected));
+ });
+ const actor=$('petCreature');
+ if(!busy&&actor){
+  actor.classList.remove('walk','eat','bath','sleep','jump','toileting','lying','bathing');
+  actor.style.left='50%';
+ }
+ if(!silent)note(place==='living'?'🏡 함께 놀자!':place==='bedroom'?'🛏️ 포근한 침실이에요!':'🚽 뽀득뽀득 화장실이에요!');
+}
 function moveActor(x,state,duration=1300){
- const el=$('petCreature');el.classList.remove('walk','eat','bath','sleep','jump');el.classList.add('walk');el.style.left=x+'%';
+ const el=$('petCreature');el.classList.remove('walk','eat','bath','sleep','jump','toileting','lying','bathing');el.classList.add('walk');el.style.left=x+'%';
  setTimeout(()=>{if(el.classList.contains('walk'))el.classList.remove('walk')},duration);
 }
-function finishAction(ms=1500){clearTimeout(actionTimer);actionTimer=setTimeout(()=>{busy=false;$('petCreature').classList.remove('walk','eat','bath','sleep','jump');$('petCreature').style.left='50%';render();save()},ms)}
+function finishAction(ms=1500){clearTimeout(actionTimer);actionTimer=setTimeout(()=>{busy=false;const el=$('petCreature');el.classList.remove('walk','eat','bath','sleep','jump','toileting','lying','bathing');el.style.left='50%';$('petRoom').classList.remove('bedtime','flushing');render();save()},ms)}
 function floatFood(food){
  const room=$('petRoom'),v=document.createElement('span');v.className='food-float';v.textContent=food;
  room.append(v);setTimeout(()=>v.remove(),1450);
@@ -271,24 +310,56 @@ function care(action){
  if(mini.active||busy)return;const p=getPet(),el=$('petCreature'),owner=id;busy=true;
  if(action==='feed'){
   if(p.food>=98){note('배가 아주 든든해요! 조금 후에 먹어요 ♡');busy=false;return;}
-  note('🍓 맛있는 밥이에요! 친구가 밥그릇으로 걸어가요.');$('petBowl').classList.add('shake');moveActor(73,'walk',650);
+  switchRoom('living',{force:true,silent:true});note('🍓 맛있는 밥이에요! 친구가 밥그릇으로 걸어가요.');$('petBowl').classList.add('shake');moveActor(73,'walk',650);
   floatFood(PETS.find(x=>x.id===id).food);
   actionTimer=setTimeout(()=>{if(id!==owner)return;el.classList.remove('walk');showPetMood('eating');el.classList.add('eat');playTone(550);$('petBowl').classList.remove('shake');$('petFoodVisual').style.opacity='.18';
    p.food=clamp(p.food+23);p.happy=clamp(p.happy+6);p.energy=clamp(p.energy-2);p.feedCount++;gainXp(p,12);
    note('냠냠! 맛있게 먹었어요! 😋');sparkles('💖',5);save();finishAction(1450);delayedPoop(owner);setTimeout(()=>$('petFoodVisual').style.opacity='1',1450);
   },900);
  }else if(action==='clean'){
-  const count=p.poops;p.poops=0;p.clean=clamp(p.clean+(count?27:8));gainXp(p,count?10:3);showPetMood('happy');note(count?'✨ 똥을 모두 치웠어요! 깨끗!':'🧹 반짝반짝 청소했어요!');sparkles('✨',8);playTone(900);finishAction(900);
+  switchRoom('bathroom',{force:true,silent:true});
+  note('🚽 화장실로 걸어가요. 변기에서 볼일을 봐요!');
+  moveActor(76,'walk',850);
+  actionTimer=setTimeout(()=>{
+   if(id!==owner)return;
+   el.classList.remove('walk');el.classList.add('toileting');
+   const count=p.poops;
+   p.poops=0;p.clean=clamp(p.clean+(count?27:12));gainXp(p,count?10:4);
+   $('petRoom').classList.add('flushing');
+   renderPoops();renderMetersOnly();
+   note(count?'🚽 쉬~ 시원해요! 물도 내리고 깨끗하게!':'🚽 화장실 다녀왔어요. 손도 씻어요!');
+   sparkles('🫧',7);playTone(770);save();finishAction(1800);
+  },1000);
  }else if(action==='bath'){
-  showPetMood('bath');el.classList.add('bath');p.clean=clamp(p.clean+34);p.happy=clamp(p.happy+6);gainXp(p,13);note('🫧 보글보글~ 목욕했어요!');sparkles('🫧',9);playTone(730);finishAction(1950);
+  switchRoom('bathroom',{force:true,silent:true});
+  note('🛁 욕조에 들어가 목욕 준비!');
+  moveActor(24,'walk',750);
+  actionTimer=setTimeout(()=>{
+   if(id!==owner)return;
+   el.classList.remove('walk');el.classList.add('bathing');
+   p.clean=clamp(p.clean+34);p.happy=clamp(p.happy+6);gainXp(p,13);
+   note('🫧 보글보글! 거품 목욕으로 반짝반짝!');
+   renderMetersOnly();sparkles('🫧',10);playTone(730);save();finishAction(2400);
+  },900);
  }else if(action==='sleep'){
   if(p.energy>=97){note('아직 쌩쌩해요! 조금 더 놀아요.');busy=false;return;}
-  showPetMood('sleep');el.classList.add('sleep');el.style.left='30%';p.energy=clamp(p.energy+32);p.happy=clamp(p.happy+3);gainXp(p,12);note('🌙 쿨쿨... 좋은 꿈 꾸는 중 Zzz');sparkles('💤',4);finishAction(2600);
+  switchRoom('bedroom',{force:true,silent:true});
+  note('🛏️ 침실로 걸어가서 이불을 덮어요!');
+  moveActor(65,'walk',850);
+  actionTimer=setTimeout(()=>{
+   if(id!==owner)return;
+   el.classList.remove('walk');showPetMood('sleep');
+   el.classList.add('sleep','lying');el.style.left='65%';
+   $('petRoom').classList.add('bedtime');
+   p.energy=clamp(p.energy+32);p.happy=clamp(p.happy+3);gainXp(p,12);
+   note('🌙 포근한 침대에서 쿨쿨... 좋은 꿈 꾸세요! Zzz');
+   sparkles('💤',5);renderMetersOnly();playTone(490);save();finishAction(6500);
+  },1100);
  }else if(action==='pet'){
-  p.happy=clamp(p.happy+14);gainXp(p,6);showPetMood('happy');el.classList.add('jump');note('💗 쓰담쓰담! 너무 좋아요!');sparkles('💕',8);playTone(850);finishAction(820);
+  switchRoom('living',{force:true,silent:true});p.happy=clamp(p.happy+14);gainXp(p,6);showPetMood('happy');el.classList.add('jump');note('💗 쓰담쓰담! 너무 좋아요!');sparkles('💕',8);playTone(850);finishAction(820);
  }else if(action==='play'){
   if(p.energy<12){note('🥱 졸려요. 먼저 잠을 자게 해줘요!');busy=false;return;}
-  p.happy=clamp(p.happy+20);p.energy=clamp(p.energy-8);p.food=clamp(p.food-3);gainXp(p,12);
+  switchRoom('living',{force:true,silent:true});p.happy=clamp(p.happy+20);p.energy=clamp(p.energy-8);p.food=clamp(p.food-3);gainXp(p,12);
   showPetMood('excited');el.classList.add('jump');note('🧸 폴짝폴짝! 신나게 놀았어요!');sparkles('⭐',8);playTone(900);finishAction(1000);
  }else busy=false;
  renderMetersOnly();save();
@@ -296,7 +367,7 @@ function care(action){
 function renderMetersOnly(){
  const p=getPet();
  for(const [key,field] of [['food','Food'],['happy','Happy'],['clean','Clean'],['energy','Energy']]){$('stat'+field).textContent=formatPercent(p[key]);$('bar'+field).style.width=clamp(p[key])+'%'}
- $('petCoins').textContent=p.coins;$('petLevel').textContent='LV.'+p.level;$('petStage').textContent=(p.level>=3?'GROWN-UP':'BABY')+' · LV. '+p.level;
+ $('petCoins').textContent=cache.walletCoins.toLocaleString('ko-KR');$('petLevel').textContent='LV.'+p.level;$('petStage').textContent=(p.level>=3?'GROWN-UP':'BABY')+' · LV. '+p.level;
  $('xpFill').style.width=p.xp+'%';$('xpText').textContent=p.xp+' / 100 XP';
 }
 function passiveNeeds(){
@@ -315,7 +386,7 @@ function updateNeeds(){
  passiveNeeds();
 }
 function roam(){
- if(mini.active||busy)return;const el=$('petCreature');if(el.classList.contains('sleep'))return;
+ if(mini.active||busy||activeRoom!=='living')return;const el=$('petCreature');if(el.classList.contains('sleep'))return;
  moveActor(rand(33,69),'walk',900);
  const later=rand(2,4);setTimeout(()=>{if(!busy&&!mini.active)el.style.left='50%'},later*1000);
 }
@@ -323,7 +394,7 @@ function notifyParent(type){try{if(window.parent!==window)window.parent.postMess
 function stopMini(showResult=true){
  if(!mini.active)return;mini.active=false;clearInterval(miniTick);clearInterval(miniSpawn);miniTick=null;miniSpawn=null;notifyParent('endMini');
  if(showResult){
-  const p=getPet(),coins=Math.min(70,5+mini.score*3);p.coins+=coins;p.happy=clamp(p.happy+12);p.energy=clamp(p.energy-5);gainXp(p,Math.min(35,10+mini.score*2));save();
+  const p=getPet(),coins=Math.min(70,5+mini.score*3);cache.walletCoins+=coins;p.happy=clamp(p.happy+12);p.energy=clamp(p.energy-5);gainXp(p,Math.min(35,10+mini.score*2));save();
   $('miniResult').hidden=false;$('miniResultIcon').textContent=mini.score>=8?'🏆':'💖';
   $('miniResultPet').innerHTML=petSvg(PETS.find(x=>x.id===id),'miniwinner',p.level>=3,'happy');
   $('miniResultTitle').textContent=mini.score>=8?'와! 우리 친구가 정말 신났어요!':'우리 친구랑 즐거웠어요!';
@@ -376,6 +447,8 @@ function spawnMini(){
 }
 $('petSound').addEventListener('click',()=>{sound=!sound;$('petSound').textContent=sound?'🔊':'🔇'});
 document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>care(b.dataset.action)));
+document.querySelectorAll('[data-go-room]').forEach(b=>b.addEventListener('click',()=>switchRoom(b.dataset.goRoom)));
+
 document.querySelectorAll('[data-game]').forEach(b=>b.addEventListener('click',()=>beginMini(b.dataset.game)));
 $('petCreature').addEventListener('click',()=>care('pet'));
 $('petCreature').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();care('pet')}});
@@ -386,9 +459,10 @@ $('miniField').addEventListener('touchmove',e=>{if(mini.active&&e.cancelable)e.p
 window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data?.petHouse==='stop')stopMini(false)});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){getPet().lastAt=Math.min(getPet().lastAt,now());updateNeeds()}});
 window.addEventListener('pagehide',save);
+window.addEventListener('pageshow',()=>{if(!mini.active&&!busy){renderMetersOnly();save()}});
 read();for(const p of Object.keys(cache.pets))cache.pets[p]=recover(cache.pets[p]);
-renderPicker();render();note('💖 '+PETS.find(p=>p.id===id).name+'와 함께 놀자!');
+renderPicker();render();switchRoom('living',{force:true,silent:true});note('💖 '+PETS.find(p=>p.id===id).name+'와 함께 놀자!');
 setInterval(updateNeeds,12000);roamTimer=setInterval(roam,6500);
-window.PetGameDebug={getState:()=>({id,pet:{...getPet(),owned:[...getPet().owned]},mini:{...mini},species:PETS.map(x=>x.id)}),feed:()=>care('feed'),care,select:selectPet,startMini:beginMini,stopMini};
+window.PetGameDebug={getState:()=>({id,room:activeRoom,walletCoins:cache.walletCoins,storageAvailable,pet:{...getPet(),owned:[...getPet().owned]},mini:{...mini},species:PETS.map(x=>x.id)}),feed:()=>care('feed'),care,select:selectPet,startMini:beginMini,stopMini};
 save();
 })();
